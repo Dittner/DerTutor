@@ -32,7 +32,7 @@ async def lifespan(_: FastAPI):
 
     # async with db_helper.engine.begin() as conn:
     #     await conn.run_sync(Base.metadata.drop_all)
-    async with ctx.open_session() as session:
+    async with ctx.session_manager.session_factory() as session:
         hashed_password = hash_pwd('admin')
         await InsertDefaultRowsService.run(session, 'admin', hashed_password)
 

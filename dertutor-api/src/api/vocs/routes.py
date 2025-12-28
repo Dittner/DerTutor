@@ -1,7 +1,8 @@
 import logging
 
-import src.context as ctx
 from fastapi import APIRouter
+from sqlalchemy.ext.asyncio.session import AsyncSession
+from src.api.decorators import only_superuser, open_session
 from src.api.vocs.dao import VocsDAO
 from src.api.vocs.schema import VocCreate, VocDelete, VocRead, VocRename
 
@@ -10,24 +11,27 @@ log = logging.getLogger('uvicorn')
 
 
 @router.get('/vocs', response_model=list[VocRead])
-async def get_vocs(lang_id: int):
-    async with ctx.open_session() as session:
-        return await VocsDAO.find_all(session, lang_id=lang_id)
+@open_session
+async def get_vocs(session: AsyncSession, lang_id: int):
+    return await VocsDAO.find_all(session, lang_id=lang_id)
 
 
 @router.post('/vocs', response_model=VocRead)
-async def create_voc(voc: VocCreate):
-    async with ctx.open_session() as session:
-        return await VocsDAO.add_one(session, **voc.model_dump())
+@open_session
+@only_superuser
+async def create_voc(session: AsyncSession, voc: VocCreate):
+    return await VocsDAO.add_one(session, **voc.model_dump())
 
 
 @router.patch('/vocs/rename', response_model=VocRead)
-async def rename_voc(voc: VocRename):
-    async with ctx.open_session() as session:
-        return await VocsDAO.update_one(session, voc.id, name=voc.name)
+@open_session
+@only_superuser
+async def rename_voc(session: AsyncSession, voc: VocRename):
+    return await VocsDAO.update_one(session, voc.id, name=voc.name)
 
 
 @router.delete('/vocs', response_model=VocRead)
-async def delete_voc(voc: VocDelete):
-    async with ctx.open_session() as session:
-        return await VocsDAO.delete_one(session, id=voc.id)
+@open_session
+@only_superuser
+async def delete_voc(session: AsyncSession, voc: VocDelete):
+    return await VocsDAO.delete_one(session, id=voc.id)

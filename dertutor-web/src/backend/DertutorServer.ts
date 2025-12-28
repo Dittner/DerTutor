@@ -85,7 +85,7 @@ export class DertutorServer extends RestApi {
     //DO NOT USE THESE HEADERS: { 'Content-Type': 'multipart/form-data' }
     //let browser to add 'Content-Type': 'multipart/form-data; boundary=----WebKitFormBou...' 
     const headers = {}
-    return this.post('/media/uploadfile/' + noteId, formData, headers)
+    return this.post('/media/uploadfile?note_id=' + noteId, formData, headers)
   }
 
   deleteFile(schema: DeleteMedialFileSchema): RXOperation<any, RestApiError> {

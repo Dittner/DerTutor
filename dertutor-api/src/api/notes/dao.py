@@ -5,6 +5,7 @@ import sqlalchemy
 from pydantic.fields import Field
 from pydantic.main import BaseModel
 from sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlalchemy.orm.strategy_options import selectinload
 from src.api.dao import BaseDAO
 from src.api.notes.schema import Page
 from src.repo import Note
@@ -22,6 +23,12 @@ class SearchParams(BaseModel):
 
 class NotesDAO(BaseDAO[Note]):
     model = Note
+
+    @classmethod
+    async def find_one_or_none_with_media(cls, session: AsyncSession, **filter_by: str | int | bool) -> Note | None:
+        query = sqlalchemy.select(Note).filter_by(**filter_by).options(selectinload(Note.media))
+        result = await session.execute(query)
+        return result.scalar_one_or_none()
 
     @classmethod
     async def search_notes(cls, session: AsyncSession, params: SearchParams) -> Page[Any]:
