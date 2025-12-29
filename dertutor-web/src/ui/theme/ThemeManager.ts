@@ -134,7 +134,7 @@ export class ThemeManager {
 
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#80858a' //707f8b 
+    const text = '#707f8b' //707f8b 
     const red = '#eb6c6c'
     const blue = '#57a9d5'
     const black = '#111111'

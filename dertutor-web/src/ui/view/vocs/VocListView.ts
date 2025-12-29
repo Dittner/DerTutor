@@ -1,10 +1,8 @@
 import { btn, div, h2, hstack, spacer, vlist, vstack } from "flinker-dom"
-import { LayoutLayer } from "../../../app/Application"
 import { ILang, IVoc } from "../../../domain/DomainModel"
 import { FontFamily } from "../../controls/Font"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
-import { LineInput } from "../../controls/Input"
 import { Markdown } from "../../controls/Markdown"
 
 const ACTION_TIPS = `
@@ -90,19 +88,6 @@ export const VocListView = () => {
               s.textColor = theme().green
               s.text = ACTION_TIPS.trim()
             })
-        })
-
-      LineInput(vm.bufferController.$buffer, vm.bufferController.$cursorPos)
-        .observe(vm.$mode)
-        .react(s => {
-          const mode = vm.$mode.value
-          s.visible = vm.$mode.value !== 'explore'
-          s.position = 'fixed'
-          s.width = '100%'
-          s.height = theme().statusBarHeight + 'px'
-          s.bottom = '0'
-          s.title = mode === 'create' ? 'New:' : mode === 'rename' ? 'Rename:' : 'Input:'
-          s.layer = LayoutLayer.MODAL
         })
     })
 }

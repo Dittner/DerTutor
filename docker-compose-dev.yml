@@ -49,8 +49,8 @@ services:
     volumes:
       - ./dertutor-api:/app
       - ./data/dertutor:/app/data
-    ports:
-      - 3002:80
+    #ports:
+    #  - 3002:80
     tty: true
     networks:
       - network
@@ -64,13 +64,26 @@ services:
       target: dev
     restart: unless-stopped
     environment:
-      - VITE_DERTUTOR_API_URL=http://localhost:3002/api
+      - VITE_DERTUTOR_API_URL=http://localhost:4444/api
     depends_on:
       - dertutor-api
     volumes:
       - ./dertutor-web/src:/app/src
+    #ports:
+    #  - 3003:3000
+    networks:
+      - network
+
+  nginx:
+    container_name: nginx
+    restart: always
+    image: nginx:1.13
+    depends_on:
+      - dertutor-api
     ports:
-      - 3003:3000
+      - 4444:4444
+    volumes:
+      - ./nginx/conf.prod:/etc/nginx/conf.d/nginx.conf
     networks:
       - network
 

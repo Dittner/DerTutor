@@ -1,7 +1,6 @@
 import { RXObservableValue } from "flinker"
 
 import { AVAILABLE_LEVELS, DomainService, ILang, INote, IPage, IVoc } from "../../../domain/DomainModel"
-import { InputBufferController } from "../../controls/Input"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { ViewModel } from "../ViewModel"
 import { CreateNoteSchema, DeleteNoteSchema, GetPageSchema, RenameNoteSchema } from "../../../backend/Schema"
@@ -25,9 +24,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
   readonly $searchBuffer = new RXObservableValue('')
   readonly $searchFocused = new RXObservableValue(false)
-
-  readonly $mode = new RXObservableValue<'explore' | 'create' | 'rename'>('explore')
-  readonly bufferController = new InputBufferController()
 
   constructor(ctx: DerTutorContext) {
     const interactor = new NoteListInteractor(ctx)
@@ -58,16 +54,18 @@ export class NoteListVM extends ViewModel<NoteListState> {
   }
 
   private addKeybindings() {
+    this.addDefaultKeybindings()
+
     this.actionsList.add('g', 'Select first note', () => this.moveCursorToTheFirst())
     this.actionsList.add('G', 'Select last note', () => this.moveCursorToTheLast())
 
     this.actionsList.add('<Right>', 'Select next note', () => this.moveNext())
     this.actionsList.add('<Left>', 'Select prev note', () => this.movePrev())
 
-    this.actionsList.add('n', 'New note (ADMIN)', () => this.createNote())
-    this.actionsList.add('r', 'Rename note (ADMIN)', () => this.renameNote())
-    this.actionsList.add('e', 'Edit note (ADMIN)', () => this.edit())
-    this.actionsList.add(':d<CR>', 'Delete note (ADMIN)', () => this.deleteNote())
+    this.actionsList.add('n', 'New note (SUPERUSER)', () => this.createNote())
+    this.actionsList.add('r', 'Rename note (SUPERUSER)', () => this.renameNote())
+    this.actionsList.add('e', 'Edit note (SUPERUSER)', () => this.edit())
+    this.actionsList.add(':d<CR>', 'Delete note (SUPERUSER)', () => this.deleteNote())
     this.actionsList.add('/', 'Search', () => this.$searchFocused.value = true)
 
     this.actionsList.add('<Space>', 'Play audio', () => this.playAudio())
@@ -120,60 +118,161 @@ export class NoteListVM extends ViewModel<NoteListState> {
   }
 
   private edit() {
-    if (this.$mode.value === 'explore') {
+    if (!this.ctx.$user.value) {
+      this.ctx.$msg.value = { text: 'User not authorized', level: 'warning' }
+      return
+    }
+
+    if (!this.ctx.$user.value.is_superuser) {
+      this.ctx.$msg.value = { text: 'You do not have permission to edit any note', level: 'warning' }
+      return
+    }
+
+    if (!this.inputMode.$isActive.value) {
       this.navigator.updateWith({ edit: true })
     } else {
       this.ctx.$msg.value = { level: 'error', text: 'Editor should be closed before starting editting another note' }
     }
   }
 
-  private createNote() {
-    if (this.$mode.value === 'explore' && this.$state.value.voc) {
-      this.bufferController.$buffer.value = ''
-      this.$mode.value = 'create'
+  private async createNote() {
+    if (this.inputMode.$isActive.value) return
+    if (!this.$state.value.voc) {
+      this.ctx.$msg.value = { text: 'Vocabulary not selected' }
+      return
+    }
+
+    const res = await this.inputMode.activate('New:', '').asAwaitable
+
+    if (!res.isCanceled) {
+      const lang = this.$state.value.lang
+      const voc = this.$state.value.voc
+      const name = res.value.trim()
+      if (lang && voc && name) {
+        const scheme = {} as CreateNoteSchema
+        scheme.lang_id = lang.id
+        scheme.voc_id = voc.id
+        scheme.name = name
+        scheme.text = '# ' + name + '\n\n' + (lang.code === 'en' ? '## Examples\n' : '## Beispiele\n')
+        scheme.level = this.navigator.$keys.value.level
+        scheme.tag_id = this.navigator.$keys.value.tagId
+        scheme.audio_url = ''
+
+        console.log('Creating note, schema:', scheme)
+        console.log('Creating note, json:', JSON.stringify(scheme))
+
+        this.server.createNote(scheme).pipe()
+          .onReceive((n: INote | undefined) => {
+            console.log('NoteListVM:applyInput, creating note, result: ', n)
+            if (n) {
+              this.interactor.clearCache()
+              this.navigator.updateWith({ page: 1, noteId: n.id })
+            }
+          })
+          .onError(e => {
+            const msg = e.message.indexOf('duplicate key') !== -1 ? 'Note already exists' : e.message
+            this.ctx.$msg.value = { level: 'error', text: msg }
+          })
+          .subscribe()
+      }
     }
   }
 
-  private renameNote() {
-    if (!this.$state.value.selectedNote) return
-    if (this.$mode.value !== 'explore') return
-    this.bufferController.$buffer.value = this.$state.value.selectedNote.name
-    this.$mode.value = 'rename'
-  }
+  private async renameNote() {
+    if (this.inputMode.$isActive.value) return
+    if (!this.$state.value.selectedNote) {
+      this.ctx.$msg.value = { text: 'Note not selected' }
+      return
+    }
 
-  private deleteNote() {
-    if (this.$mode.value !== 'explore') return
-    const page = this.$state.value.page
-    const note = this.$state.value.selectedNote
-    if (!page || !note) return
-    const schema = { id: note.id } as DeleteNoteSchema
-    this.server.deleteNote(schema).pipe()
-      .onReceive(_ => {
-        console.log('NoteListVM:deleteNote complete')
-        this.ctx.$msg.value = { level: 'info', text: 'deleted' }
+    const res = await this.inputMode.activate('Rename:', this.$state.value.selectedNote.name).asAwaitable
 
-        const index = page.items.findIndex(child => child.id === note.id) ?? -1
-        let nextNote: INote | undefined
-        if (index > 0) {
-          nextNote = page.items[index - 1]
-        } else if (index === 0 && page.items.length > 1) {
-          nextNote = page.items[1]
+    if (!res.isCanceled) {
+      const page = this.$state.value.page
+      const note = this.$state.value.selectedNote
+      if (page && note) {
+        const newName = res.value.trim()
+        if (!newName) {
+          this.ctx.$msg.value = { level: 'info', text: 'Empty name' }
+          return
+        }
+        else if (newName === note.name) {
+          this.ctx.$msg.value = { level: 'info', text: 'No changes' }
+          return
         }
 
-        this.interactor.clearCache()
-        this.navigator.updateWith({ noteId: nextNote?.id })
-      })
-      .onError(e => {
-        this.ctx.$msg.value = { level: 'error', text: e.message }
-      })
-      .subscribe()
+        const scheme = {} as RenameNoteSchema
+        scheme.id = note.id
+        scheme.name = newName
+
+        this.server.renameNote(scheme).pipe()
+          .onReceive((note: INote | undefined) => {
+            console.log('NoteListVM:completeRenaming, res: ', note)
+            if (note) {
+              this.ctx.$msg.value = { level: 'info', text: 'renamed' }
+
+              const ind = page.items.findIndex(n => n.id === note.id)
+              if (ind !== -1 && page) {
+                this.interactor.clearCache()
+                this.navigator.updateWith({})
+              }
+            } else {
+              this.ctx.$msg.value = { level: 'warning', text: 'Renamed note is failed' }
+            }
+          })
+          .onError(e => {
+            const msg = e.message.indexOf('duplicate key') ? 'Note already exists' : e.message
+            this.ctx.$msg.value = { level: 'error', text: msg }
+          })
+          .subscribe()
+      }
+    }
+  }
+
+  private async deleteNote() {
+    if (this.inputMode.$isActive.value) return
+    if (!this.$state.value.page) return
+    if (!this.$state.value.selectedNote) return
+
+    const res = await this.inputMode.activate('Delete [yes|no]?', 'no').asAwaitable
+
+    if (!res.isCanceled) {
+      const page = this.$state.value.page
+      const note = this.$state.value.selectedNote
+
+      if (page && note) {
+        const answer = res.value.trim().toLocaleLowerCase()
+        if (answer === 'y' || answer === 'yes') {
+          const schema = { id: note.id } as DeleteNoteSchema
+          this.server.deleteNote(schema).pipe()
+            .onReceive(_ => {
+              console.log('NoteListVM:deleteNote complete')
+              this.ctx.$msg.value = { level: 'info', text: 'deleted' }
+
+              const index = page.items.findIndex(child => child.id === note.id) ?? -1
+              let nextNote: INote | undefined
+              if (index > 0) {
+                nextNote = page.items[index - 1]
+              } else if (index === 0 && page.items.length > 1) {
+                nextNote = page.items[1]
+              }
+
+              this.interactor.clearCache()
+              this.navigator.updateWith({ noteId: nextNote?.id })
+            })
+            .onError(e => {
+              this.ctx.$msg.value = { level: 'error', text: e.message }
+            })
+            .subscribe()
+        }
+      }
+    }
   }
 
   playAudio() {
     if (this.$state.value.selectedNote?.audio_url)
       new Audio(this.server.baseUrl + this.$state.value.selectedNote.audio_url).play()
   }
-
 
   reprLevel(level: number | undefined) {
     return level && level < AVAILABLE_LEVELS.length ? AVAILABLE_LEVELS[level] : ''
@@ -210,107 +309,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
       }
 
       this.navigator.navigateTo(keys)
-    }
-  }
-
-  override async onKeyDown(e: KeyboardEvent): Promise<void> {
-    if (this.$mode.value === 'explore') {
-      super.onKeyDown(e)
-    } else {
-      const code = this.actionsList.parser.keyToCode(e)
-      if (code === '<ESC>') {
-        this.$mode.value = 'explore'
-      } else if (code === '<CR>') {
-        this.applyInput()
-      } else if (code === '<C-v>') {
-        await this.bufferController.pasteFromKeyboard()
-      } else {
-        this.bufferController.onKeyDown(e)
-      }
-    }
-  }
-
-  private applyInput() {
-    if (this.$mode.value === 'create') {
-      this.completeCreation()
-      this.$mode.value = 'explore'
-    } else if (this.$mode.value === 'rename') {
-      this.completeRenaming()
-      this.$mode.value = 'explore'
-    }
-  }
-
-  private completeCreation() {
-    const lang = this.$state.value.lang
-    const voc = this.$state.value.voc
-    const name = this.bufferController.$buffer.value.trim()
-    if (lang && voc && name) {
-      const scheme = {} as CreateNoteSchema
-      scheme.lang_id = lang.id
-      scheme.voc_id = voc.id
-      scheme.name = name
-      scheme.text = '# ' + name + '\n\n' + (lang.code === 'en' ? '## Examples\n' : '## Beispiele\n')
-      scheme.level = this.navigator.$keys.value.level
-      scheme.tag_id = this.navigator.$keys.value.tagId
-      scheme.audio_url = ''
-
-      console.log('Creating note, schema:', scheme)
-      console.log('Creating note, json:', JSON.stringify(scheme))
-
-      this.server.createNote(scheme).pipe()
-        .onReceive((n: INote | undefined) => {
-          console.log('NoteListVM:applyInput, creating note, result: ', n)
-          if (n) {
-            this.interactor.clearCache()
-            this.navigator.updateWith({ page: 1, noteId: n.id })
-          }
-        })
-        .onError(e => {
-          const msg = e.message.indexOf('duplicate key') !== -1 ? 'Note already exists' : e.message
-          this.ctx.$msg.value = { level: 'error', text: msg }
-        })
-        .subscribe()
-    }
-  }
-
-  private completeRenaming() {
-    const page = this.$state.value.page
-    const note = this.$state.value.selectedNote
-    if (page && note) {
-      const newName = this.bufferController.$buffer.value.trim()
-      if (!newName) {
-        this.ctx.$msg.value = { level: 'info', text: 'Empty name' }
-        return
-      }
-      else if (newName === note.name) {
-        this.ctx.$msg.value = { level: 'info', text: 'No changes' }
-        return
-      }
-
-      const scheme = {} as RenameNoteSchema
-      scheme.id = note.id
-      scheme.name = newName
-
-      this.server.renameNote(scheme).pipe()
-        .onReceive((note: INote | undefined) => {
-          console.log('NoteListVM:completeRenaming, res: ', note)
-          if (note) {
-            this.ctx.$msg.value = { level: 'info', text: 'renamed' }
-
-            const ind = page.items.findIndex(n => n.id === note.id)
-            if (ind !== -1 && page) {
-              this.interactor.clearCache()
-              this.navigator.updateWith({})
-            }
-          } else {
-            this.ctx.$msg.value = { level: 'warning', text: 'Renamed note is failed' }
-          }
-        })
-        .onError(e => {
-          const msg = e.message.indexOf('duplicate key') ? 'Note already exists' : e.message
-          this.ctx.$msg.value = { level: 'error', text: msg }
-        })
-        .subscribe()
     }
   }
 

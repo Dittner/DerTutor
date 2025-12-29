@@ -6,6 +6,7 @@ from src.api.decorators import only_superuser, open_session
 from src.api.users import auth
 from src.api.users.dao import UserDAO
 from src.api.users.schema import UserAuth, UserRead
+from src.repo import User
 
 router = APIRouter(prefix='', tags=['Auth'])
 log = logging.getLogger('uvicorn')
@@ -16,6 +17,13 @@ log = logging.getLogger('uvicorn')
 @only_superuser
 async def get_users(session: AsyncSession):
     return await UserDAO.find_all(session)
+
+
+@router.get('/users/me', response_model=UserRead)
+@open_session
+@only_superuser
+async def get_me(user: User):
+    return user
 
 
 @router.post('/users/register', response_model=UserRead)
@@ -31,7 +39,7 @@ async def register_user(session: AsyncSession, data: UserAuth):
     )
 
 
-@router.post('/users/login', response_model=UserRead)
+@router.post('/users/auth', response_model=UserRead)
 @open_session
 async def login(session: AsyncSession, user: UserAuth, response: Response):
     return await auth.login(session, user.username, user.password, response)

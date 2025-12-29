@@ -1,14 +1,44 @@
 import { RXOperation } from 'flinker'
 import { RestApi, RestApiError } from './RestApi'
-import { CreateNoteSchema, CreateVocSchema, DeleteMedialFileSchema, DeleteNoteSchema, DeleteVocSchema, GetPageSchema, RenameNoteSchema, RenameVocSchema, UpdateNoteSchema } from './Schema'
+import { AuthenticateSchema, CreateNoteSchema, CreateVocSchema, DeleteMedialFileSchema, DeleteNoteSchema, DeleteVocSchema, GetPageSchema, RenameNoteSchema, RenameVocSchema, UpdateNoteSchema } from './Schema'
 import { Path } from '../app/Utils'
-import { ILang, INote, IPage } from '../domain/DomainModel'
+import { ILang, INote, IPage, IUser } from '../domain/DomainModel'
 
 export class DertutorServer extends RestApi {
   constructor() {
     //env is defined in dockerfile
     const baseUrl = import.meta.env.VITE_DERTUTOR_API_URL ?? 'http://localhost:3456/api'
     super(baseUrl)
+  }
+
+  //--------------------------------------
+  //  user and auth
+  //--------------------------------------
+
+  loadCurrentUser(): RXOperation<IUser, RestApiError> {
+    const op = this.get('/users/me')
+    op.pipe()
+      .onReceive(_ => { this, this.$isUserAuthenticated.value = true })
+      .onError(_ => { this, this.$isUserAuthenticated.value = false })
+      .subscribe()
+    return op
+  }
+
+  signIn(schema: AuthenticateSchema): RXOperation<IUser, RestApiError> {
+    const op = this.post('/users/auth', schema)
+    op.pipe()
+      .onReceive(_ => { this, this.$isUserAuthenticated.value = true })
+      .onError(_ => { this, this.$isUserAuthenticated.value = false })
+      .subscribe()
+    return op
+  }
+
+  signOut(): RXOperation<IUser, RestApiError> {
+    const op = this.post('/users/logout')
+    op.pipe()
+      .onReceive(_ => { this, this.$isUserAuthenticated.value = false })
+      .subscribe()
+    return op
   }
 
   //--------------------------------------

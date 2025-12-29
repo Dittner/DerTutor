@@ -59,6 +59,11 @@ export class InputBufferController {
 
   constructor() { }
 
+  reset(value: string) {
+    this.$buffer.value = value
+    this.$cursorPos.value = -1
+  }
+
   async pasteFromKeyboard() {
     const text = await navigator.clipboard.readText()
     if (text) {
@@ -116,12 +121,16 @@ export class InputBufferController {
 
 export interface LineInputProps extends StackProps {
   title: string
+  isSecure: boolean
 }
 
 export const LineInput = ($buffer: RXObservableValue<string>, $cursorPos: RXObservableValue<number>) => {
-  const $sharedState = new RXObservableValue<LineInputProps>({ title: '' })
+  const $sharedState = new RXObservableValue<LineInputProps>({ title: '', isSecure: false })
   const textColor = '#111111'
   return hstack<LineInputProps>()
+    .observe($sharedState, 'affectsChildrenProps')
+    .observe($buffer, 'affectsChildrenProps')
+    .observe($cursorPos, 'affectsChildrenProps')
     .react(s => {
       s.fontFamily = FontFamily.MONO
       s.gap = '0'
@@ -141,7 +150,6 @@ export const LineInput = ($buffer: RXObservableValue<string>, $cursorPos: RXObse
     .children(() => {
 
       span()
-        .observe($sharedState)
         .react(s => {
           s.fontSize = 'inherit'
           s.text = $sharedState.value.title
@@ -149,20 +157,17 @@ export const LineInput = ($buffer: RXObservableValue<string>, $cursorPos: RXObse
         })
 
       span()
-        .observe($buffer)
-        .observe($cursorPos)
         .react(s => {
           const t = $buffer.value
           const i = $cursorPos.value
+          const value = i === -1 ? t : t.slice(0, i)
           s.fontSize = 'inherit'
           s.textColor = 'inherit'
           s.height = '100%'
-          s.text = i === -1 ? t : t.slice(0, i)
+          s.text = $sharedState.value.isSecure ? '*'.repeat(value.length) : value
         })
 
       span()
-        .observe($buffer)
-        .observe($cursorPos)
         .react(s => {
           const t = $buffer.value
           const i = $cursorPos.value
@@ -174,15 +179,14 @@ export const LineInput = ($buffer: RXObservableValue<string>, $cursorPos: RXObse
         })
 
       span()
-        .observe($buffer)
-        .observe($cursorPos)
         .react(s => {
           const t = $buffer.value
           const i = $cursorPos.value
+          const value = i === -1 ? '' : t.slice(i + 1)
           s.fontSize = 'inherit'
           s.textColor = 'inherit'
           s.height = '100%'
-          s.text = i === -1 ? '' : t.slice(i + 1)
+          s.text = $sharedState.value.isSecure ? '*'.repeat(value.length) : value
         })
     })
 }

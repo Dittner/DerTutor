@@ -1,3 +1,10 @@
+export interface IUser {
+  readonly id: number
+  readonly username: string
+  readonly is_active: boolean
+  readonly is_superuser: boolean
+}
+
 export interface ILang {
   readonly id: number
   readonly code: string

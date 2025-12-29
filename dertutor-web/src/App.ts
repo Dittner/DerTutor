@@ -8,6 +8,7 @@ import { EditorView } from "./ui/view/editor/EditorView"
 import { NoteListView } from "./ui/view/note/NoteListView"
 import { VocListView } from "./ui/view/vocs/VocListView"
 import { DerTutorContext } from "./DerTutorContext"
+import { LineInput } from "./ui/controls/Input"
 
 export const globalContext = GlobalContext.init()
 
@@ -31,6 +32,7 @@ export function App() {
           else return undefined
         })
 
+      NavBar()
       ActionsHelpView()
       Footer()
       AppErrorInfo()
@@ -48,11 +50,12 @@ export const ActionsHelpView = () => {
       s.visible = vm && vm.$showActions.value
       s.position = 'fixed'
       s.paddingTop = theme().navBarHeight + 'px'
-      s.right = '0'
+      s.left = window.innerWidth / 2 + 'px'
+      s.width = window.innerWidth / 2 + 'px'
       s.top = '0'
-      s.height = window.innerHeight - theme().statusBarHeight + 'px'
+      s.height = window.innerHeight + 'px'
       s.paddingHorizontal = '20px'
-      s.gap = '0'
+      s.gap = '0px'
       s.bgColor = theme().actionsBg
     }).children(() => {
       const vm = ctx.$activeVM.value
@@ -78,10 +81,10 @@ const ActionInfoView = (a: Action) => {
       span().react(s => {
         s.display = 'inline-block'
         s.text = a.cmd
-        s.textColor = theme().isLight ? theme().red : theme().red
+        s.textColor = theme().strong
         s.paddingHorizontal = '20px'
         s.paddingVertical = '5px'
-        s.width = '120px'
+        s.width = '200px'
         s.whiteSpace = 'nowrap'
         s.textAlign = 'right'
       })
@@ -89,7 +92,7 @@ const ActionInfoView = (a: Action) => {
       span()
         .react(s => {
           s.text = a.desc
-          s.textColor = theme().strong
+          s.textColor = theme().text
           s.width = '100%'
           s.whiteSpace = 'nowrap'
           s.paddingVertical = '5px'
@@ -97,7 +100,39 @@ const ActionInfoView = (a: Action) => {
     })
 }
 
+const NavBar = () => {
+  const ctx = DerTutorContext.self
+
+  return hstack()
+    .react(s => {
+      s.position = 'fixed'
+      s.top = '0'
+      s.left = '0'
+      s.fontFamily = FontFamily.MONO
+      s.fontSize = theme().defMenuFontSize
+      s.gap = '10px'
+      //s.width = '100%'
+      s.minHeight = theme().navBarHeight + 'px'
+      s.valign = 'center'
+      s.paddingHorizontal = '20px'
+    })
+    .children(() => {
+
+      p()
+        .observe(ctx.$user)
+        .react(s => {
+          s.textColor = theme().text50
+          if (!ctx.$user.value)
+            s.text = ''
+          else
+            s.text = ctx.$user.value.username + (ctx.$user.value.is_superuser ? ':superuser' : '')
+        })
+
+    })
+}
 const Footer = () => {
+  const ctx = DerTutorContext.self
+
   return hstack()
     .react(s => {
       s.position = 'fixed'
@@ -119,6 +154,20 @@ const Footer = () => {
       })
 
       CmdView()
+
+      observer(ctx.$activeVM).onReceive(vm => {
+        return vm && LineInput(vm.inputMode.bufferController.$buffer, vm.inputMode.bufferController.$cursorPos)
+          .observe(vm.inputMode.$isActive)
+          .react(s => {
+            s.visible = vm.inputMode.$isActive.value
+            s.position = 'fixed'
+            s.width = '100%'
+            s.height = theme().statusBarHeight + 'px'
+            s.bottom = '0'
+            s.title = vm.inputMode.name
+            s.isSecure = vm.inputMode.isSecure
+          })
+      })
     })
 }
 
@@ -154,7 +203,7 @@ export const CmdView = () => {
       s.text = ctx.$activeVM.value?.$cmd.value ?? ''
       s.whiteSpace = 'nowrap'
       s.paddingHorizontal = '10px'
-      s.textColor = theme().text
+      s.textColor = theme().text50
     })
 }
 

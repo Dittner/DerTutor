@@ -62,6 +62,7 @@ export class RestApi {
   readonly baseUrl: string
 
   readonly $isServerAvailable = new RXObservableValue(false)
+  readonly $isUserAuthenticated = new RXObservableValue(false)
   headers: any = { 'Content-Type': 'application/json' }
 
   constructor(baseUrl: string,) {
@@ -99,7 +100,7 @@ export class RestApi {
     return cmd.run()
   }
 
-  post(path: string, schema: any, headers: any = undefined): RXOperation<any, RestApiError> {
+  post(path: string, schema: any = undefined, headers: any = undefined): RXOperation<any, RestApiError> {
     const cmd = new RestApiCmd(this, 'POST', path, schema, headers)
     return cmd.run()
   }
@@ -158,30 +159,34 @@ export class RestApi {
 
   async handlerError(response: Response | null): Promise<never> {
     if (response) {
-      const details = (await this.getResponseDetails(response)) ?? ''
+      const details = (await this.getResponseDetails(response))
+      let msg = 'Uknown error'
+      'message' in details && (msg = details['message'])
+      'details' in details && (msg = details['details'])
+      'detail' in details && (msg = details['detail'])
+
       console.log('Response status:', response.status)
       console.log('Problem details:', details)
       if (response.status === 401 || response.status === 403) {
-        throw new RestApiError('notAuthorized', response.status, 'User not authorized')
+        this.$isUserAuthenticated.value = false
+        throw new RestApiError('notAuthorized', response.status, msg || 'User not authorized')
       } else if (response.status === 400) {
-        throw new RestApiError('clientError', response.status, details)
+        throw new RestApiError('clientError', response.status, msg)
       } else if (response.status === 404) {
-        throw new RestApiError('clientError', response.status, details || 'Not found')
+        throw new RestApiError('clientError', response.status, msg || 'Not found')
       } else if (response.status >= 500) {
-        throw new RestApiError('serverError', response.status, 'Server error: ' + details)
+        throw new RestApiError('serverError', response.status, 'Server error: ' + msg)
       } else {
-        throw new RestApiError('unknownError', response.status, 'Unknown error: ' + details)
+        throw new RestApiError('unknownError', response.status, 'Unknown error: ' + msg)
       }
     } else {
       throw new RestApiError('noConnection', NO_CONNECTION_STATUS, 'No response')
     }
   }
 
-  async getResponseDetails(response: Response) {
+  async getResponseDetails(response: Response): any {
     try {
-      const details = await response.text()
-      console.log('Details:', details)
-      return details
+      return await response.json()
     } catch (_) { }
     return null
   }

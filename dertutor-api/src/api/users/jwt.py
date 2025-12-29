@@ -28,7 +28,9 @@ class JWTParser:
         now = datetime.now(UTC)
         access.update({'exp': now + timedelta(days=self.access_expire_in_days)})
         refresh.update({'exp': now + timedelta(days=self.refresh_expire_in_days)})
-        return jwt.encode(access, self.secret_key, self.algorithm), jwt.encode(refresh, self.secret_key, self.algorithm)
+        a = jwt.encode(access, self.secret_key, self.algorithm)
+        r = jwt.encode(refresh, self.secret_key, self.algorithm)
+        return a, r
 
     def decode(self, token: Token) -> dict[str, Any]:
         return jwt.decode(token, self.secret_key, algorithms=[self.algorithm])

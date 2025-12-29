@@ -1,10 +1,8 @@
 import { hstack, input, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { globalContext } from "../../../App"
-import { LayoutLayer } from "../../../app/Application"
 import { INote, ITag } from "../../../domain/DomainModel"
 import { Btn, LinkBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
-import { LineInput } from "../../controls/Input"
 import { Markdown } from "../../controls/Markdown"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { MaterialIcon } from "../../icons/MaterialIcon"
@@ -30,7 +28,7 @@ export const NoteListView = () => {
           const hasAudio = vm.$state.value.selectedNote !== undefined && vm.$state.value.selectedNote.audio_url !== ''
           s.mouseEnabled = hasAudio
           s.position = 'relative'
-          s.top = '120px'
+          s.top = '125px'
           s.opacity = hasAudio ? '1' : '0'
         })
 
@@ -77,20 +75,6 @@ export const NoteListView = () => {
           s.top = theme().navBarHeight + 'px'
           s.left = theme().menuWidth + theme().maxNoteViewWidth + 100 + 'px'
           s.valign = 'center'
-        })
-
-      LineInput(vm.bufferController.$buffer, vm.bufferController.$cursorPos)
-        .observe(vm.$mode)
-        .react(s => {
-          const mode = vm.$mode.value
-          s.visible = vm.$mode.value !== 'explore'
-          s.title = mode === 'create' ? 'New:' : mode === 'rename' ? 'Rename:' : 'Input:'
-          s.position = 'fixed'
-          s.width = '100%'
-          s.height = theme().statusBarHeight + 'px'
-          s.left = '0'
-          s.bottom = '0'
-          s.layer = LayoutLayer.MODAL
         })
     })
 }
@@ -443,30 +427,5 @@ const SearchPanel = () => {
           vm.$searchFocused.value = true
           document.activeElement instanceof HTMLInputElement && document.activeElement.select()
         })
-
-      // spacer().react(s => s.height = '10px')
-
-      // hstack()
-      //   .react(s => {
-      //     s.gap = '10px'
-      //   })
-      //   .children(() => {
-      //     switcher()
-      //       .observe(vm.$searchGlobally)
-      //       .react(s => {
-      //         s.isSelected = vm.$searchGlobally.value
-      //         s.trackColor = theme().text + '40'
-      //       })
-      //       .whenSelected(s => {
-      //         s.trackColor = theme().accent
-      //       })
-      //       .onClick(() => vm.$searchGlobally.value = !vm.$searchGlobally.value)
-
-      //     p().react(s => {
-      //       s.textColor = theme().text50
-      //       s.fontSize = theme().defMenuFontSize
-      //       s.text = 'Search globally'
-      //     })
-      //   })
     })
 }

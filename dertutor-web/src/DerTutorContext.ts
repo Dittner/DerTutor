@@ -4,7 +4,7 @@ import { NoteListVM } from './ui/view/note/NoteListVM'
 import { IViewModel } from './ui/view/ViewModel'
 import { VocListVM } from './ui/view/vocs/VocListVM'
 import { EditorVM } from './ui/view/editor/EditorVM'
-import { ILang } from './domain/DomainModel'
+import { ILang, IUser } from './domain/DomainModel'
 import { globalContext } from './App'
 
 export interface Message {
@@ -21,6 +21,7 @@ export class DerTutorContext {
   readonly noteListVM: NoteListVM
   readonly editorVM: EditorVM
 
+  readonly $user = new RXObservableValue<IUser | undefined>(undefined)
   readonly $allLangs = new RXObservableValue<ILang[]>([])
   readonly $msg = new RXObservableValue<Message | undefined>(undefined)
   readonly router: DerTutorRouter
@@ -42,6 +43,15 @@ export class DerTutorContext {
 
     this.router = new DerTutorRouter(this)
 
+    globalContext.server.$isUserAuthenticated.pipe().onReceive(value => {
+      if (!value)
+        this.$user.value = undefined
+    })
+
+    globalContext.server.loadCurrentUser().pipe().onReceive(value => {
+      this.$user.value = value
+    })
+
     document.addEventListener('keydown', this.onKeyDown.bind(this))
   }
 
@@ -55,15 +65,22 @@ export class DerTutorRouter {
   constructor(ctx: DerTutorContext) {
     globalContext.navigator.$keys.pipe()
       .onReceive(keys => {
+        let newVM: IViewModel
         if (!globalContext.server.$isServerAvailable.value)
-          ctx.$activeVM.value = ctx.connectionVM
+          newVM = ctx.connectionVM
         else if (keys.noteId && keys.edit)
-          ctx.$activeVM.value = ctx.editorVM
+          newVM = ctx.editorVM
         else if (keys.langCode && (keys.vocCode || (keys.searchKey && keys.searchKey.length > 1)))
-          ctx.$activeVM.value = ctx.noteListVM
+          newVM = ctx.noteListVM
         else
-          ctx.$activeVM.value = ctx.vocListVM
+          newVM = ctx.vocListVM
 
+        if(ctx.$activeVM.value !== newVM) {
+          ctx.$activeVM.value?.deactivate()
+          ctx.$activeVM.value = newVM
+          newVM.activate()
+        }
+        
         ctx.$activeVM.value.urlDidChange(keys)
       })
       .subscribe()

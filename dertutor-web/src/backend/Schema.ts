@@ -1,3 +1,8 @@
+export interface AuthenticateSchema {
+  username: string
+  password: string
+}
+
 export interface CreateVocSchema {
   lang_id: number
   name: string

@@ -1,6 +1,5 @@
 import { RXObservableValue } from "flinker"
 
-import { InputBufferController } from "../../controls/Input"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { ViewModel } from "../ViewModel"
 import { DomainService, ILang, IVoc } from "../../../domain/DomainModel"
@@ -8,6 +7,7 @@ import { CreateVocSchema, DeleteVocSchema, RenameVocSchema } from "../../../back
 import { UrlKeys } from "../../../app/URLNavigator"
 import { globalContext } from "../../../App"
 import { Interactor } from "../Interactor"
+
 
 export interface VocListState {
   allLangs?: ILang[]
@@ -20,8 +20,6 @@ export class VocListVM extends ViewModel<VocListState> {
   readonly $selectedLang = new RXObservableValue<ILang | undefined>(undefined)
   readonly $highlightedLang = new RXObservableValue<ILang | undefined>(undefined)
   readonly $highlightedVoc = new RXObservableValue<IVoc | undefined>(undefined)
-  readonly $mode = new RXObservableValue<'explore' | 'create' | 'rename'>('explore')
-  readonly bufferController = new InputBufferController()
 
   constructor(ctx: DerTutorContext) {
     const interactor = new VocListInteractor(ctx)
@@ -40,6 +38,8 @@ export class VocListVM extends ViewModel<VocListState> {
   }
 
   private addKeybindings() {
+    this.addDefaultKeybindings()
+
     this.actionsList.add('g', 'Select first item', () => this.moveCursorToTheFirst())
     this.actionsList.add('G', 'Select last item', () => this.moveCursorToTheLast())
 
@@ -48,9 +48,9 @@ export class VocListVM extends ViewModel<VocListState> {
     this.actionsList.add('<Left>', 'Select prev item', () => this.moveCursor(-1))
     this.actionsList.add('<Up>', 'Select prev item', () => this.moveCursor(-1))
 
-    this.actionsList.add('n', 'New vocabulary (ADMIN)', () => this.createVoc())
-    this.actionsList.add('r', 'Rename vocabulary (ADMIN)', () => this.renameVoc())
-    this.actionsList.add(':d<CR>', 'Delete vocabulary (ADMIN)', () => this.deleteVoc())
+    this.actionsList.add('n', 'New vocabulary (SUPERUSER)', () => this.createVoc())
+    this.actionsList.add('r', 'Rename vocabulary (SUPERUSER)', () => this.renameVoc())
+    this.actionsList.add(':d<CR>', 'Delete vocabulary (SUPERUSER)', () => this.deleteVoc())
     this.actionsList.add('q', 'Quit', () => this.quit())
 
     this.actionsList.add('<CR>', 'Go [Enter]', () => this.applySelection())
@@ -119,151 +119,125 @@ export class VocListVM extends ViewModel<VocListState> {
       this.ctx.$msg.value = { text: 'Not selected' }
   }
 
-  private createVoc() {
-    if (this.$selectedLang.value) {
-      if (this.$mode.value === 'explore') {
-        this.bufferController.$buffer.value = ''
-        this.$mode.value = 'create'
-      }
-    } else {
+  private async createVoc() {
+    if (this.inputMode.$isActive.value) return
+    if (!this.$selectedLang.value) {
       this.ctx.$msg.value = { text: 'Language not selected' }
+      return
     }
-  }
 
-  private renameVoc() {
-    if (!this.$highlightedVoc.value) return
-    if (this.$mode.value !== 'explore') return
-    this.bufferController.$buffer.value = this.$highlightedVoc.value.name
-    this.$mode.value = 'rename'
-  }
+    const res = await this.inputMode.activate('New:', '').asAwaitable
 
-  private quit() {
-    if (this.$selectedLang.value) {
-      this.$highlightedVoc.value = undefined
-      this.$highlightedLang.value = this.$selectedLang.value
-      this.$selectedLang.value = undefined
-    }
-  }
+    if (!res.isCanceled) {
+      const lang = this.$selectedLang.value
+      const name = res.value.trim()
+      if (lang && name) {
+        const schema = {} as CreateVocSchema
+        schema.lang_id = lang.id
+        schema.name = name
 
-  override async onKeyDown(e: KeyboardEvent): Promise<void> {
-    if (this.$mode.value === 'explore') {
-      super.onKeyDown(e)
-    } else {
-      const code = this.actionsList.parser.keyToCode(e)
-      if (code === '<ESC>') {
-        this.$mode.value = 'explore'
-      } else if (code === '<CR>') {
-        this.applyInput()
-      } else if (code === '<C-v>') {
-        await this.bufferController.pasteFromKeyboard()
-      } else {
-        this.bufferController.onKeyDown(e)
-      }
-    }
-  }
-
-  private applyInput() {
-    if (this.$mode.value === 'create') {
-      this.completeCreation()
-      this.$mode.value = 'explore'
-    } else if (this.$mode.value === 'rename') {
-      this.completeRenaming()
-      this.$mode.value = 'explore'
-    }
-  }
-
-  private completeCreation() {
-    const lang = this.$selectedLang.value
-    const name = this.bufferController.$buffer.value.trim()
-    if (lang && name) {
-      const schema = {} as CreateVocSchema
-      schema.lang_id = lang.id
-      schema.name = name
-
-      this.server.createVoc(schema).pipe()
-        .onReceive((data: IVoc) => {
-          console.log('VocListVM:applyInput, creating voc, result: ', data)
-          if (data) {
-            lang.vocs.push(data)
-            this.$selectedLang.value = undefined
-            this.$selectedLang.value = lang
-            this.$highlightedVoc.value = data
-          } else {
-            this.ctx.$msg.value = { level: 'warning', text: 'Created vocabulary is demaged' }
-          }
-        })
-        .onError(e => {
-          const msg = e.message.indexOf('duplicate key') ? 'Vocabulary already exists' : e.message
-          this.ctx.$msg.value = { level: 'error', text: msg }
-        })
-        .subscribe()
-    }
-  }
-
-  private completeRenaming() {
-    const lang = this.$selectedLang.value
-    const voc = this.$highlightedVoc.value
-
-    if (lang && voc) {
-      const newName = this.bufferController.$buffer.value.trim()
-      if (!newName) {
-        this.ctx.$msg.value = { level: 'warning', text: 'Empty name' }
-        return
-      } else if (newName === voc.name) {
-        this.ctx.$msg.value = { level: 'info', text: 'No changes' }
-        return
-      }
-
-      const schema = { id: voc.id, name: newName } as RenameVocSchema
-      this.server.renameVoc(schema).pipe()
-        .onReceive((data: IVoc) => {
-          console.log('VocListVM:applyInput, renaming voc, result: ', data)
-          if (data) {
-            this.ctx.$msg.value = { text: 'renamed' }
-            const ind = lang.vocs.findIndex(v => v.id === voc.id)
-            if (ind !== -1) {
-              lang.vocs[ind] = { id: voc.id, lang_id: lang.id, name: data.name } as IVoc
+        this.server.createVoc(schema).pipe()
+          .onReceive((data: IVoc) => {
+            console.log('VocListVM:applyInput, creating voc, result: ', data)
+            if (data) {
+              lang.vocs.push(data)
               this.$selectedLang.value = undefined
               this.$selectedLang.value = lang
-              this.$highlightedVoc.value = lang.vocs[ind]
+              this.$highlightedVoc.value = data
+            } else {
+              this.ctx.$msg.value = { level: 'warning', text: 'Created vocabulary is demaged' }
             }
-          } else {
-            this.ctx.$msg.value = { text: 'Renamed vocabulary is demaged', level: 'warning' }
-          }
-        })
-        .onError(e => {
-          const msg = e.message.indexOf('duplicate key') ? 'Note already exists' : e.message
-          this.ctx.$msg.value = { level: 'error', text: msg }
-        })
-        .subscribe()
+          })
+          .onError(e => {
+            const msg = e.message.indexOf('duplicate key') !== -1 ? 'Vocabulary already exists' : e.message
+            this.ctx.$msg.value = { level: 'error', text: msg }
+          })
+          .subscribe()
+      }
     }
   }
 
-  private deleteVoc() {
-    if (this.$mode.value !== 'explore') return
-    const lang = this.$selectedLang.value
-    const voc = this.$highlightedVoc.value
-    if (lang && voc) {
-      const schema = { id: voc.id } as DeleteVocSchema
-      this.server.deleteVoc(schema).pipe()
-        .onReceive(_ => {
-          console.log('VocListVM:deleteNote complete')
-          this.ctx.$msg.value = { level: 'info', text: 'deleted' }
-          this.moveCursor(1)
-          if (this.$highlightedVoc.value === voc)
-            this.moveCursor(-1)
+  private async renameVoc() {
+    if (this.inputMode.$isActive.value) return
+    if (!this.$highlightedVoc.value) return
 
-          const ind = lang.vocs.findIndex(v => v.id === voc.id)
-          if (ind !== -1) {
-            lang.vocs.splice(ind, 1)
-            this.$selectedLang.value = undefined
-            this.$selectedLang.value = lang
-          }
-        })
-        .onError(e => {
-          this.ctx.$msg.value = { level: 'error', text: e.message }
-        })
-        .subscribe()
+    const res = await this.inputMode.activate('Rename:', this.$highlightedVoc.value.name).asAwaitable
+
+    if (!res.isCanceled) {
+      const lang = this.$selectedLang.value
+      const voc = this.$highlightedVoc.value
+
+      if (lang && voc) {
+        const newName = res.value.trim()
+        if (!newName) {
+          this.ctx.$msg.value = { level: 'warning', text: 'Empty name' }
+          return
+        } else if (newName === voc.name) {
+          this.ctx.$msg.value = { level: 'info', text: 'No changes' }
+          return
+        }
+
+        const schema = { id: voc.id, name: newName } as RenameVocSchema
+        this.server.renameVoc(schema).pipe()
+          .onReceive((data: IVoc) => {
+            console.log('VocListVM:applyInput, renaming voc, result: ', data)
+            if (data) {
+              this.ctx.$msg.value = { text: 'renamed' }
+              const ind = lang.vocs.findIndex(v => v.id === voc.id)
+              if (ind !== -1) {
+                lang.vocs[ind] = { id: voc.id, lang_id: lang.id, name: data.name } as IVoc
+                this.$selectedLang.value = undefined
+                this.$selectedLang.value = lang
+                this.$highlightedVoc.value = lang.vocs[ind]
+              }
+            } else {
+              this.ctx.$msg.value = { text: 'Renamed vocabulary is demaged', level: 'warning' }
+            }
+          })
+          .onError(e => {
+            const msg = e.message.indexOf('duplicate key') !== -1 ? 'Note already exists' : e.message
+            this.ctx.$msg.value = { level: 'error', text: msg }
+          })
+          .subscribe()
+      }
+    }
+  }
+
+  private async deleteVoc() {
+    if (this.inputMode.$isActive.value) return
+    if (!this.$highlightedVoc.value) return
+
+    const res = await this.inputMode.activate('Delete [yes|no]?', 'no').asAwaitable
+
+    if (!res.isCanceled) {
+      const lang = this.$selectedLang.value
+      const voc = this.$highlightedVoc.value
+
+      if (lang && voc) {
+        const answer = res.value.trim().toLocaleLowerCase()
+        if (answer === 'y' || answer === 'yes') {
+          const schema = { id: voc.id } as DeleteVocSchema
+          this.server.deleteVoc(schema).pipe()
+            .onReceive(_ => {
+              console.log('VocListVM:deleteNote complete')
+              this.ctx.$msg.value = { level: 'info', text: 'deleted' }
+              this.moveCursor(1)
+              if (this.$highlightedVoc.value === voc)
+                this.moveCursor(-1)
+
+              const ind = lang.vocs.findIndex(v => v.id === voc.id)
+              if (ind !== -1) {
+                lang.vocs.splice(ind, 1)
+                this.$selectedLang.value = undefined
+                this.$selectedLang.value = lang
+              }
+            })
+            .onError(e => {
+              this.ctx.$msg.value = { level: 'error', text: e.message }
+            })
+            .subscribe()
+        }
+      }
     }
   }
 
@@ -273,6 +247,14 @@ export class VocListVM extends ViewModel<VocListState> {
     if (lang && voc) {
       const index = lang.vocs.findIndex(child => child.id === voc.id)
       this.ctx.$msg.value = { 'text': index != -1 ? `${index + 1}:${lang.vocs.length}` : '', 'level': 'info' }
+    }
+  }
+
+  private quit() {
+    if (this.$selectedLang.value) {
+      this.$highlightedVoc.value = undefined
+      this.$highlightedLang.value = this.$selectedLang.value
+      this.$selectedLang.value = undefined
     }
   }
 }
