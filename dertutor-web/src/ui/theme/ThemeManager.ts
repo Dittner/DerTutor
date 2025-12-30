@@ -134,11 +134,11 @@ export class ThemeManager {
 
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#707f8b' //707f8b 
-    const red = '#eb6c6c'
+    const text = '#707884' //707f8b 
+    const red = '#b9777d'
     const blue = '#57a9d5'
     const black = '#111111'
-    const accent = '#b7c09e'  //a2b6a4
+    const accent = '#9fa786'  //a2b6a4 b9777d
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
@@ -154,10 +154,10 @@ export class ThemeManager {
       strong: '#a0a5aa',
       actionsBg: '#18191c',
       blue,
-      mark: '#c971dd',
+      mark: '#b9777d',
       link: blue,
-      btn: '#d0b66f',
-      warn: '#d0b66f',
+      btn: '#a9b69e',
+      warn: '#a9b69e',
       border: text + '20',
       editor: '#729e9c'
     })

@@ -392,12 +392,23 @@ class NoteListInteractor extends Interactor<NoteListState> {
     if (!state.page) return
     let note = state.page.items.find(n => n.id === keys.noteId)
     if (!note && state.page.items.length > 0) {
-      if (this.prevState.page && this.prevState.page.page < state.page.page)
+      if (this.prevState.page && this.prevState.page.page < state.page.page) {
         note = state.page.items[0]
-      else if (this.prevState.page && this.prevState.page.page > state.page.page)
-        note = state.page.items[state.page.items.length - 1]
-      else
+      }
+      else if (this.prevState.page && this.prevState.page.page > state.page.page) {
+        if (this.prevState.lang?.id !== state.lang?.id ||
+          this.prevState.voc?.id !== state.voc?.id ||
+          this.prevState.level !== state.level ||
+          this.prevState.tagId !== state.tagId ||
+          this.prevState.searchKey !== state.searchKey) {
+          note = state.page.items[0]
+        } else {
+          note = state.page.items[state.page.items.length - 1]
+        }
+      }
+      else {
         note = state.page.items[0]
+      }
 
       globalContext.navigator.updateWith({ noteId: note.id }, 'replace')
     }

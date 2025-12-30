@@ -403,7 +403,7 @@ const SearchPanel = () => {
           s.fontFamily = FontFamily.APP
           s.autoFocus = vm.$searchFocused.value
           s.fontSize = theme().defMenuFontSize
-          s.textColor = theme().accent
+          s.textColor = theme().mark
           s.cornerRadius = '4px'
           s.paddingHorizontal = '10px'
           s.autoCorrect = 'off'
@@ -411,7 +411,7 @@ const SearchPanel = () => {
           s.border = '1px solid ' + theme().text + '40'
         })
         .whenFocused(s => {
-          s.border = '1px solid ' + theme().accent
+          s.border = '1px solid ' + theme().mark
         })
         .onKeyDown(e => {
           if (e.key === 'Enter') {

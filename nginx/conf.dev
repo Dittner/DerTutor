@@ -1,5 +1,5 @@
 server {
-  listen 4444;
+  listen 8080;
 
   server_name localhost;
 
@@ -22,5 +22,14 @@ server {
 
   location / {
     proxy_pass http://dertutor-web-client:3000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+    # Configuration for WebSocket support
+    proxy_http_version 1.1;                 # WebSockets require HTTP/1.1 for the upgrade handshake.
+    proxy_set_header Upgrade $http_upgrade; # Passes the Upgrade header from the client to the backend server.
+    proxy_set_header Connection "upgrade";  # Passes the Connection header, necessary for the protocol switch.
+    proxy_cache_bypass $http_upgrade;       # Ensures the connection is not cached and the upgrade happens correctly. 
   }
 }

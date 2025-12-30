@@ -48,7 +48,14 @@ async def lifespan(_: FastAPI):
     await ctx.close_all_connections()
 
 
-app = FastAPI(title='DERTUTOR API', lifespan=lifespan, default_response_class=ORJSONResponse)
+app = FastAPI(
+    title='DERTUTOR API',
+    docs_url='/api/docs',
+    redoc_url='/api/redoc',
+    openapi_url='/api/openapi.json',
+    lifespan=lifespan,
+    default_response_class=ORJSONResponse,
+)
 
 app.include_router(users_router, prefix='/api')
 app.include_router(langs_router, prefix='/api')

@@ -111,7 +111,7 @@ const Panel = (title: string) => {
       s.paddingVertical = '5px'
       s.paddingHorizontal = '20px'
       s.cornerRadius = '5px'
-      s.minHeight = '60px'
+      s.minHeight = '70px'
       s.valign = 'center'
       s.halign = 'stretch'
     })

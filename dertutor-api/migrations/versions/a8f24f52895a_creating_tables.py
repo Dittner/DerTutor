@@ -1,20 +1,19 @@
 """creating tables
 
-Revision ID: a40b0ee329b9
+Revision ID: a8f24f52895a
 Revises:
-Create Date: 2025-12-20 02:32:15.267231
+Create Date: 2025-12-30 18:21:33.880353
 
 """
-
-from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
 
-revision: str = 'a40b0ee329b9'
-down_revision: str | Sequence[str] | None = None
-branch_labels: str | Sequence[str] | None = None
-depends_on: str | Sequence[str] | None = None
+# revision identifiers, used by Alembic.
+revision: str = 'a8f24f52895a'
+down_revision: str | list[str] | None = None
+branch_labels: str | list[str] | None = None
+depends_on: str | list[str] | None = None
 
 
 def upgrade() -> None:
@@ -28,10 +27,21 @@ def upgrade() -> None:
         sa.UniqueConstraint('code', name=op.f('uq_langs_code')),
     )
     op.create_table(
+        'users',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('username', sa.String(length=256), nullable=False),
+        sa.Column('hashed_password', sa.String(length=255), nullable=False),
+        sa.Column('is_active', sa.Boolean(), nullable=False),
+        sa.Column('is_superuser', sa.Boolean(), nullable=False),
+        sa.PrimaryKeyConstraint('id', name=op.f('pk_users')),
+        sa.UniqueConstraint('username', name=op.f('uq_users_username')),
+    )
+    op.create_table(
         'tags',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.Text(), server_default='', nullable=False),
         sa.Column('lang_id', sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(['lang_id'], ['langs.id'], name=op.f('fk_tags_lang_id_langs')),
         sa.PrimaryKeyConstraint('id', name=op.f('pk_tags')),
         sa.UniqueConstraint('lang_id', 'name', name=op.f('uq_tags_lang_id_name')),
     )
@@ -73,4 +83,5 @@ def downgrade() -> None:
     op.drop_table('notes')
     op.drop_table('vocs')
     op.drop_table('tags')
+    op.drop_table('users')
     op.drop_table('langs')

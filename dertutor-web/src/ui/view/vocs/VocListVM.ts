@@ -112,9 +112,9 @@ export class VocListVM extends ViewModel<VocListState> {
 
   private printID() {
     if (this.$highlightedVoc.value)
-      this.ctx.$msg.value = { text: `ID=${this.$highlightedVoc.value}` }
+      this.ctx.$msg.value = { text: `ID=${this.$highlightedVoc.value.id}` }
     else if (this.$selectedLang.value)
-      this.ctx.$msg.value = { text: `ID=${this.$selectedLang.value}` }
+      this.ctx.$msg.value = { text: `ID=${this.$selectedLang.value.id}` }
     else
       this.ctx.$msg.value = { text: 'Not selected' }
   }
