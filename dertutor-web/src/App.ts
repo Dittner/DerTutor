@@ -53,7 +53,7 @@ export const ActionsHelpView = () => {
       s.left = window.innerWidth / 2 + 'px'
       s.width = window.innerWidth / 2 + 'px'
       s.top = '0'
-      s.height = window.innerHeight + 'px'
+      s.height = window.innerHeight - theme().statusBarHeight + 'px'
       s.paddingHorizontal = '20px'
       s.gap = '0px'
       s.bgColor = theme().actionsBg

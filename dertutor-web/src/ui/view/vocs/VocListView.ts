@@ -27,28 +27,12 @@ export const VocListView = () => {
       div()
         .react(s => {
           s.gap = '10px'
-          s.paddingTop = theme().navBarHeight + 'px'
-          s.paddingLeft = '20px'
+          s.paddingTop = theme().navBarHeight + 70 + 'px'
           s.width = theme().menuWidth + 'px'
           s.height = window.innerHeight - theme().statusBarHeight + 'px'
           s.borderRight = '1px solid ' + theme().border
         })
-
-      vstack()
-        .react(s => {
-          s.width = '100%'
-          s.gap = '20px'
-          s.paddingTop = theme().navBarHeight + 'px'
-        }).children(() => {
-
-          h2()
-            .observe(vm.$selectedLang)
-            .react(s => {
-              s.textColor = theme().text50
-              s.text = vm.$selectedLang.value ? 'Select a vocabulary' : 'Select a language'
-              s.paddingLeft = '20px'
-            })
-
+        .children(() => {
           vlist<ILang>()
             .observe(vm.$langs, 'recreateChildren')
             .observe(vm.$selectedLang, 'affectsChildrenProps')
@@ -60,6 +44,23 @@ export const VocListView = () => {
               s.width = '500px'
               s.maxWidth = theme().menuWidth + 'px'
               s.gap = '0'
+            })
+        })
+
+      vstack()
+        .react(s => {
+          s.width = '100%'
+          s.gap = '0px'
+          s.paddingTop = theme().navBarHeight + 'px'
+        }).children(() => {
+
+          h2()
+            .observe(vm.$selectedLang)
+            .react(s => {
+              s.textColor = theme().text50
+              s.text = vm.$selectedLang.value ? 'Select a vocabulary' : 'Select a language'
+              s.paddingLeft = '20px'
+              s.height = '70px'
             })
 
           vlist<IVoc>()
@@ -104,13 +105,13 @@ const LangRenderer = (lang: ILang) => {
       s.paddingHorizontal = '20px'
       s.textAlign = 'left'
       s.text = lang.name
-      s.textColor = isHighlighted ? theme().appBg : theme().red + 'cc'
-      s.bgColor = isHighlighted ? theme().red + 'cc' : theme().appBg
+      s.textColor = theme().red + 'cc'
+      s.bgColor = isHighlighted ? theme().appBg : theme().appBg
+      s.borderColor = isHighlighted ? theme().red + 'cc' : theme().appBg
     })
     .whenSelected(s => {
-      s.textColor = theme().red + 'cc'
-      s.borderColor = theme().red + 'cc'
-      s.bgColor = theme().appBg
+      s.textColor = theme().appBg
+      s.bgColor = theme().red
     })
     .onClick(() => {
       vm.$selectedLang.value = undefined
@@ -130,14 +131,13 @@ const VocRenderer = (voc: IVoc, index: number) => {
       s.paddingLeft = '20px'
       s.text = index + 1 + '. ' + voc.name
       s.textColor = theme().blue + 'cc'
-      s.bgColor = theme().appBg
+      s.borderColor = theme().appBg
     })
     .whenHovered(s => {
       s.textColor = theme().blue
     })
     .whenSelected(s => {
-      s.textColor = theme().appBg
-      s.bgColor = theme().blue + 'cc'
+      s.borderColor = theme().blue
     })
     .onClick(() => {
       vm.$highlightedVoc.value = voc

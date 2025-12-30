@@ -138,7 +138,7 @@ export class ThemeManager {
     const red = '#eb6c6c'
     const blue = '#57a9d5'
     const black = '#111111'
-    const accent = '#bdbf84'  //a2b6a4
+    const accent = '#b7c09e'  //a2b6a4
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
@@ -147,7 +147,7 @@ export class ThemeManager {
       text50: text + 'aa',
       red,
       green: '#307c7d',
-      h1: '#c0c5ca',
+      h1: '#b5bac8',
       header: '#307c7d',
       em: accent,
       accent,
