@@ -1,4 +1,4 @@
-import { hstack, input, p, spacer, span, vlist, vstack } from "flinker-dom"
+import { hstack, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { globalContext } from "../../../App"
 import { INote, ITag } from "../../../domain/DomainModel"
 import { Btn, LinkBtn } from "../../controls/Button"
@@ -8,6 +8,7 @@ import { DerTutorContext } from "../../../DerTutorContext"
 import { MaterialIcon } from "../../icons/MaterialIcon"
 import { theme } from "../../theme/ThemeManager"
 import { Title } from "../../controls/Text"
+import { TextInput } from "../../controls/Input"
 
 export const NoteListView = () => {
   const ctx = DerTutorContext.self
@@ -28,7 +29,7 @@ export const NoteListView = () => {
           const hasAudio = vm.$state.value.selectedNote !== undefined && vm.$state.value.selectedNote.audio_url !== ''
           s.mouseEnabled = hasAudio
           s.position = 'relative'
-          s.top = '125px'
+          s.top = '135px'
           s.opacity = hasAudio ? '1' : '0'
         })
 
@@ -113,7 +114,7 @@ const NotesMenu = () => {
         .itemHash((item: INote) => item.id + item.name + ':' + (item.id === vm.$state.value.selectedNote?.id))
         .react(s => {
           s.fontFamily = FontFamily.MONO
-          s.fontSize = theme().defMenuFontSize
+          s.fontSize = theme().smallFontSize
           s.width = '100%'
           s.gap = '0'
         })
@@ -185,7 +186,7 @@ const NotesPaginator = () => {
           s.visible = p && p.pages > 0
           s.text = p ? `${p.page}` : ''
           s.fontFamily = FontFamily.APP
-          s.fontSize = theme().defMenuFontSize
+          s.fontSize = theme().smallFontSize
           s.cornerRadius = '2px'
           s.textSelectable = false
           s.textColor = theme().accent + 'cc'
@@ -228,7 +229,7 @@ const NavBar = () => {
     .react(s => {
       s.gap = '10px'
       s.whiteSpace = 'nowrap'
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.fontFamily = FontFamily.MONO
       s.valign = 'center'
       s.textSelectable = false
@@ -290,7 +291,7 @@ const NoteMeta = () => {
       else if (level) s.text += level
       else if (tag) s.text += tag
       s.fontFamily = FontFamily.APP
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.paddingHorizontal = '10px'
       s.textColor = theme().text50
     })
@@ -328,7 +329,7 @@ const LevelsBar = () => {
     .itemRenderer(LevelRenderer)
     .itemHash((item: number) => item + ':' + (item === vm.$state.value.level))
     .react(s => {
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.fontFamily = FontFamily.MONO
       s.gap = '0px'
       s.width = '100%'
@@ -365,7 +366,7 @@ const TagSelector = () => {
     .itemRenderer(TagRenderer)
     .itemHash((item: ITag) => item.id + ':' + (item.id === vm.$state.value.tagId))
     .react(s => {
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.fontFamily = FontFamily.MONO
       s.gap = '10px'
       s.width = '100%'
@@ -393,25 +394,11 @@ const SearchPanel = () => {
       s.halign = 'left'
     })
     .children(() => {
-      input()
+      TextInput(vm.$searchBuffer)
         .observe(vm.$searchFocused)
-        .bind(vm.$searchBuffer)
         .react(s => {
-          s.type = 'text'
           s.width = '100%'
-          s.className = 'search'
-          s.fontFamily = FontFamily.APP
           s.autoFocus = vm.$searchFocused.value
-          s.fontSize = theme().defMenuFontSize
-          s.textColor = theme().mark
-          s.cornerRadius = '4px'
-          s.paddingHorizontal = '10px'
-          s.autoCorrect = 'off'
-          s.autoComplete = 'off'
-          s.border = '1px solid ' + theme().text + '40'
-        })
-        .whenFocused(s => {
-          s.border = '1px solid ' + theme().mark
         })
         .onKeyDown(e => {
           if (e.key === 'Enter') {

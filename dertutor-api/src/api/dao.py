@@ -1,7 +1,11 @@
+import logging
+
 from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+log = logging.getLogger('uvicorn')
 
 
 class BaseDAO[T]:
@@ -14,9 +18,13 @@ class BaseDAO[T]:
             session.add(new_instance)
             await session.commit()
             return new_instance
-        except SQLAlchemyError as e:
+        except IntegrityError as e:
             await session.rollback()
-            raise e
+            if 'UniqueViolationError' in str(e.orig):
+                log.info('UniqueViolationError catched: %s', e)
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=cls.model.__name__ + ' already exists')
+            log.info('Error inserting item: %s', e.orig)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e.orig))
 
     @classmethod
     async def find_one_or_none(cls, session: AsyncSession, **filter_by: str | int | bool) -> T | None:

@@ -7,6 +7,7 @@ import { UpdateNoteSchema } from "../../../backend/Schema"
 import { UrlKeys } from "../../../app/URLNavigator"
 import { Interactor } from "../Interactor"
 import { globalContext } from "../../../App"
+import { TextReplacer } from "./TextReplacer"
 
 export interface EditorState {
   allLangs?: ILang[]
@@ -29,28 +30,33 @@ export class EditorVM extends ViewModel<EditorState> {
   readonly $level = new RXObservableValue<number | undefined>(undefined)
   readonly $tagId = new RXObservableValue<number | undefined>(undefined)
   readonly $audioUrl = new RXObservableValue('')
+  readonly $selectedVocId = new RXObservableValue(-1)
   readonly $buffer = new RXObservableValue('')
   readonly $hasChanges = new RXObservableValue(false)
   readonly $filesPendingUpload = new RXObservableValue<Array<FileWrapper>>([])
   readonly $mediaFiles = new RXObservableValue<Array<IMediaFile>>([])
+  readonly textReplacer = new TextReplacer()
 
   constructor(ctx: DerTutorContext) {
     const interactor = new EditorInteractor(ctx)
     super('editor', ctx, interactor)
 
-    RX.combine(this.$buffer, this.$level, this.$tagId, this.$audioUrl).pipe()
+    RX.combine(this.$buffer, this.$level, this.$tagId, this.$audioUrl, this.$selectedVocId).pipe()
       .skipFirst()
       .onReceive(values => {
+        console.log('changeg!!!')
         const buffer = values[0]
-        const level = values[1] as number
-        const tagId = values[2] as number | undefined
+        const level = values[1]
+        const tagId = values[2]
         const audioUrl = values[3]
+        const vocId = values[4]
         const note = this.$state.value.note
         if (note) {
           this.$hasChanges.value = buffer !== note.text ||
             level !== note.level ||
             tagId !== note.tag_id ||
-            audioUrl !== note.audio_url
+            audioUrl !== note.audio_url ||
+            vocId !== note.voc_id
         } else {
           this.$hasChanges.value = false
         }
@@ -71,6 +77,7 @@ export class EditorVM extends ViewModel<EditorState> {
       this.$level.value = note.level
       this.$tagId.value = note.tag_id
       this.$audioUrl.value = note.audio_url
+      this.$selectedVocId.value = note.voc_id
     } else {
       this.ctx.$msg.value = { text: 'Note to edit not loaded', level: 'warning' }
       this.navigator.updateWith({ edit: undefined })
@@ -80,7 +87,8 @@ export class EditorVM extends ViewModel<EditorState> {
   override async onKeyDown(e: KeyboardEvent): Promise<void> {
     if (this.isActive) {
       if (e.key === 'Escape') {
-        this.quit()
+        if (globalContext.app.$dropdownState.value !== '') globalContext.app.$dropdownState.value = ''
+        else this.quit()
       }
       //Ctrl + Shift + S
       else if (e.ctrlKey && e.shiftKey && e.keyCode === 83) {
@@ -116,6 +124,7 @@ export class EditorVM extends ViewModel<EditorState> {
       schema.level = this.$level.value
       schema.tag_id = this.$tagId.value
       schema.audio_url = this.$audioUrl.value
+      schema.voc_id = this.$selectedVocId.value
 
       this.server.updateNote(schema).pipe()
         .onReceive((data: any) => {
@@ -140,6 +149,7 @@ export class EditorVM extends ViewModel<EditorState> {
       this.$level.value = note.level
       this.$tagId.value = note.tag_id
       this.$audioUrl.value = note.audio_url
+      this.$selectedVocId.value = note.voc_id
     }
   }
 
@@ -265,6 +275,10 @@ export class EditorVM extends ViewModel<EditorState> {
     const lang = this.$state.value.lang
     const voc = lang && lang.vocs.find(v => v.id === n?.voc_id)
     return n && voc && lang ? `${lang.name} › ${voc.name} › ${n.name}(ID:${n.id})` : 'Note not found'
+  }
+
+  replaceAll(value: string, replaceWith: string) {
+    this.$buffer.value = this.$buffer.value.replaceAll(value, replaceWith)
   }
 }
 

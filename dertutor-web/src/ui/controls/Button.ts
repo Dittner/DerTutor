@@ -85,7 +85,7 @@ export const RedBtn = () => {
   return IconBtn()
     .react(s => {
       s.fontFamily = FontFamily.APP
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.iconSize = theme().defFontSize
       s.minHeight = '25px'
       s.gap = '2px'
@@ -105,9 +105,9 @@ export const Btn = () => {
   return IconBtn()
     .react(s => {
       s.fontFamily = FontFamily.APP
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.iconSize = theme().defFontSize
-      s.minHeight = '35px'
+      s.minHeight = '30px'
       s.gap = '2px'
       s.textColor = theme().text50
       s.cornerRadius = '4px'
@@ -131,7 +131,7 @@ export const LinkBtn = () => {
     .react(s => {
       s.wrap = false
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.textColor = theme().link + 'cc'
       s.paddingVertical = '5px'
       s.bgColor = theme().transparent
@@ -150,7 +150,7 @@ export const Link = () => {
     .react(s => {
       s.wrap = false
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.textColor = theme().link
       s.bgColor = theme().transparent
     })

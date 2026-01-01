@@ -1,4 +1,4 @@
-import { btn, div, h2, hstack, spacer, vlist, vstack } from "flinker-dom"
+import { btn, div, h2, hlist, hstack, spacer, vlist, vstack } from "flinker-dom"
 import { ILang, IVoc } from "../../../domain/DomainModel"
 import { FontFamily } from "../../controls/Font"
 import { DerTutorContext } from "../../../DerTutorContext"
@@ -33,7 +33,16 @@ export const VocListView = () => {
           s.borderRight = '1px solid ' + theme().border
         })
         .children(() => {
-          vlist<ILang>()
+
+        })
+
+      vstack()
+        .react(s => {
+          s.width = '100%'
+          s.gap = '0px'
+        }).children(() => {
+
+          hlist<ILang>()
             .observe(vm.$langs, 'recreateChildren')
             .observe(vm.$selectedLang, 'affectsChildrenProps')
             .observe(vm.$highlightedLang, 'affectsChildrenProps')
@@ -45,14 +54,8 @@ export const VocListView = () => {
               s.maxWidth = theme().menuWidth + 'px'
               s.gap = '0'
             })
-        })
 
-      vstack()
-        .react(s => {
-          s.width = '100%'
-          s.gap = '0px'
-          s.paddingTop = theme().navBarHeight + 'px'
-        }).children(() => {
+          spacer().react(s => s.height = '100px')
 
           h2()
             .observe(vm.$selectedLang)
@@ -71,7 +74,7 @@ export const VocListView = () => {
             .itemHash((item: IVoc) => item.id + item.name + ':' + (item === vm.$highlightedVoc.value))
             .react(s => {
               s.fontFamily = FontFamily.MONO
-              s.fontSize = theme().defMenuFontSize
+              s.fontSize = theme().smallFontSize
               s.width = '100%'
               s.gap = '0'
             })
@@ -85,8 +88,8 @@ export const VocListView = () => {
               s.mode = 'md'
               s.position = 'absolute'
               s.bottom = theme().statusBarHeight + 20 + 'px'
-              s.fontSize = theme().defMenuFontSize
-              s.textColor = theme().green
+              s.fontSize = theme().smallFontSize
+              s.textColor = theme().header
               s.text = ACTION_TIPS.trim()
             })
         })
@@ -125,19 +128,20 @@ const VocRenderer = (voc: IVoc, index: number) => {
   const vm = ctx.vocListVM
   return btn()
     .react(s => {
+      const isSelected = vm.$highlightedVoc.value === voc
       s.wrap = false
-      s.isSelected = vm.$highlightedVoc.value === voc
+      s.isSelected = isSelected
       s.paddingRight = '5px'
       s.paddingLeft = '20px'
       s.text = index + 1 + '. ' + voc.name
-      s.textColor = theme().blue + 'cc'
+      s.textColor = isSelected ? theme().accent : theme().accent + 'cc'
       s.borderColor = theme().appBg
     })
     .whenHovered(s => {
-      s.textColor = theme().blue
+      s.textColor = theme().accent
     })
     .whenSelected(s => {
-      s.borderColor = theme().blue
+      s.borderColor = theme().accent
     })
     .onClick(() => {
       vm.$highlightedVoc.value = voc

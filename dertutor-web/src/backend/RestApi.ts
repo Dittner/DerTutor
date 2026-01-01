@@ -160,10 +160,12 @@ export class RestApi {
   async handlerError(response: Response | null): Promise<never> {
     if (response) {
       const details = (await this.getResponseDetails(response))
-      let msg = 'Uknown error'
-      'message' in details && (msg = details['message'])
-      'details' in details && (msg = details['details'])
-      'detail' in details && (msg = details['detail'])
+      let msg = ''
+      if (details) {
+        'message' in details && (msg = details['message'])
+        'details' in details && (msg = details['details'])
+        'detail' in details && (msg = details['detail'])
+      }
 
       console.log('Response status:', response.status)
       console.log('Problem details:', details)
@@ -177,14 +179,14 @@ export class RestApi {
       } else if (response.status >= 500) {
         throw new RestApiError('serverError', response.status, 'Server error: ' + msg)
       } else {
-        throw new RestApiError('unknownError', response.status, 'Unknown error: ' + msg)
+        throw new RestApiError('unknownError', response.status, msg || 'Unknown error')
       }
     } else {
       throw new RestApiError('noConnection', NO_CONNECTION_STATUS, 'No response')
     }
   }
 
-  async getResponseDetails(response: Response): any {
+  async getResponseDetails(response: Response) {
     try {
       return await response.json()
     } catch (_) { }

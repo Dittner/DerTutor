@@ -31,6 +31,7 @@ export class Application {
   readonly $pathName = new RXObservableValue('')
   readonly $scrollY = new RXObservableValue(0)
   readonly $err = new RXObservableValue('')
+  readonly $dropdownState = new RXObservableValue('')
 
   readonly isMobileDevice: boolean
 

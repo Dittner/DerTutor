@@ -5,7 +5,7 @@ import { FontFamily } from '../controls/Font'
 export interface GlobalTheme {
   id: 'dark' | 'light'
   isLight: boolean
-  defMenuFontSize: string
+  smallFontSize: string
   defFontSize: string
   defFontWeight: FontWeight
   appBg: string
@@ -19,6 +19,7 @@ export interface GlobalTheme {
   strong: string
   link: string
   blue: string
+  info: string
   warn: string
   editor: string
   mark: string
@@ -97,7 +98,7 @@ export class ThemeManager {
     return {
       id: 'light',
       isLight: true,
-      defMenuFontSize: '0.75rem',
+      smallFontSize: '0.75rem',
       defFontSize: '1rem',
       defFontWeight: '400',
       appBg: white,
@@ -118,11 +119,12 @@ export class ThemeManager {
       link: '#29177c',
       editor: black,
       transparent: '#00000000',
+      info: '#29177c',
       warn: '#a56a26',
       maxNoteViewWidth: 850,
       menuWidth: 400,
       statusBarHeight: 30,
-      navBarHeight: 40,
+      navBarHeight: 50,
     }
   }
 
@@ -134,11 +136,11 @@ export class ThemeManager {
 
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#707884' //707f8b 
+    const text = '#707786' //707f8b 
     const red = '#b9777d'
-    const blue = '#57a9d5'
-    const black = '#111111'
-    const accent = '#9fa786'  //a2b6a4 b9777d
+    const blue = '#498ebf'
+    const black = '#18191e'
+    const accent = '#b0c8b3'  //9fa786
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
@@ -146,20 +148,21 @@ export class ThemeManager {
       text,
       text50: text + 'aa',
       red,
-      green: '#307c7d',
-      h1: '#b5bac8',
-      header: '#307c7d',
+      green: '#5eb3b3',
+      h1: '#b1bace',
+      header: '#296891',
       em: accent,
       accent,
-      strong: '#a0a5aa',
-      actionsBg: '#18191c',
+      strong: '#969dad',
+      actionsBg: '#22232a',
       blue,
-      mark: '#b9777d',
-      link: blue,
-      btn: '#a9b69e',
-      warn: '#a9b69e',
-      border: text + '20',
-      editor: '#729e9c'
+      mark: '#dd7d85',
+      link: blue, 
+      btn: '#c693c3',
+      info: '#5eb3b3', 
+      warn: '#c5b567',
+      border: '#2f3238',
+      editor: '#969dad' //839295
     })
   }
 
@@ -333,8 +336,9 @@ export class ThemeManager {
     const markProps: UIComponentProps = {
       fontSize: 'inherit',
       fontWeight: 'inherit',
-      textColor: t.isLight ? 'inherit' : t.appBg,
-      bgColor: t.mark,
+      //textColor: t.isLight ? 'inherit' : t.appBg,
+      bgColor: 'inherit',
+      textColor: t.mark,
       //bgImage: t.isLight ? `linear-gradient(${t.mark + '00'}, ${t.mark + '50'})` : 'inherit',
     }
 
@@ -370,7 +374,7 @@ export class ThemeManager {
     buildRule(linkProps, parentSelector, 'a:visited')
     buildRule(linkProps, parentSelector, 'a:active')
     linkProps.textDecoration = 'underline'
-    buildRule(linkProps, parentSelector, 'a', 'hover')
+    buildRule(linkProps, parentSelector, 'a', ':hover')
 
     /******************************/
     // quote
@@ -432,7 +436,7 @@ export class ThemeManager {
     const hrProps: UIComponentProps = {
       width: '100%',
       //height: '1px',
-      border: ['1px', 'solid', t.green],
+      border: ['1px', 'solid', t.header],
       marginBottom: '20px',
     }
     buildRule(hrProps, parentSelector, 'hr')
@@ -488,20 +492,41 @@ export class ThemeManager {
     buildRule({ fontSize: 'inherit', textColor: 'inherit' }, parentSelector, 'div.poem div')
 
     /******************************/
-    // note
+    // info
     /******************************/
 
-    const noteProps: UIComponentProps = {
+    const infoProps: UIComponentProps = {
       width: '100%',
       fontSize: '0.9rem',
       fontWeight: t.defFontWeight,
-      textColor: t.text,
+      textColor: t.info,
       paddingHorizontal: '20px',
       //bgColor: '#e5f0df',
-      borderLeft: '1px solid ' + t.text50
+      borderLeft: '1px solid ' + t.info + '88'
     }
-    buildRule(noteProps, parentSelector, 'div.note')
-    buildRule({ fontSize: 'inherit', textColor: 'inherit' }, parentSelector, 'div.note div')
+    buildRule(infoProps, parentSelector, 'div.info')
+    buildRule({ fontSize: 'inherit', textColor: 'inherit' }, parentSelector, 'div.info div')
+
+    /******************************/
+    // warn
+    /******************************/
+
+    const warnProps: UIComponentProps = {
+      width: '100%',
+      fontSize: '0.9rem',
+      fontWeight: t.defFontWeight,
+      textColor: t.warn,
+      paddingHorizontal: '20px',
+      borderLeft: '1px solid ' + t.warn
+    }
+    const warnFirstChildProps: UIComponentProps = {
+      width: '100%',
+      fontSize: t.defFontSize,
+      content: '"⚠ "',
+      textColor: t.warn,
+    }
+    buildRule(warnProps, parentSelector, 'div.warn')
+    buildRule(warnFirstChildProps, parentSelector, 'div.warn div p:first-child::before')
   }
 }
 

@@ -15,7 +15,7 @@ export interface TextInputProps extends StackProps {
   title?: string
 }
 
-export const TextInput = (inputBinding: RXObservableValue<string>) => {
+export const TitledTextInput = (inputBinding: RXObservableValue<string>) => {
   const $state = new RXObservableValue({} as TextInputProps)
   return vstack<TextInputProps>()
     .propsDidChange(props => $state.value = props)
@@ -49,6 +49,29 @@ export const TextInput = (inputBinding: RXObservableValue<string>) => {
         .whenFocused(s => {
           s.borderBottom = ['1px', 'solid', theme().red]
         })
+    })
+}
+
+export const TextInput = (inputBinding: RXObservableValue<string>) => {
+  return input()
+    .bind(inputBinding)
+    .react(s => {
+      s.type = 'text'
+      s.fontFamily = FontFamily.APP
+      s.fontSize = theme().smallFontSize
+      s.textColor = theme().mark
+      s.cornerRadius = '4px'
+      s.paddingHorizontal = '10px'
+      s.autoCorrect = 'off'
+      s.autoComplete = 'off'
+      s.border = '1px solid ' + theme().border
+      s.bgColor = '#00000010'
+    })
+    .whenFocused(s => {
+      s.border = '1px solid ' + theme().mark
+    })
+    .whenPlaceholderShown(s => {
+      s.textColor = theme().text + '88'
     })
 }
 
@@ -135,7 +158,7 @@ export const LineInput = ($buffer: RXObservableValue<string>, $cursorPos: RXObse
       s.fontFamily = FontFamily.MONO
       s.gap = '0'
       s.width = '100%'
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.valign = 'top'
       s.height = '100%'
       s.lineHeight = '1.9'

@@ -15,8 +15,8 @@ export const TextEditor = (formatter: TextFormatter) => {
       e.stopPropagation()
       TextEditorController.uppercase(ta)
     }
-    // Ctrl+Shift+X
-    if (e.ctrlKey && e.shiftKey && e.keyCode === 88) {
+    // Ctrl+Shift+X or Cmd + Backspace
+    if (e.ctrlKey && e.shiftKey && e.keyCode === 88 || (e.metaKey && e.keyCode === 8)) {
       e.preventDefault()
       e.stopPropagation()
       TextEditorController.removeSentenceUnderCursor(ta)
@@ -99,7 +99,6 @@ export const TextEditor = (formatter: TextFormatter) => {
       s.autoCorrect = 'off'
       s.autoFocus = true
       s.spellCheck = false
-      s.paddingHorizontal = '5px'
       s.disableHorizontalScroll = true
     })
     .onKeyDown(keyDownFn)

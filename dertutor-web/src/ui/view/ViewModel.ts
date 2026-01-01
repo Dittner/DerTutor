@@ -92,6 +92,7 @@ export class ViewModel<ViewModelState> implements IViewModel {
 
     if (this.inputMode.$isActive.value) {
       this.inputMode.onKeyDown(e)
+      e.preventDefault()
       return
     }
 

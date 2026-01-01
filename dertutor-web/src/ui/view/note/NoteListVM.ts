@@ -170,8 +170,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
             }
           })
           .onError(e => {
-            const msg = e.message.indexOf('duplicate key') !== -1 ? 'Note already exists' : e.message
-            this.ctx.$msg.value = { level: 'error', text: msg }
+            this.ctx.$msg.value = { level: 'error', text: e.message }
           })
           .subscribe()
       }

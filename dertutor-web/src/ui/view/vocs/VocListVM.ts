@@ -149,8 +149,7 @@ export class VocListVM extends ViewModel<VocListState> {
             }
           })
           .onError(e => {
-            const msg = e.message.indexOf('duplicate key') !== -1 ? 'Vocabulary already exists' : e.message
-            this.ctx.$msg.value = { level: 'error', text: msg }
+            this.ctx.$msg.value = { level: 'error', text: e.message }
           })
           .subscribe()
       }

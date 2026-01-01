@@ -36,6 +36,7 @@ export function App() {
       ActionsHelpView()
       Footer()
       AppErrorInfo()
+      ModalView()
     })
 }
 
@@ -50,8 +51,8 @@ export const ActionsHelpView = () => {
       s.visible = vm && vm.$showActions.value
       s.position = 'fixed'
       s.paddingTop = theme().navBarHeight + 'px'
-      s.left = window.innerWidth / 2 + 'px'
-      s.width = window.innerWidth / 2 + 'px'
+      s.right = '0px'
+      s.width = '600px'
       s.top = '0'
       s.height = window.innerHeight - theme().statusBarHeight + 'px'
       s.paddingHorizontal = '20px'
@@ -76,7 +77,7 @@ const ActionInfoView = (a: Action) => {
       s.width = '100%'
       s.height = '100%'
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
     }).children(() => {
       span().react(s => {
         s.display = 'inline-block'
@@ -84,7 +85,7 @@ const ActionInfoView = (a: Action) => {
         s.textColor = theme().strong
         s.paddingHorizontal = '20px'
         s.paddingVertical = '5px'
-        s.width = '200px'
+        s.width = '160px'
         s.whiteSpace = 'nowrap'
         s.textAlign = 'right'
       })
@@ -109,7 +110,7 @@ const NavBar = () => {
       s.top = '0'
       s.left = '0'
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.gap = '10px'
       //s.width = '100%'
       s.minHeight = theme().navBarHeight + 'px'
@@ -121,7 +122,7 @@ const NavBar = () => {
       p()
         .observe(ctx.$user)
         .react(s => {
-          s.textColor = theme().text50
+          s.textColor = '#5b4495'
           if (!ctx.$user.value)
             s.text = ''
           else
@@ -139,7 +140,7 @@ const Footer = () => {
       s.bottom = '0'
       s.left = '0'
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.gap = '10px'
       s.width = '100%'
       s.minHeight = theme().statusBarHeight + 'px'
@@ -178,7 +179,7 @@ export const MessangerView = () => {
     .react(s => {
       const msg = ctx.$msg.value
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.text = msg?.text ?? ''
       //s.bgColor = theme().appBg
       s.width = '100%'
@@ -199,7 +200,7 @@ export const CmdView = () => {
     .observe(ctx.$activeVM.pipe().skipNullable().flatMap(vm => vm.$cmd).fork())
     .react(s => {
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.text = ctx.$activeVM.value?.$cmd.value ?? ''
       s.whiteSpace = 'nowrap'
       s.paddingHorizontal = '10px'
@@ -228,4 +229,20 @@ const AppErrorInfo = () => {
         s.textAlign = 'center'
       })
     })
+}
+
+const ModalView = () => {
+  return div()
+    .observe(globalContext.app.$dropdownState)
+    .react(s => {
+      s.visible = globalContext.app.$dropdownState.value.length > 0
+      s.position = 'fixed'
+      s.top = '0'
+      s.width = '100vw'
+      s.height = '100vh'
+      s.bgColor = theme().appBg + '50'
+    }).children(() => {
+
+    })
+    .onClick(() => globalContext.app.$dropdownState.value = '')
 }

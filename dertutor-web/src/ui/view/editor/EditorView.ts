@@ -1,7 +1,7 @@
-import { btn, div, hlist, hstack, input, p, spacer, vstack } from "flinker-dom"
+import { btn, div, hlist, hstack, input, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { globalContext } from "../../../App"
-import { IMediaFile, INote, ITag } from "../../../domain/DomainModel"
-import { Btn, LinkBtn, RedBtn } from "../../controls/Button"
+import { IMediaFile, INote, ITag, IVoc } from "../../../domain/DomainModel"
+import { Btn, Icon, LinkBtn, RedBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { Markdown } from "../../controls/Markdown"
 import { DerTutorContext } from "../../../DerTutorContext"
@@ -9,6 +9,9 @@ import { theme } from "../../theme/ThemeManager"
 import { FileWrapper } from "./EditorVM"
 import { TextEditor } from "./TextEditor"
 import { TextFormatter } from "./TextFormatter"
+import { TextInput } from "../../controls/Input"
+import { LayoutLayer } from "../../../app/Application"
+import { MaterialIcon } from "../../icons/MaterialIcon"
 
 export const EditorView = () => {
   console.log('new EditorView')
@@ -20,14 +23,14 @@ export const EditorView = () => {
   const formatter = new TextFormatter()
 
   const onFocus = (e: FocusEvent) => {
-    if (noteInFocus !== vm.$state.value.note) {
-      noteInFocus = vm.$state.value.note
-      const ta = e.currentTarget as HTMLTextAreaElement
-      //scroll to first line
-      ta.setSelectionRange(0, 0)
-      ta.blur()
-      ta.focus()
-    }
+    // if (noteInFocus !== vm.$state.value.note) {
+    //   noteInFocus = vm.$state.value.note
+    //   const ta = e.currentTarget as HTMLTextAreaElement
+    //   //scroll to first line
+    //   ta.setSelectionRange(0, 0)
+    //   ta.blur()
+    //   ta.focus()
+    // }
   }
 
   return div().children(() => {
@@ -51,13 +54,14 @@ export const EditorView = () => {
         s.bgColor = theme().appBg
         s.caretColor = theme().isLight ? '#000000' : theme().red
         s.textColor = theme().editor
+        s.padding = '10px'
         s.fontFamily = FontFamily.MONO
         s.fontSize = '18px'
-        s.height = window.innerHeight - theme().statusBarHeight - theme().navBarHeight + 'px'
+        s.height = window.innerHeight - theme().statusBarHeight - theme().navBarHeight - 20 + 'px'
         s.border = '1px solid ' + theme().border
       })
       .whenFocused(s => {
-        s.border = '1px solid ' + theme().editor
+        s.border = '1px solid #454545'
       })
       .onFocus(onFocus)
 
@@ -70,6 +74,8 @@ export const EditorView = () => {
         s.gap = '20px'
       })
       .children(() => {
+        VocSelector()
+        ReplacePanel()
         LevelsPanel()
         TagSelector()
         PronunciationPanel()
@@ -118,7 +124,7 @@ const Panel = (title: string) => {
     .children(() => {
       p()
         .react(s => {
-          s.fontSize = theme().defMenuFontSize
+          s.fontSize = theme().smallFontSize
           s.fontFamily = FontFamily.APP
           s.minWidth = '150px'
           s.textColor = theme().text50
@@ -152,7 +158,7 @@ const LevelRenderer = (level: number) => {
       s.text = vm.reprLevel(level)
       s.textAlign = 'left'
     })
-    .onClick(() => vm.$level.value = vm.$level.value === level ? 0 : level)
+    .onClick(() => vm.$level.value = vm.$level.value === level ? undefined : level)
 }
 
 const TagSelector = () => {
@@ -183,7 +189,7 @@ const TagRenderer = (t: ITag) => {
       s.cornerRadius = '2px'
       s.text = t.name
       s.marginRight = '5px'
-      s.marginTop = '5px'
+      s.paddingVertical = '0px'
     })
     .whenHovered(s => {
       s.textColor = theme().text
@@ -206,7 +212,7 @@ const PronunciationPanel = () => {
           s.visible = vm.$audioUrl.value !== ''
           s.gap = '0px'
           s.width = '100%'
-          s.fontSize = theme().defMenuFontSize
+          s.fontSize = theme().smallFontSize
           s.fontFamily = FontFamily.APP
           s.popUp = 'Play'
         })
@@ -266,7 +272,7 @@ const MediaFileView = (mf: IMediaFile) => {
         .react(s => {
           s.gap = '0px'
           s.width = '100%'
-          s.fontSize = theme().defMenuFontSize
+          s.fontSize = theme().smallFontSize
           s.fontFamily = FontFamily.APP
           s.flexGrow = 1
         })
@@ -375,7 +381,7 @@ const FileView = (w: FileWrapper) => {
           s.width = '100%'
           s.height = '40px'
           s.fontFamily = FontFamily.APP
-          s.fontSize = theme().defMenuFontSize
+          s.fontSize = theme().smallFontSize
           s.textColor = theme().text
           s.bgColor = undefined
           s.autoCorrect = 'off'
@@ -400,14 +406,13 @@ const Header = () => {
   return hstack()
     .react(s => {
       s.gap = '20px'
-      s.paddingHorizontal = '30px'
+      s.paddingHorizontal = '20px'
       s.height = theme().navBarHeight + 'px'
       s.halign = 'right'
       s.valign = 'center'
       s.bgColor = theme().appBg
     })
     .children(() => {
-
       BlueBtn()
         .observe(vm.$hasChanges)
         .react(s => {
@@ -446,7 +451,7 @@ const BlueBtn = () => {
   return btn()
     .react(s => {
       s.fontFamily = FontFamily.APP
-      s.fontSize = theme().defMenuFontSize
+      s.fontSize = theme().smallFontSize
       s.minHeight = '25px'
       s.gap = '2px'
       s.textColor = theme().btn + 'cc'
@@ -458,5 +463,116 @@ const BlueBtn = () => {
     .whenSelected(s => {
       s.textColor = theme().accent
       s.bgColor = theme().header
+    })
+}
+
+
+const ReplacePanel = () => {
+  const vm = DerTutorContext.self.editorVM
+  return Panel('Replace')
+    .children(() => {
+      TextInput(vm.textReplacer.$replaceFrom).react(s => {
+        s.placeholder = 'From:'
+      })
+
+      TextInput(vm.textReplacer.$replaceTo).react(s => {
+        s.placeholder = 'To:'
+      })
+
+      spacer()
+
+      BlueBtn()
+        .observe(vm.textReplacer.$replaceFrom.pipe().map(value => value.length > 0).removeDuplicates().fork())
+        .react(s => {
+          s.isDisabled = vm.textReplacer.$replaceFrom.value.length === 0
+          s.text = 'Replace all'
+        })
+        .onClick(() => vm.replaceAll(vm.textReplacer.$replaceFrom.value, vm.textReplacer.$replaceTo.value))
+    })
+}
+
+const VocSelector = () => {
+  const vm = DerTutorContext.self.editorVM
+  const dropdownId = 'EditorView.VocSelector'
+  return Panel('Vocabulary')
+    .children(() => {
+      spacer()
+
+      vstack()
+        .react(s => {
+          s.width = '400px'
+          s.halign = 'right'
+        }).children(() => {
+          Btn()
+            .observe(vm.$state)
+            .observe(vm.$selectedVocId)
+            .react(s => {
+              const selectedVoc = vm.$state.value.lang?.vocs.find(v => v.id === vm.$selectedVocId.value)
+              s.isSelected = selectedVoc !== undefined
+            })
+            .onClick(() => globalContext.app.$dropdownState.value = dropdownId)
+            .children(() => {
+              span()
+                .observe(vm.$state)
+                .observe(vm.$selectedVocId)
+                .react(s => {
+                  const selectedVoc = vm.$state.value.lang?.vocs.find(v => v.id === vm.$selectedVocId.value)
+                  s.text = selectedVoc ? selectedVoc.name : 'Voc not found'
+                })
+
+              Icon()
+                .observe(globalContext.app.$dropdownState, 'affectsProps')
+                .react(s => {
+                  s.fontSize = theme().defFontSize
+                  s.value = globalContext.app.$dropdownState.value === dropdownId ? MaterialIcon.arrow_drop_down : MaterialIcon.arrow_right
+                })
+            })
+
+          vlist<IVoc>()
+            .observe(globalContext.app.$dropdownState, 'affectsProps')
+            .observe(vm.$selectedVocId, 'recreateChildren')
+            .observe(vm.$state, 'affectsChildrenProps')
+            .items(() => vm.$state.value.lang?.vocs ?? [])
+            .itemRenderer(VocRenderer)
+            .itemHash((item: IVoc) => item.id + item.name + ':' + (item.id === vm.$selectedVocId.value))
+            .react(s => {
+              s.visible = globalContext.app.$dropdownState.value === dropdownId
+              s.fontFamily = FontFamily.MONO
+              s.fontSize = theme().smallFontSize
+              s.padding = '20px'
+              s.width = '400px'
+              s.marginTop = '30px'
+              s.gap = '0'
+              s.bgColor = theme().border
+              s.border = theme().border
+              s.cornerRadius = '5px'
+              s.position = 'absolute'
+              s.layer = LayoutLayer.MODAL
+            })
+        })
+
+
+    })
+}
+
+const VocRenderer = (voc: IVoc, index: number) => {
+  const vm = DerTutorContext.self.editorVM
+  return btn()
+    .react(s => {
+      s.wrap = false
+      s.fontSize = theme().smallFontSize
+      s.isSelected = vm.$selectedVocId.value === voc.id
+      s.text = index + 1 + '. ' + voc.name
+      s.textColor = theme().text50
+    })
+    .whenHovered(s => {
+      s.textColor = theme().text
+    })
+    .whenSelected(s => {
+      s.textColor = theme().accent
+    })
+    .onClick(() => {
+      vm.$selectedVocId.value = voc.id
+      globalContext.app.$dropdownState.value = ''
     })
 }
