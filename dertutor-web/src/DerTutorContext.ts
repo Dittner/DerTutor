@@ -70,7 +70,7 @@ export class DerTutorRouter {
           newVM = ctx.connectionVM
         else if (keys.noteId && keys.edit)
           newVM = ctx.editorVM
-        else if (keys.langCode && (keys.vocCode || (keys.searchKey && keys.searchKey.length > 1)))
+        else if (keys.langCode && (keys.vocCode || keys.searchKey !== undefined))
           newVM = ctx.noteListVM
         else
           newVM = ctx.vocListVM

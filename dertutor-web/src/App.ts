@@ -22,6 +22,7 @@ export function App() {
       s.width = '100%'
     })
     .children(() => {
+      AuthStatus()
 
       observer(ctx.$activeVM)
         .onReceive(vm => {
@@ -32,7 +33,6 @@ export function App() {
           else return undefined
         })
 
-      NavBar()
       ActionsHelpView()
       Footer()
       AppErrorInfo()
@@ -48,13 +48,13 @@ export const ActionsHelpView = () => {
     .observe(ctx.$activeVM, 'recreateChildren')
     .react(s => {
       const vm = ctx.$activeVM.value
+      const layout = globalContext.app.$layout.value
       s.visible = vm && vm.$showActions.value
       s.position = 'fixed'
-      s.paddingTop = theme().navBarHeight + 'px'
       s.right = '0px'
       s.width = '600px'
-      s.top = '0'
-      s.height = window.innerHeight - theme().statusBarHeight + 'px'
+      s.top = layout.navBarHeight + 'px'
+      s.height = (window.innerHeight - layout.statusBarHeight - layout.navBarHeight) + 'px'
       s.paddingHorizontal = '20px'
       s.gap = '0px'
       s.bgColor = theme().actionsBg
@@ -77,7 +77,7 @@ const ActionInfoView = (a: Action) => {
       s.width = '100%'
       s.height = '100%'
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().smallFontSize
+      s.fontSize = theme().fontSizeXS
     }).children(() => {
       span().react(s => {
         s.display = 'inline-block'
@@ -101,36 +101,25 @@ const ActionInfoView = (a: Action) => {
     })
 }
 
-const NavBar = () => {
+const AuthStatus = () => {
   const ctx = DerTutorContext.self
 
-  return hstack()
+  return p()
+    .observe(ctx.$user)
     .react(s => {
       s.position = 'fixed'
-      s.top = '0'
-      s.left = '0'
+      s.left = '20px'
+      s.top = '10px'
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().smallFontSize
-      s.gap = '10px'
-      //s.width = '100%'
-      s.minHeight = theme().navBarHeight + 'px'
-      s.valign = 'center'
-      s.paddingHorizontal = '20px'
-    })
-    .children(() => {
-
-      p()
-        .observe(ctx.$user)
-        .react(s => {
-          s.textColor = '#5b4495'
-          if (!ctx.$user.value)
-            s.text = ''
-          else
-            s.text = ctx.$user.value.username + (ctx.$user.value.is_superuser ? ':superuser' : '')
-        })
-
+      s.fontSize = theme().fontSizeXS
+      s.textColor = '#6e6190'
+      if (!ctx.$user.value)
+        s.text = ''
+      else
+        s.text = ctx.$user.value.username + (ctx.$user.value.is_superuser ? ':superuser' : '')
     })
 }
+
 const Footer = () => {
   const ctx = DerTutorContext.self
 
@@ -140,10 +129,10 @@ const Footer = () => {
       s.bottom = '0'
       s.left = '0'
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().smallFontSize
+      s.fontSize = theme().fontSizeXS
       s.gap = '10px'
       s.width = '100%'
-      s.minHeight = theme().statusBarHeight + 'px'
+      s.minHeight = globalContext.app.$layout.value.statusBarHeight + 'px'
       s.valign = 'center'
       s.bgColor = theme().text + '10'
       //s.blur = '5px'
@@ -163,7 +152,7 @@ const Footer = () => {
             s.visible = vm.inputMode.$isActive.value
             s.position = 'fixed'
             s.width = '100%'
-            s.height = theme().statusBarHeight + 'px'
+            s.height = globalContext.app.$layout.value.statusBarHeight + 'px'
             s.bottom = '0'
             s.title = vm.inputMode.name
             s.isSecure = vm.inputMode.isSecure
@@ -179,11 +168,11 @@ export const MessangerView = () => {
     .react(s => {
       const msg = ctx.$msg.value
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().smallFontSize
+      s.fontSize = theme().fontSizeXS
+      s.paddingHorizontal = '20px'
       s.text = msg?.text ?? ''
       //s.bgColor = theme().appBg
       s.width = '100%'
-      s.paddingHorizontal = '20px'
 
       if (msg?.level === 'error')
         s.textColor = theme().red
@@ -200,11 +189,11 @@ export const CmdView = () => {
     .observe(ctx.$activeVM.pipe().skipNullable().flatMap(vm => vm.$cmd).fork())
     .react(s => {
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().smallFontSize
+      s.fontSize = theme().fontSizeXS
       s.text = ctx.$activeVM.value?.$cmd.value ?? ''
       s.whiteSpace = 'nowrap'
-      s.paddingHorizontal = '10px'
       s.textColor = theme().text50
+      s.paddingHorizontal = '20px'
     })
 }
 

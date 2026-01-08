@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from src.api.media.schema import MediaRead
 
 
 class NoteCreate(BaseModel):
@@ -46,13 +47,6 @@ class Page[T](BaseModel):
     page: int
     pages: int
     size: int
-
-
-class MediaRead(BaseModel):
-    uid: str
-    note_id: int
-    name: str
-    media_type: str
 
 
 class NoteReadFull(BaseModel):

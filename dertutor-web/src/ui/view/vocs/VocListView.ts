@@ -1,9 +1,10 @@
-import { btn, div, h2, hlist, hstack, spacer, vlist, vstack } from "flinker-dom"
+import { btn, div, p, spacer, vlist, vstack } from "flinker-dom"
 import { ILang, IVoc } from "../../../domain/DomainModel"
 import { FontFamily } from "../../controls/Font"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
 import { Markdown } from "../../controls/Markdown"
+import { globalContext } from "../../../App"
 
 const ACTION_TIPS = `
 ## [icon:lightbulb_outline] Tips
@@ -18,65 +19,93 @@ const ACTION_TIPS = `
 export const VocListView = () => {
   const ctx = DerTutorContext.self
   const vm = ctx.vocListVM
-  return hstack()
-    .react(s => {
-      s.height = '100%'
-      s.gap = '0px'
-    }).children(() => {
-
-      div()
-        .react(s => {
-          s.gap = '10px'
-          s.paddingTop = theme().navBarHeight + 70 + 'px'
-          s.width = theme().menuWidth + 'px'
-          s.height = window.innerHeight - theme().statusBarHeight + 'px'
-          s.borderRight = '1px solid ' + theme().border
-        })
-        .children(() => {
-
-        })
+  return div()
+      .children(() => {
 
       vstack()
+      .observe(globalContext.app.$layout)
         .react(s => {
-          s.width = '100%'
+          const layout = globalContext.app.$layout.value
+          s.position = 'fixed'
+          s.paddingHorizontal = '20px'
+          s.top = layout.navBarHeight + 'px'
+          s.left = layout.sideSpaceWidth + 'px'
+          s.width = layout.contentWidth + 'px'
+          s.height = window.innerHeight - layout.navBarHeight - layout.statusBarHeight + 'px'
           s.gap = '0px'
         }).children(() => {
 
-          hlist<ILang>()
-            .observe(vm.$langs, 'recreateChildren')
-            .observe(vm.$selectedLang, 'affectsChildrenProps')
-            .observe(vm.$highlightedLang, 'affectsChildrenProps')
-            .items(() => vm.$langs.value)
-            .itemRenderer(LangRenderer)
-            .itemHash((item: ILang) => item.id + ':' + (item === vm.$selectedLang.value))
+          vstack()
             .react(s => {
-              s.width = '500px'
-              s.maxWidth = theme().menuWidth + 'px'
               s.gap = '0'
+              s.halign = 'center'
+              s.width = '100%'
+            }).children(() => {
+              p()
+                .observe(vm.$selectedLang)
+                .react(s => {
+                  s.position = 'relative'
+                  s.textColor = theme().red
+                  s.text = 'Select a language'
+                  s.marginBottom = '-15px'
+                  s.bgColor = theme().appBg
+                  s.paddingHorizontal = '20px'
+                })
+
+              vlist<ILang>()
+                .observe(vm.$langs, 'recreateChildren')
+                .observe(vm.$selectedLang, 'affectsChildrenProps')
+                .observe(vm.$highlightedLang, 'affectsChildrenProps')
+                .items(() => vm.$langs.value)
+                .itemRenderer(LangRenderer)
+                .itemHash((item: ILang) => item.id + ':' + (item === vm.$selectedLang.value))
+                .react(s => {
+                  s.fontFamily = FontFamily.APP
+                  s.fontSize = theme().fontSizeXS
+                  s.width = '100%'
+                  s.gap = '0'
+                  s.padding = '20px'
+                  s.border = '1px solid ' + theme().red
+                })
             })
 
-          spacer().react(s => s.height = '100px')
 
-          h2()
+          spacer().react(s => s.height = '50px')
+
+          vstack()
             .observe(vm.$selectedLang)
             .react(s => {
-              s.textColor = theme().text50
-              s.text = vm.$selectedLang.value ? 'Select a vocabulary' : 'Select a language'
-              s.paddingLeft = '20px'
-              s.height = '70px'
-            })
-
-          vlist<IVoc>()
-            .observe(vm.$selectedLang, 'recreateChildren')
-            .observe(vm.$highlightedVoc, 'affectsChildrenProps')
-            .items(() => vm.$selectedLang.value?.vocs ?? [])
-            .itemRenderer(VocRenderer)
-            .itemHash((item: IVoc) => item.id + item.name + ':' + (item === vm.$highlightedVoc.value))
-            .react(s => {
-              s.fontFamily = FontFamily.MONO
-              s.fontSize = theme().smallFontSize
-              s.width = '100%'
+              s.visible = vm.$selectedLang.value !== undefined
               s.gap = '0'
+              s.halign = 'center'
+              s.width = '100%'
+            }).children(() => {
+              p()
+                .observe(vm.$selectedLang)
+                .react(s => {
+                  s.position = 'relative'
+                  s.textColor = theme().accent
+                  s.text = 'Select a vocabulary'
+                  s.marginBottom = '-15px'
+                  s.bgColor = theme().appBg
+                  s.paddingHorizontal = '20px'
+                })
+
+              vlist<IVoc>()
+                .observe(vm.$selectedLang, 'recreateChildren')
+                .observe(vm.$highlightedVoc, 'affectsChildrenProps')
+                .items(() => vm.$selectedLang.value?.vocs ?? [])
+                .itemRenderer(VocRenderer)
+                .itemHash((item: IVoc) => item.id + item.name + ':' + (item === vm.$highlightedVoc.value))
+                .react(s => {
+                  s.fontFamily = FontFamily.APP
+                  s.fontSize = theme().fontSizeXS
+                  s.width = '100%'
+                  s.gap = '0'
+                  s.padding = '20px'
+                  s.border = '1px solid ' + theme().accent
+                })
+
             })
 
           spacer().react(s => s.height = '20px')
@@ -84,11 +113,10 @@ export const VocListView = () => {
           Markdown()
             .react(s => {
               s.className = theme().id
-              s.paddingHorizontal = '20px'
               s.mode = 'md'
               s.position = 'absolute'
-              s.bottom = theme().statusBarHeight + 20 + 'px'
-              s.fontSize = theme().smallFontSize
+              s.bottom = '0px'
+              s.fontSize = theme().fontSizeXS
               s.textColor = theme().header
               s.text = ACTION_TIPS.trim()
             })
@@ -106,11 +134,13 @@ const LangRenderer = (lang: ILang) => {
       s.wrap = false
       s.isSelected = isSelected
       s.paddingHorizontal = '20px'
-      s.textAlign = 'left'
+      s.textAlign = 'center'
+      s.width = '100%'
       s.text = lang.name
-      s.textColor = theme().red + 'cc'
-      s.bgColor = isHighlighted ? theme().appBg : theme().appBg
-      s.borderColor = isHighlighted ? theme().red + 'cc' : theme().appBg
+      s.textColor = isHighlighted ? theme().red : theme().text
+    })
+    .whenHovered(s => {
+      s.textDecoration = 'underline'
     })
     .whenSelected(s => {
       s.textColor = theme().appBg
@@ -131,17 +161,18 @@ const VocRenderer = (voc: IVoc, index: number) => {
       const isSelected = vm.$highlightedVoc.value === voc
       s.wrap = false
       s.isSelected = isSelected
-      s.paddingRight = '5px'
-      s.paddingLeft = '20px'
+      s.textAlign = 'left'
+      s.width = '100%'
       s.text = index + 1 + '. ' + voc.name
-      s.textColor = isSelected ? theme().accent : theme().accent + 'cc'
-      s.borderColor = theme().appBg
+      s.textColor = isSelected ? theme().accent : theme().text
+      //s.borderColor = theme().appBg
     })
     .whenHovered(s => {
-      s.textColor = theme().accent
+      s.textDecoration = 'underline'
     })
     .whenSelected(s => {
-      s.borderColor = theme().accent
+      s.textColor = theme().accent
+      //s.borderColor = theme().accent
     })
     .onClick(() => {
       vm.$highlightedVoc.value = voc

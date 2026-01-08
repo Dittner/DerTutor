@@ -38,7 +38,7 @@ export const TitledTextInput = (inputBinding: RXObservableValue<string>) => {
           s.width = '100%'
           s.height = '40px'
           s.fontFamily = FontFamily.APP
-          s.fontSize = theme().defFontSize
+          s.fontSize = theme().fontSize
           s.textColor = theme().header
           s.bgColor = theme().text + '10'
           s.padding = '10px'
@@ -58,20 +58,19 @@ export const TextInput = (inputBinding: RXObservableValue<string>) => {
     .react(s => {
       s.type = 'text'
       s.fontFamily = FontFamily.APP
-      s.fontSize = theme().smallFontSize
+      s.fontSize = theme().fontSizeXS
       s.textColor = theme().mark
       s.cornerRadius = '4px'
       s.paddingHorizontal = '10px'
       s.autoCorrect = 'off'
       s.autoComplete = 'off'
       s.border = '1px solid ' + theme().border
-      s.bgColor = '#00000010'
     })
     .whenFocused(s => {
       s.border = '1px solid ' + theme().mark
     })
     .whenPlaceholderShown(s => {
-      s.textColor = theme().text + '88'
+      s.textColor = theme().text50
     })
 }
 
@@ -83,7 +82,7 @@ export class InputBufferController {
   constructor() { }
 
   reset(value: string) {
-    this.$buffer.value = value
+    this.$buffer.value = value.replaceAll('\n', '')
     this.$cursorPos.value = -1
   }
 
@@ -93,13 +92,29 @@ export class InputBufferController {
       const i = this.$cursorPos.value === -1 ? this.$buffer.value.length : this.$cursorPos.value
       const t1 = this.$buffer.value.slice(0, i)
       const t2 = this.$buffer.value.slice(i)
-      this.$buffer.value = t1 + text + t2
+      this.$buffer.value = (t1 + text + t2).replaceAll('\n', '')
       this.$cursorPos.value = this.$cursorPos.value === -1 ? -1 : this.$cursorPos.value + text.length
     }
   }
 
+  private umlautLetter(ch:string) {
+    switch(ch) {
+      case 'a': return 'ä'
+      case 'A': return 'Ä'
+      case 'u': return 'ü'
+      case 'U': return 'Ü'
+      case 'o': return 'ö'
+      case 'O': return 'Ö'
+    }
+    return ch
+  }
+
+  private umlaut = false
   onKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Backspace') {
+    if (e.key === 'Dead') {
+      this.umlaut = true
+    }
+    else if (e.key === 'Backspace') {
       if (this.$buffer.value.length > 0 && this.$cursorPos.value !== 0) {
         if (this.$cursorPos.value === -1)
           this.$buffer.value = this.$buffer.value.slice(0, -1)
@@ -132,10 +147,13 @@ export class InputBufferController {
         this.$cursorPos.value = this.$cursorPos.value + 1
     }
     else if (e.key.length === 1) {
+      let letter = this.umlaut ? this.umlautLetter(e.key) : e.key
+      this.umlaut = false
+
       if (this.$cursorPos.value === -1)
-        this.$buffer.value += e.key
+        this.$buffer.value += letter
       else {
-        this.$buffer.value = this.$buffer.value.slice(0, this.$cursorPos.value) + e.key + this.$buffer.value.slice(this.$cursorPos.value)
+        this.$buffer.value = this.$buffer.value.slice(0, this.$cursorPos.value) + letter + this.$buffer.value.slice(this.$cursorPos.value)
         this.$cursorPos.value++
       }
     }
@@ -158,7 +176,7 @@ export const LineInput = ($buffer: RXObservableValue<string>, $cursorPos: RXObse
       s.fontFamily = FontFamily.MONO
       s.gap = '0'
       s.width = '100%'
-      s.fontSize = theme().smallFontSize
+      s.fontSize = theme().fontSizeXS
       s.valign = 'top'
       s.height = '100%'
       s.lineHeight = '1.9'

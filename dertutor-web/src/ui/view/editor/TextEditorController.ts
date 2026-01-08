@@ -129,6 +129,17 @@ export class TextEditorController {
     }
   }
 
+  static toOrderedList(ta: HTMLTextAreaElement) {
+    try {
+      if (ta.selectionStart === ta.selectionEnd) return
+      let text = ta.value.slice(ta.selectionStart, ta.selectionEnd)
+      let res = '```ol\n' + text.split('\n').map(v => '1. ' + v).join(';\n') + '\n```'
+      document.execCommand('insertText', false, res)
+    } catch (e) {
+      console.log('TextEditorController:lowercase: ', e)
+    }
+  }
+
   static wrapAsMultilineCode(ta: HTMLTextAreaElement) {
     try {
       if (ta.selectionStart === ta.selectionEnd) {

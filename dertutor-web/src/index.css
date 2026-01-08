@@ -1,6 +1,6 @@
 :root {
     --LineHeight: 1.6;
-    --font-family: -apple-system, 'system-ui', 'system-ui', sans-serif;
+    --font-family: -apple-system, 'system-ui', sans-serif;
     --font-family-mono: monospace, 'jetbrains', Menlo, source-code-pro, Monaco, 'Courier New', monospace;
     --font-family-article: 'verdana2', -apple-system, 'system-ui', 'system-ui', sans-serif;
 }
@@ -65,6 +65,7 @@ body {
     overflow-x: hidden;
     overflow-y: scroll;
     overscroll-behavior: none;
+    scrollbar-gutter: none;
     caret-shape: auto;
     /* white-space: pre-wrap; */
     word-spacing: normal;
@@ -124,6 +125,24 @@ ol>li:before {
     counter-increment: list;
 }
 
+blockquote::before {
+    content: '“';
+    font-family: sans-serif, serif;
+    font-style: normal;
+    font-size: 3rem;
+    margin-bottom: -2rem;
+    display: block;
+}
+
+/* img {
+    float: right;
+} */
+
+/* 
+audio::-webkit-media-controls-panel {
+    background-color: blue !important;
+} */
+
 /******************************/
 /*-------- SCROLLBAR ---------*/
 /******************************/
@@ -132,8 +151,10 @@ ol>li:before {
 .listScrollbar {
     display: block;
     overflow: auto;
-    scrollbar-gutter: stable;
+    scrollbar-gutter: unset;
     overscroll-behavior: none;
+    scroll-behavior: auto;
+    overflow: visible;
 }
 
 .listScrollbar::-webkit-scrollbar {
@@ -145,7 +166,7 @@ ol>li:before {
 }
 
 .listScrollbar::-webkit-scrollbar-thumb {
-    background: #4e6c8050;
+    background: #40475650;
     border-radius: 5px;
     border-right: 4px solid transparent;
     border-left: 4px solid transparent;
@@ -153,7 +174,7 @@ ol>li:before {
 }
 
 .listScrollbar::-webkit-scrollbar-thumb:hover {
-    background: #4e6c80;
+    background: #404756;
     border-radius: 5px;
     border-right: 4px solid transparent;
     border-left: 4px solid transparent;
@@ -161,7 +182,7 @@ ol>li:before {
 }
 
 .light.listScrollbar::-webkit-scrollbar-thumb {
-    background: #4e6c8050;
+    background: #40475650;
     border-radius: 5px;
     border-right: 4px solid transparent;
     border-left: 4px solid transparent;
@@ -169,7 +190,7 @@ ol>li:before {
 }
 
 .light.listScrollbar::-webkit-scrollbar-thumb:hover {
-    background: #4e6c80;
+    background: #40475680;
     border-radius: 5px;
     border-right: 4px solid transparent;
     border-left: 4px solid transparent;

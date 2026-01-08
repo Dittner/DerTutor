@@ -3,7 +3,7 @@ import { RXObservableValue } from "flinker"
 import { AVAILABLE_LEVELS, DomainService, ILang, INote, IPage, IVoc } from "../../../domain/DomainModel"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { ViewModel } from "../ViewModel"
-import { CreateNoteSchema, DeleteNoteSchema, GetPageSchema, RenameNoteSchema } from "../../../backend/Schema"
+import { CreateNoteSchema, DeleteNoteSchema, GetPageSchema, RenameNoteSchema, SearchByNameSchema } from "../../../backend/Schema"
 import { UrlKeys } from "../../../app/URLNavigator"
 import { globalContext } from "../../../App"
 import { Interactor } from "../Interactor"
@@ -15,6 +15,7 @@ export interface NoteListState {
   page?: IPage
   selectedNote?: INote
   searchKey?: string
+  searchMode?: boolean
   level?: number
   tagId?: number
 }
@@ -23,7 +24,11 @@ export class NoteListVM extends ViewModel<NoteListState> {
   readonly $state = new RXObservableValue<Readonly<NoteListState>>({})
 
   readonly $searchBuffer = new RXObservableValue('')
-  readonly $searchFocused = new RXObservableValue(false)
+
+  readonly $quickSearchBuffer = new RXObservableValue('')
+  readonly $quickSearchFocused = new RXObservableValue(false)
+  readonly $quickSearchResult = new RXObservableValue<INote | undefined>(undefined)
+
 
   constructor(ctx: DerTutorContext) {
     const interactor = new NoteListInteractor(ctx)
@@ -48,6 +53,11 @@ export class NoteListVM extends ViewModel<NoteListState> {
     }
     else if (!state.page) {
       this.navigator.navigateTo({ langCode: state.lang.code })
+    } else {
+      this.ctx.$msg.value = { text: '0:0', level: 'info' }
+      if (state.searchKey !== undefined) {
+        this.focusGlobalSearchInput()
+      }
     }
 
     window.scrollTo(0, 0)
@@ -66,7 +76,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add('r', 'Rename note (SUPERUSER)', () => this.renameNote())
     this.actionsList.add('e', 'Edit note (SUPERUSER)', () => this.edit())
     this.actionsList.add(':d<CR>', 'Delete note (SUPERUSER)', () => this.deleteNote())
-    this.actionsList.add('/', 'Search', () => this.$searchFocused.value = true)
+    this.actionsList.add('/', 'Search', () => this.focusGlobalSearchInput())
 
     this.actionsList.add('<Space>', 'Play audio', () => this.playAudio())
     this.actionsList.add(':id<CR>', 'Print ID of note', () => this.printID())
@@ -153,7 +163,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
         scheme.lang_id = lang.id
         scheme.voc_id = voc.id
         scheme.name = name
-        scheme.text = '# ' + name + '\n\n' + (lang.code === 'en' ? '## Examples\n' : '## Beispiele\n')
+        scheme.text = '# ' + name + '\n\n' + (lang.code === 'en' ? '## E.g.\n' : '## Bsp.\n')
         scheme.level = this.navigator.$keys.value.level
         scheme.tag_id = this.navigator.$keys.value.tagId
         scheme.audio_url = ''
@@ -273,6 +283,45 @@ export class NoteListVM extends ViewModel<NoteListState> {
       new Audio(this.server.baseUrl + this.$state.value.selectedNote.audio_url).play()
   }
 
+  focusGlobalSearchInput() {
+    const selectedText = window.getSelection()?.toString() ?? ''
+    if (selectedText) this.$quickSearchBuffer.value = selectedText
+    this.$quickSearchFocused.value = true
+  }
+
+  quickSearch(name: string) {
+    if (name.length < 2) {
+      this.ctx.$msg.value = { text: 'Search text is too short', level: 'warning' }
+      return
+    } else if (!this.$state.value.lang) {
+      this.ctx.$msg.value = { text: 'Language not selected', level: 'warning' }
+      return
+    }
+
+    this.$quickSearchBuffer.value = name
+
+    console.log('NoteListVM.quickSearch by name:', name)
+    const scheme = {} as SearchByNameSchema
+    scheme.lang_id = this.$state.value.lang.id
+    scheme.voc_id = this.$state.value.lang.id //the first vocabularies have the same ids as languages
+    scheme.name = name
+
+    globalContext.server.searchNoteByName(scheme).pipe()
+      .onReceive(notes => {
+        console.log('NoteListVM.quickSearch result:', notes)
+        if (notes.length > 0) {
+          this.$quickSearchResult.value = notes[0]
+        } else {
+          this.ctx.$msg.value = { text: `"${name}" not found` }
+          this.$quickSearchResult.value = undefined
+        }
+      })
+      .onError(e => {
+        this.ctx.$msg.value = { level: 'error', text: e.message }
+        this.$quickSearchResult.value = undefined
+      })
+  }
+
   reprLevel(level: number | undefined) {
     return level && level < AVAILABLE_LEVELS.length ? AVAILABLE_LEVELS[level] : ''
   }
@@ -352,6 +401,7 @@ class NoteListInteractor extends Interactor<NoteListState> {
   }
 
   private async chooseFilters(state: NoteListState, keys: UrlKeys) {
+    state.searchMode = keys.searchKey !== undefined
     state.searchKey = keys.searchKey
     state.level = keys.level
     state.tagId = keys.tagId
@@ -359,7 +409,16 @@ class NoteListInteractor extends Interactor<NoteListState> {
 
   private async loadPage(state: NoteListState, keys: UrlKeys) {
     if (!state.lang) return
-    if (!state.voc && (!keys.searchKey || keys.searchKey.length <= 1)) return
+    if (!state.voc && (!keys.searchKey || keys.searchKey.length <= 1)) {
+      state.page = {
+        items: [],
+        total: 0,
+        page: 0,
+        size: 0,
+        pages: 0
+      }
+      return
+    }
 
     if (!this.prevState.page ||
       this.prevState.page.page !== (keys.page ?? 1) ||

@@ -20,6 +20,7 @@ export const Icon = <P extends IconProps>() => {
       s.value = MaterialIcon.question_mark
       s.className = 'md-icon'
       s.textSelectable = false
+      s.fontSize = theme().fontSize
     })
     .map(s => s.text = s.value)
 }
@@ -69,7 +70,7 @@ export const IconBtn = () => {
           const ss = $sharedState.value
           s.text = ss.text
           s.textColor = 'inherit'
-          s.fontSize = 'inherit'
+          s.fontSize = ss.fontSize ?? 'inherit'
           s.fontFamily = 'inherit'
         })
     })
@@ -85,8 +86,8 @@ export const RedBtn = () => {
   return IconBtn()
     .react(s => {
       s.fontFamily = FontFamily.APP
-      s.fontSize = theme().smallFontSize
-      s.iconSize = theme().defFontSize
+      s.fontSize = theme().fontSizeXS
+      s.iconSize = theme().fontSize
       s.minHeight = '25px'
       s.gap = '2px'
       s.textColor = theme().red + 'cc'
@@ -105,8 +106,7 @@ export const Btn = () => {
   return IconBtn()
     .react(s => {
       s.fontFamily = FontFamily.APP
-      s.fontSize = theme().smallFontSize
-      s.iconSize = theme().defFontSize
+      s.fontSize = theme().fontSizeXS
       s.minHeight = '30px'
       s.gap = '2px'
       s.textColor = theme().text50
@@ -130,18 +130,16 @@ export const LinkBtn = () => {
   return btn()
     .react(s => {
       s.wrap = false
-      s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().smallFontSize
-      s.textColor = theme().link + 'cc'
+      s.fontFamily = FontFamily.APP
+      s.fontSize = theme().fontSizeXS
+      s.textColor = theme().link
       s.paddingVertical = '5px'
-      s.bgColor = theme().transparent
     })
     .whenHovered(s => {
-      s.textColor = theme().link
+      s.textColor = theme().link100
     })
     .whenSelected(s => {
-      s.textColor = theme().appBg
-      s.bgColor = theme().link + 'cc'
+      s.textColor = theme().link100
     })
 }
 
@@ -150,7 +148,7 @@ export const Link = () => {
     .react(s => {
       s.wrap = false
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().smallFontSize
+      s.fontSize = theme().fontSizeXS
       s.textColor = theme().link
       s.bgColor = theme().transparent
     })

@@ -1,6 +1,6 @@
 import { btn, div, hlist, hstack, input, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { globalContext } from "../../../App"
-import { IMediaFile, INote, ITag, IVoc } from "../../../domain/DomainModel"
+import { IMediaFile, ITag, IVoc } from "../../../domain/DomainModel"
 import { Btn, Icon, LinkBtn, RedBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { Markdown } from "../../controls/Markdown"
@@ -19,19 +19,7 @@ export const EditorView = () => {
   const ctx = DerTutorContext.self
   const vm = ctx.editorVM
 
-  let noteInFocus: INote | undefined = undefined
   const formatter = new TextFormatter()
-
-  const onFocus = (e: FocusEvent) => {
-    // if (noteInFocus !== vm.$state.value.note) {
-    //   noteInFocus = vm.$state.value.note
-    //   const ta = e.currentTarget as HTMLTextAreaElement
-    //   //scroll to first line
-    //   ta.setSelectionRange(0, 0)
-    //   ta.blur()
-    //   ta.focus()
-    // }
-  }
 
   return div().children(() => {
 
@@ -45,32 +33,31 @@ export const EditorView = () => {
       .observe(vm.$state)
       .bind(vm.$buffer)
       .react(s => {
+        const layout = globalContext.app.$layout.value 
         s.visible = vm.$state.value.note !== undefined
         s.position = 'fixed'
         s.left = '20px'
-        s.top = theme().navBarHeight + 'px'
+        s.top = layout.navBarHeight + 'px'
         s.width = window.innerWidth / 2 - 20 + 'px'
-        //s.fontSize = theme().defMenuFontSize
         s.bgColor = theme().appBg
         s.caretColor = theme().isLight ? '#000000' : theme().red
         s.textColor = theme().editor
         s.padding = '10px'
         s.fontFamily = FontFamily.MONO
         s.fontSize = '18px'
-        s.height = window.innerHeight - theme().statusBarHeight - theme().navBarHeight - 20 + 'px'
+        s.height = window.innerHeight - layout.statusBarHeight - layout.navBarHeight - 20 + 'px'
         s.border = '1px solid ' + theme().border
       })
       .whenFocused(s => {
         s.border = '1px solid #454545'
       })
-      .onFocus(onFocus)
 
     vstack()
       .react(s => {
         s.paddingLeft = window.innerWidth / 2 + 20 + 'px'
         s.width = '100%'
         s.paddingRight = '10px'
-        s.paddingTop = theme().navBarHeight + 'px'
+        s.paddingTop = globalContext.app.$layout.value.navBarHeight + 'px'
         s.gap = '20px'
       })
       .children(() => {
@@ -85,7 +72,7 @@ export const EditorView = () => {
         spacer().react(s => {
           s.width = '100%'
           s.height = '2px'
-          s.marginVertical = theme().navBarHeight + 'px'
+          s.marginVertical = globalContext.app.$layout.value.navBarHeight + 'px'
           s.bgColor = theme().text50
         })
 
@@ -99,10 +86,10 @@ export const EditorView = () => {
             s.cornerRadius = '5px'
             s.text = vm.$buffer.value
             s.mode = 'md'
-            s.fontSize = theme().defFontSize
+            s.fontSize = theme().fontSize
             s.absolutePathPrefix = globalContext.server.baseUrl
             s.paddingHorizontal = '5px'
-            s.paddingBottom = theme().statusBarHeight + 15 + 'px'
+            s.paddingBottom = globalContext.app.$layout.value.statusBarHeight + 15 + 'px'
           })
       })
   })
@@ -124,10 +111,10 @@ const Panel = (title: string) => {
     .children(() => {
       p()
         .react(s => {
-          s.fontSize = theme().smallFontSize
+          s.fontSize = theme().fontSizeXS
           s.fontFamily = FontFamily.APP
           s.minWidth = '150px'
-          s.textColor = theme().text50
+          s.textColor = theme().text
           s.text = title + ':'
           s.textSelectable = false
         })
@@ -212,7 +199,7 @@ const PronunciationPanel = () => {
           s.visible = vm.$audioUrl.value !== ''
           s.gap = '0px'
           s.width = '100%'
-          s.fontSize = theme().smallFontSize
+          s.fontSize = theme().fontSizeXS
           s.fontFamily = FontFamily.APP
           s.popUp = 'Play'
         })
@@ -230,7 +217,7 @@ const PronunciationPanel = () => {
             .onClick(() => vm.playAudio())
         })
 
-      BlueBtn()
+      AccentBtn()
         .observe(vm.$audioUrl)
         .react(s => {
           s.visible = vm.$audioUrl.value === ''
@@ -272,7 +259,7 @@ const MediaFileView = (mf: IMediaFile) => {
         .react(s => {
           s.gap = '0px'
           s.width = '100%'
-          s.fontSize = theme().smallFontSize
+          s.fontSize = theme().fontSizeXS
           s.fontFamily = FontFamily.APP
           s.flexGrow = 1
         })
@@ -284,10 +271,10 @@ const MediaFileView = (mf: IMediaFile) => {
 
           LinkBtn()
             .react(s => {
-              s.text = vm.getMediaFileLink(mf)
+              s.text = mf.url + ''
               s.popUp = 'Copy link'
             })
-            .onClick(() => globalContext.app.copyTextToClipboard(vm.getMediaFileLink(mf)))
+            .onClick(() => globalContext.app.copyTextToClipboard(mf.url))
         })
 
       RedBtn()
@@ -325,7 +312,7 @@ const PendingUploadResources = () => {
           s.valign = 'center'
         })
         .children(() => {
-          BlueBtn()
+          AccentBtn()
             .react(s => {
               s.text = 'Choose a media-file'
             })
@@ -339,7 +326,7 @@ const PendingUploadResources = () => {
               s.text = '|'
             })
 
-          BlueBtn()
+          AccentBtn()
             .observe(vm.$filesPendingUpload)
             .react(s => {
               s.visible = vm.$filesPendingUpload.value.length > 0
@@ -381,7 +368,7 @@ const FileView = (w: FileWrapper) => {
           s.width = '100%'
           s.height = '40px'
           s.fontFamily = FontFamily.APP
-          s.fontSize = theme().smallFontSize
+          s.fontSize = theme().fontSizeXS
           s.textColor = theme().text
           s.bgColor = undefined
           s.autoCorrect = 'off'
@@ -407,13 +394,14 @@ const Header = () => {
     .react(s => {
       s.gap = '20px'
       s.paddingHorizontal = '20px'
-      s.height = theme().navBarHeight + 'px'
+      s.width = '100%'
+      s.height = globalContext.app.$layout.value.navBarHeight + 'px'
       s.halign = 'right'
       s.valign = 'center'
       s.bgColor = theme().appBg
     })
     .children(() => {
-      BlueBtn()
+      AccentBtn()
         .observe(vm.$hasChanges)
         .react(s => {
           s.isDisabled = !vm.$hasChanges.value
@@ -422,7 +410,7 @@ const Header = () => {
         })
         .onClick(() => vm.save())
 
-      BlueBtn()
+      AccentBtn()
         .observe(vm.$hasChanges)
         .react(s => {
           s.isDisabled = !vm.$hasChanges.value
@@ -430,7 +418,7 @@ const Header = () => {
         })
         .onClick(() => vm.discardChanges())
 
-      BlueBtn()
+      AccentBtn()
         .observe(vm.$hasChanges)
         .react(s => {
           s.visible = vm.$state.value.lang?.code === 'en'
@@ -438,7 +426,7 @@ const Header = () => {
         })
         .onClick(() => vm.loadTranslation())
 
-      BlueBtn()
+      AccentBtn()
         .react(s => {
           s.text = 'Quit'
           s.popUp = 'ESC'
@@ -447,11 +435,11 @@ const Header = () => {
     })
 }
 
-const BlueBtn = () => {
+const AccentBtn = () => {
   return btn()
     .react(s => {
       s.fontFamily = FontFamily.APP
-      s.fontSize = theme().smallFontSize
+      s.fontSize = theme().fontSizeXS
       s.minHeight = '25px'
       s.gap = '2px'
       s.textColor = theme().btn + 'cc'
@@ -481,7 +469,7 @@ const ReplacePanel = () => {
 
       spacer()
 
-      BlueBtn()
+      AccentBtn()
         .observe(vm.textReplacer.$replaceFrom.pipe().map(value => value.length > 0).removeDuplicates().fork())
         .react(s => {
           s.isDisabled = vm.textReplacer.$replaceFrom.value.length === 0
@@ -523,7 +511,7 @@ const VocSelector = () => {
               Icon()
                 .observe(globalContext.app.$dropdownState, 'affectsProps')
                 .react(s => {
-                  s.fontSize = theme().defFontSize
+                  s.fontSize = theme().fontSize
                   s.value = globalContext.app.$dropdownState.value === dropdownId ? MaterialIcon.arrow_drop_down : MaterialIcon.arrow_right
                 })
             })
@@ -538,7 +526,7 @@ const VocSelector = () => {
             .react(s => {
               s.visible = globalContext.app.$dropdownState.value === dropdownId
               s.fontFamily = FontFamily.MONO
-              s.fontSize = theme().smallFontSize
+              s.fontSize = theme().fontSizeXS
               s.padding = '20px'
               s.width = '400px'
               s.marginTop = '30px'
@@ -560,10 +548,11 @@ const VocRenderer = (voc: IVoc, index: number) => {
   return btn()
     .react(s => {
       s.wrap = false
-      s.fontSize = theme().smallFontSize
+      s.fontSize = theme().fontSizeXS
       s.isSelected = vm.$selectedVocId.value === voc.id
       s.text = index + 1 + '. ' + voc.name
       s.textColor = theme().text50
+      s.paddingVertical = '5px'
     })
     .whenHovered(s => {
       s.textColor = theme().text

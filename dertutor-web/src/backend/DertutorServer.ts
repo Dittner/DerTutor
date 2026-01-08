@@ -1,8 +1,9 @@
 import { RXOperation } from 'flinker'
 import { RestApi, RestApiError } from './RestApi'
-import { AuthenticateSchema, CreateNoteSchema, CreateVocSchema, DeleteMedialFileSchema, DeleteNoteSchema, DeleteVocSchema, GetPageSchema, RenameNoteSchema, RenameVocSchema, UpdateNoteSchema } from './Schema'
+import { AuthenticateSchema, CreateNoteSchema, CreateVocSchema, DeleteMedialFileSchema, DeleteNoteSchema, DeleteVocSchema, GetPageSchema, RenameNoteSchema, RenameVocSchema, SearchByNameSchema, UpdateNoteSchema } from './Schema'
 import { Path } from '../app/Utils'
-import { ILang, INote, IPage, IUser } from '../domain/DomainModel'
+import { ILang, IMediaFile, INote, IPage, IUser } from '../domain/DomainModel'
+import { UploadFileCmd } from './cmd/UploadFileCmd'
 
 export class DertutorServer extends RestApi {
   constructor() {
@@ -78,6 +79,11 @@ export class DertutorServer extends RestApi {
     return this.get('/notes?note_id=' + noteId)
   }
 
+  searchNoteByName(scheme: SearchByNameSchema): RXOperation<INote[], RestApiError> {
+    const queryParams = Path.querify(scheme)
+    return this.get('/notes/search_by_name?' + queryParams)
+  }
+
   createNote(scheme: CreateNoteSchema): RXOperation<INote | undefined, RestApiError> {
     return this.post('/notes', scheme)
   }
@@ -107,15 +113,9 @@ export class DertutorServer extends RestApi {
     return this.get(path)
   }
 
-  uploadFile(noteId: number, file: File, fileName: string): RXOperation<any, RestApiError> {
-    console.log('UploadFileCmd:startLoading, f=', file)
-    const formData = new FormData();
-    formData.append('file', file, fileName)
-
-    //DO NOT USE THESE HEADERS: { 'Content-Type': 'multipart/form-data' }
-    //let browser to add 'Content-Type': 'multipart/form-data; boundary=----WebKitFormBou...' 
-    const headers = {}
-    return this.post('/media/uploadfile?note_id=' + noteId, formData, headers)
+  uploadFile(noteId: number, file: File, fileName: string): RXOperation<IMediaFile, RestApiError> {
+    const cmd = new UploadFileCmd(this, '/media/uploadfile?note_id=' + noteId, file, fileName)
+    return cmd.run()
   }
 
   deleteFile(schema: DeleteMedialFileSchema): RXOperation<any, RestApiError> {

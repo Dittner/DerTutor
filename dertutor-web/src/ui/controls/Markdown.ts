@@ -7,7 +7,10 @@ interface MarkdownProps extends TextProps {
   mode: 'md' | 'rawText' | 'rawHtml'
 }
 
-const parser = new MDParser(new MDGrammar())
+const g = new MDGrammar()
+//g.audio.matcher[1] = g.audio.matcher[1].replace('controls', '')
+const parser = new MDParser(g)
+
 export const Markdown = () => {
   return div<MarkdownProps>()
     .map(s => {

@@ -42,23 +42,22 @@ export class URLNavigator {
       tagId: params.has('tag') ? Number(params.get('tag')) : undefined,
       page: params.has('page') ? Number(params.get('page')) : undefined,
       edit: params.has('edit') ? true : undefined,
-      searchKey: params.get('key') ?? undefined,
+      searchKey: params.has('key') ? params.get('key') ?? '' : undefined,
     }
   }
 
   buildLink(keys: UrlKeys) {
     if (!keys.langCode) return '/'
 
-    const isSearching = keys.searchKey && keys.searchKey.length > 1
-    if (keys.vocCode === undefined && !isSearching) return `/${keys.langCode}`
+    if (keys.vocCode === undefined && keys.searchKey === undefined) return `/${keys.langCode}`
 
     let res = `/${keys.langCode}`
-    res += isSearching ? '/search?' : `/${keys.vocCode}?`
+    res += keys.searchKey !== undefined ? '/search?' : `/${keys.vocCode}?`
     res += keys.page !== undefined ? `page=${keys.page}` : 'page=1'
     if (keys.noteId !== undefined) res += `&note=${keys.noteId}`
     if (keys.level !== undefined) res += `&level=${keys.level}`
     if (keys.tagId !== undefined) res += `&tag=${keys.tagId}`
-    if (keys.searchKey) res += `&key=${keys.searchKey}`
+    if (keys.searchKey !== undefined) res += `&key=${keys.searchKey}`
     if (keys.edit) res += `&edit`
     return res
   }

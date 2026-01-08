@@ -50,10 +50,16 @@ export interface GetPageSchema {
   lang_id: number
   page: number
   size: number
-  key: string | undefined
-  voc_id: number | undefined
-  level: number | undefined
-  tag_id: number | undefined
+  key?: string
+  voc_id?: number
+  level?: number
+  tag_id?: number
+}
+
+export interface SearchByNameSchema {
+  lang_id: number
+  name: string
+  voc_id?: number
 }
 
 export interface CreateMedialFileSchema {

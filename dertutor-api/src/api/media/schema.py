@@ -6,6 +6,7 @@ class MediaRead(BaseModel):
     note_id: int
     name: str
     media_type: str
+    url: str
 
 
 class MediaDelete(BaseModel):

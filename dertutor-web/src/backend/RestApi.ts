@@ -28,14 +28,14 @@ export class RestApiCmd implements Runnable {
   private readonly api: RestApi
   private readonly method: HttpMethod
   private readonly path: string
-  private readonly body: any
+  private readonly schema: any
   private readonly headers: any
 
-  constructor(api: RestApi, method: HttpMethod, path: string, body: any = undefined, headers: any = undefined) {
+  constructor(api: RestApi, method: HttpMethod, path: string, schema: any = undefined, headers: any = undefined) {
     this.api = api
     this.method = method
     this.path = path
-    this.body = body
+    this.schema = schema
     this.headers = headers
   }
 
@@ -48,7 +48,7 @@ export class RestApiCmd implements Runnable {
   }
 
   private async startLoading(op: RXOperation<any, RestApiError>) {
-    const [response, body] = await this.api.sendRequest(this.method, this.path, this.body && JSON.stringify(this.body), this.headers)
+    const [response, body] = await this.api.sendRequest(this.method, this.path, this.schema && JSON.stringify(this.schema), this.headers)
     if (response?.ok) {
       op.success(body)
     } else {

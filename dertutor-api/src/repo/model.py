@@ -75,5 +75,6 @@ class Media(Base):
     uid: Mapped[str] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
     media_type: Mapped[str] = mapped_column(String(255))
+    url: Mapped[str] = mapped_column(String(255))
     note_id: Mapped[int] = mapped_column(ForeignKey('notes.id'))
     __table_args__ = (UniqueConstraint('note_id', 'uid'),)

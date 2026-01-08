@@ -21,6 +21,12 @@ class SearchParams(BaseModel):
     tag_id: int | None = Field(None, ge=1)
 
 
+class SearchByNameParams(BaseModel):
+    lang_id: int
+    name: str = Field(min_length=2)
+    voc_id: int | None = Field(None, ge=1)
+
+
 class NotesDAO(BaseDAO[Note]):
     model = Note
 
@@ -29,6 +35,31 @@ class NotesDAO(BaseDAO[Note]):
         query = sqlalchemy.select(Note).filter_by(**filter_by).options(selectinload(Note.media))
         result = await session.execute(query)
         return result.scalar_one_or_none()
+
+    @classmethod
+    async def search_notes_by_name(cls, session: AsyncSession, params: SearchByNameParams) -> list[Note]:
+        ss = f"""
+        SELECT * FROM notes
+        WHERE lang_id = :lang_id
+        {'AND voc_id = :voc_id' if params.voc_id else ''}
+        AND name ILIKE :name
+        ORDER BY
+            CASE
+                WHEN name LIKE :name THEN 0
+                WHEN name ILIKE :name THEN 1
+                ELSE 2
+            END ASC
+        """
+
+        pp = {}
+        pp['lang_id'] = params.lang_id
+        pp['name'] = params.name
+        if params.voc_id:
+            pp['voc_id'] = params.voc_id
+
+        clause = sqlalchemy.text(ss).bindparams(**pp)
+        select_result = await session.execute(clause)
+        return [row._mapping for row in select_result]
 
     @classmethod
     async def search_notes(cls, session: AsyncSession, params: SearchParams) -> Page[Any]:
@@ -52,10 +83,10 @@ class NotesDAO(BaseDAO[Note]):
 
         filters = f"""
             WHERE lang_id = :lang_id
-            {"AND (name ILIKE '%' || :key || '%' OR text ILIKE '%' || :key || '%')" if params.key else ''}
             {'AND voc_id = :voc_id' if params.voc_id else ''}
             {'AND level = :level' if params.level else ''}
             {'AND tag_id = :tag_id' if params.tag_id else ''}
+            {"AND (name ILIKE '%' || :key || '%' OR text ILIKE '%' || :key || '%')" if params.key else ''}
             """
 
         sort_and_paginate = f"""
@@ -63,15 +94,15 @@ class NotesDAO(BaseDAO[Note]):
                 {
             '''
                 CASE
-                    WHEN POSITION(:key IN name) = 1 THEN 0
-                    WHEN POSITION(:key IN name) > 1 THEN 1
+                    WHEN name ILIKE :key THEN 0
+                    WHEN name ILIKE '%' || :key || '%' THEN 1
                     ELSE 2
                 END ASC,
                 '''
             if params.key
             else ''
         }
-                id DESC
+            id DESC
             LIMIT :limit
             OFFSET :offset;
             """

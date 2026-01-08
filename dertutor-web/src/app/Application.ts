@@ -11,11 +11,12 @@ export enum LayoutLayer {
   ERR_MSG = '50',
 }
 
-export enum AppSize {
-  XS = 'XS',
-  S = 'S',
-  M = 'M',
-  L = 'L'
+export interface Layout {
+  isMobile: boolean
+  navBarHeight: number
+  statusBarHeight: number
+  contentWidth: number
+  sideSpaceWidth: number
 }
 
 export interface BrowserLocation {
@@ -26,7 +27,8 @@ export interface BrowserLocation {
 export type UpdateUrlMode = 'push' | 'replace'
 
 export class Application {
-  readonly $size = new RXObservableValue<AppSize>(AppSize.L)
+  readonly $layout: RXObservableValue<Layout>
+  readonly $windowWidth: RXObservableValue<number>
   readonly $location: RXObservableValue<BrowserLocation>
   readonly $pathName = new RXObservableValue('')
   readonly $scrollY = new RXObservableValue(0)
@@ -37,32 +39,39 @@ export class Application {
 
   constructor() {
     this.isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0)
+    this.$windowWidth = new RXObservableValue(window.innerWidth)
+    this.$layout = new RXObservableValue(this.getLayout())
     this.$location = new RXObservableValue({ path: document.location.pathname, queries: document.location.search })
+
+    this.$windowWidth.pipe()
+      .debounce(1000)
+      .onReceive(_ => this.$layout.value = this.getLayout())
+      .subscribe()
 
     console.log('isMobileDevice: ' + this.isMobileDevice)
     console.log('localStorage, theme: ' + window.localStorage.getItem('theme'))
-    window.addEventListener('resize', this.updateSize.bind(this))
+    window.addEventListener('resize', () => { this.$windowWidth.value = window.innerWidth })
     window.addEventListener('scroll', () => this.$scrollY.value = window.scrollY, false);
     this.watchHistoryEvents()
     this.updateLocation()
   }
 
-  navigate(to: string, mode: UpdateUrlMode) {
-    mode === 'push' ? window.history.pushState('', '', to) : window.history.replaceState('', '', to)
-  }
+  private getLayout(): Layout {
+    const windowWidth = window.innerWidth - 20
+    const contentWidth = this.isMobileDevice ? windowWidth : Math.min(1000, windowWidth)
+    const sideSpaceWidth = this.isMobileDevice ? 0 : windowWidth / 2 - contentWidth / 2
 
-  private updateSize(): void {
-    const evaluatedSize = this.evaluateAppSize()
-    if (this.$size.value !== evaluatedSize) {
-      this.$size.value = evaluatedSize
+    return {
+      isMobile: this.isMobileDevice,
+      navBarHeight: 60,
+      statusBarHeight: 30,
+      contentWidth,
+      sideSpaceWidth
     }
   }
 
-  private evaluateAppSize(): AppSize {
-    if (window.innerWidth > 1500) return AppSize.L
-    if (window.innerWidth > 1200) return AppSize.M
-    if (window.innerWidth > 767) return AppSize.S
-    return AppSize.XS
+  navigate(to: string, mode: UpdateUrlMode) {
+    mode === 'push' ? window.history.pushState('', '', to) : window.history.replaceState('', '', to)
   }
 
   private watchHistoryEvents() {

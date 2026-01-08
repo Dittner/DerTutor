@@ -50,6 +50,7 @@ export interface IMediaFile {
   readonly note_id: number
   readonly name: string
   readonly media_type: string
+  readonly url: string
 }
 
 export const AVAILABLE_LEVELS = ['', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2']

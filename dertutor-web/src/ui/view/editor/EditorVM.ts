@@ -44,7 +44,6 @@ export class EditorVM extends ViewModel<EditorState> {
     RX.combine(this.$buffer, this.$level, this.$tagId, this.$audioUrl, this.$selectedVocId).pipe()
       .skipFirst()
       .onReceive(values => {
-        console.log('changeg!!!')
         const buffer = values[0]
         const level = values[1]
         const tagId = values[2]
@@ -150,6 +149,7 @@ export class EditorVM extends ViewModel<EditorState> {
       this.$tagId.value = note.tag_id
       this.$audioUrl.value = note.audio_url
       this.$selectedVocId.value = note.voc_id
+      this.$mediaFiles.value = note.media ?? []
     }
   }
 
@@ -206,33 +206,25 @@ export class EditorVM extends ViewModel<EditorState> {
     this.$filesPendingUpload.value = [...this.$filesPendingUpload.value, new FileWrapper(file)]
   }
 
-  uploadAll() {
+  async uploadAll() {
     const note = this.$state.value.note
     if (!note) return
 
-    let uploadingFiles = this.$filesPendingUpload.value.length
-    this.$filesPendingUpload.value.forEach(w => {
-      this.server.uploadFile(note.id, w.file, w.$name.value).pipe()
-        .onReceive((data: IMediaFile | undefined) => {
-          this.ctx.$msg.value = { text: this.noteToString(note), level: 'info' }
-          console.log('EditorVM:uploadFile, complete, data: ', data)
-          if (data) {
-            this.ctx.$msg.value = { text: this.noteToString(note) + ', uploaded', level: 'info' }
-            this.$state.value = { ...this.$state.value, note: { ...note, media: note.media ? [...note.media, data] : [data] } }
-            this.$mediaFiles.value = [...this.$mediaFiles.value]
-          } else {
-            this.ctx.$msg.value = { text: this.noteToString(note) + ', mediaresource is uploaded, but received damaged result', level: 'error' }
-          }
-        })
-        .onError(e => {
-          this.ctx.$msg.value = { text: this.noteToString(note) + ', ' + e.message, level: 'error' }
-        })
-        .onComplete(() => {
-          uploadingFiles--
-          if (uploadingFiles === 0) this.$filesPendingUpload.value = []
-        })
-        .subscribe()
-    })
+    try {
+      const mediaFiles = [...this.$mediaFiles.value]
+      for (const w of this.$filesPendingUpload.value) {
+        const mf = await this.server.uploadFile(note.id, w.file, w.$name.value).asAwaitable
+        mediaFiles.push(mf)
+        console.log('Result of uploaded edia file:', mf)
+      }
+      this.$state.value = { ...this.$state.value, note: { ...note, media: mediaFiles } }
+      this.$mediaFiles.value = mediaFiles
+      this.$filesPendingUpload.value = []
+      this.ctx.$msg.value = { text: this.noteToString(note) + ', ' + mediaFiles.length + ' files uploaded', level: 'info' }
+
+    } catch (e: any) {
+      this.ctx.$msg.value = { text: this.noteToString(note) + ', ' + e.message, level: 'error' }
+    }
   }
 
   deletePendingUploadFile(w: FileWrapper) {
@@ -250,8 +242,8 @@ export class EditorVM extends ViewModel<EditorState> {
       .onReceive((data: any[]) => {
         this.ctx.$msg.value = { text: this.noteToString(note) + ', deleted', level: 'info' }
         console.log('EditorVM:deleteMediaFile, complete, data: ', data)
-        const index = note.media?.indexOf(mf)
-        if (index && index !== -1) {
+        const index = note.media?.indexOf(mf) ?? -1
+        if (index !== -1) {
           note.media && note.media.splice(index, 1)
           this.$mediaFiles.value = note.media ? [...note.media] : []
         }
@@ -264,11 +256,6 @@ export class EditorVM extends ViewModel<EditorState> {
 
   reprLevel(level: number) {
     return level < AVAILABLE_LEVELS.length ? AVAILABLE_LEVELS[level] : ''
-  }
-
-  getMediaFileLink(mf: IMediaFile) {
-    const note = this.$state.value.note
-    return note ? `/media/${note.id}/${mf.uid}` : ''
   }
 
   private noteToString(n: INote | undefined) {
