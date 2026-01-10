@@ -2,7 +2,7 @@
     --LineHeight: 1.6;
     --font-family: -apple-system, 'system-ui', sans-serif;
     --font-family-mono: monospace, 'jetbrains', Menlo, source-code-pro, Monaco, 'Courier New', monospace;
-    --font-family-article: 'verdana2', -apple-system, 'system-ui', 'system-ui', sans-serif;
+    --font-family-article: 'verdana', -apple-system, 'system-ui', 'system-ui', sans-serif;
 }
 
 .def {
@@ -104,7 +104,7 @@ blockquote {
 
 ::selection {
     color: #111111;
-    background: #bc799f;
+    background: #de93becc;
 }
 
 table {
@@ -134,9 +134,10 @@ blockquote::before {
     display: block;
 }
 
-/* img {
-    float: right;
-} */
+img {
+    position: relative;
+    left: 0;
+}
 
 /* 
 audio::-webkit-media-controls-panel {

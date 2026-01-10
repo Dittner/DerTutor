@@ -15,7 +15,6 @@ export interface GlobalTheme {
   defFontWeight: FontWeight
   defTextColor: string
   appBg: string
-  contentBg: string
   actionsBg: string
   text: string
   text50: string
@@ -24,6 +23,7 @@ export interface GlobalTheme {
   green: string
   em: string
   accent: string
+  quote: string
   strong: string
   link: string
   link100: string
@@ -43,6 +43,7 @@ export class ThemeManager {
   private readonly _lightTheme: GlobalTheme
   private readonly _darkTheme: GlobalTheme
   private readonly _darkSmallTheme: GlobalTheme
+  private readonly _lightSmallTheme: GlobalTheme
 
   readonly $theme: RXObservableValue<GlobalTheme>
 
@@ -76,11 +77,13 @@ export class ThemeManager {
   constructor() {
     this._lightTheme = this.createLightTheme()
     this._darkTheme = this.createDarkTheme(this._lightTheme)
-    this._darkSmallTheme = this.createDarkSmallTheme(this._darkTheme)
+    this._lightSmallTheme = this.createSmallTheme(this._lightTheme)
+    this._darkSmallTheme = this.createSmallTheme(this._darkTheme)
     this.$theme = new RXObservableValue(this._lightTheme)
 
     this.buildThemeSelectors(this._lightTheme)
     this.buildThemeSelectors(this._darkTheme)
+    this.buildThemeSelectors(this._lightSmallTheme)
     this.buildThemeSelectors(this._darkSmallTheme)
 
     const theme = window.localStorage.getItem('theme') ?? 'light'
@@ -98,47 +101,48 @@ export class ThemeManager {
   * */
 
   createLightTheme(): GlobalTheme {
-    const black = '#111111'
-    const white = '#f8f8f8'//efeee8
+    const black = '#000000'
+    const white = '#ffFFff'//efeee8
     const red = '#ac2f2f'
-    const header = '#755b54'
+    const header = '#bd4593'
     const blue = '#425865'
+    const border = black + '40'
     return {
       id: 'light',
       isLight: true,
 
-      fontSizeXL: '1.4rem',
+      fontSizeXL: '1.6rem',
       fontSizeL: '1.2rem',
       fontSizeM: '1.1rem',
       fontSize: '1rem',
       defFontSize: 'inherit',
       fontSizeS: '0.9rem',
-      fontSizeXS: '0.75rem',
+      fontSizeXS: '0.7rem',
 
       defFontWeight: 'normal',
       defTextColor: 'inherit',
       appBg: white,
-      contentBg: white,
       mark: '#efa6ff',
       btn: '#4a0078',
-      border: black + '20',
+      border,
       strong: black,
-      text: black,
-      text50: black + '88',
+      text: '#555555',
+      text50: '#55555588',
       red,
-      red100: '#db5c5c',
+      red100: '#a42e2e',
       green: '#7198a9',
       actionsBg: '#f0f0f0',
       h1: black,
       header,
       em: black,
-      accent: '#784085',
+      accent: '#a42e2e',
+      quote: black,
       blue,
-      link: '#29177c',
-      link100: '#29177c',
+      link: '#005b90',
+      link100: '#a42e2e',
       editor: black,
       transparent: '#00000000',
-      info: '#29177c',
+      info: '#026655',
       warn: '#a56a26',
     }
   }
@@ -150,16 +154,17 @@ export class ThemeManager {
   * */
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#707786' //707786 
+    const text = '#777e8e' //707786 
     const red = '#b9777d'
     const blue = '#4984c8'
-    const black = '#101115' //131418
-    const accent = '#a4a499'  //9fa786
+    const black = '#121416' //131418
+    const accent = '#a1a3a9'  //9fa786
+    const strong = '#8d95a7'
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
       appBg: black,
-      contentBg: '#101115',
+      contentBg: '#111111',
       text,
       text50: text + 'aa',
       red,
@@ -169,7 +174,8 @@ export class ThemeManager {
       header: '#b3996d',
       em: accent,
       accent,
-      strong: '#8d95a7',
+      quote: '#989ca7',
+      strong,
       actionsBg: '#22232a',
       blue,
       mark: '#dd7d85',
@@ -189,20 +195,16 @@ export class ThemeManager {
   *
   * */
 
-  createDarkSmallTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#888a82' //707f8b 
-    const strong = '#acac9a' //707f8b 
-    const red = '#b9777d'
-    const blue = '#5ea2c7'
-    const black = '#18191e'
-    const accent = '#acac9a'  //9fa786
+  createSmallTheme(t: GlobalTheme): GlobalTheme {
+    const text = t.isLight ? t.text : '#888888' //707f8b 
+    const accent = '#a5a5a5'  //9fa786
     return Object.assign({}, t, {
-      id: 'dark-small',
+      id: t.id + '-small',
       text: text,
       defTextColor: text,
       text50: text + '88',
-      strong: strong,
-      h1: accent,
+      strong: t.isLight ? t.strong : accent,
+      h1: t.isLight ? t.h1 : accent,
       fontSizeXL: '1rem',
       fontSizeL: '0.9rem',
       fontSizeM: '0.9rem',
@@ -210,7 +212,7 @@ export class ThemeManager {
       fontSizeS: '0.7rem',
       fontSizeXS: '0.7rem',
 
-      isLight: false,
+      isLight: t.isLight,
     })
   }
 
@@ -229,7 +231,7 @@ export class ThemeManager {
     const h1Props: UIComponentProps = {
       //textTransform: 'uppercase',
       fontSize: t.fontSizeXL,
-      fontWeight: 'bold',
+      fontWeight: '500',
       textColor: t.h1,
       paddingTop: headerPadingTop
     }
@@ -296,7 +298,7 @@ export class ThemeManager {
       //fontFamily: '--font-family-article-bi',
       fontSize: 'inherit',
       textColor: t.strong,
-      fontWeight: t.isLight ? 'bold' : 'inherit',
+      fontWeight: 'inherit',
       fontStyle: 'inherit'
     }
     buildRule(strongProps, parentSelector, 'strong')
@@ -375,7 +377,8 @@ export class ThemeManager {
       //bgColor: t.isLight ? '#bbd5bfff' : 'undefined',
       textColor: t.em,
       fontStyle: 'normal',
-      bgImage: t.isLight ? 'linear-gradient(#4ed0ad00, #4ed0ad50)' : 'inherit',
+      //bgImage: t.isLight ? 'linear-gradient(#4ed0ad00, #4ed0ad50)' : 'inherit',
+      bgColor: t.isLight ? '#4ed0ad50' : 'inherit',
       //paddingVertical: '5px'
     }
     buildRule(emphasizeProps, parentSelector, 'em')
@@ -387,9 +390,8 @@ export class ThemeManager {
     const markProps: UIComponentProps = {
       fontSize: 'inherit',
       fontWeight: 'inherit',
-      //textColor: t.isLight ? 'inherit' : t.appBg,
-      bgColor: 'unset',
-      textColor: t.mark,
+      textColor: t.isLight ? 'inherit' : t.mark,
+      bgColor: t.isLight ? t.mark : 'unset',
       //bgImage: t.isLight ? `linear-gradient(${t.mark + '00'}, ${t.mark + '50'})` : 'inherit',
     }
 
@@ -435,8 +437,8 @@ export class ThemeManager {
       width: '100%',
       paddingHorizontal: '20px',
       fontSize: 'inherit',
-      textColor: t.accent,
-      borderLeft: '1px solid ' + t.accent + '88'
+      textColor: t.quote,
+      borderLeft: '1px solid ' + t.quote + '88'
     }
     buildRule(blockquoteProps, parentSelector, 'blockquote')
 
@@ -499,8 +501,8 @@ export class ThemeManager {
       border: '1px solid ' + t.header,
       marginBottom: '20px',
     }
-    buildRule(hrProps, parentSelector, 'hr')   
-    
+    buildRule(hrProps, parentSelector, 'hr')
+
     /******************************/
     // footer
     /******************************/

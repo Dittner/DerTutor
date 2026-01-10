@@ -58,7 +58,7 @@ export class Application {
 
   private getLayout(): Layout {
     const windowWidth = window.innerWidth - 20
-    const contentWidth = this.isMobileDevice ? windowWidth : Math.min(1000, windowWidth)
+    const contentWidth = this.isMobileDevice ? windowWidth : Math.min(900, windowWidth)
     const sideSpaceWidth = this.isMobileDevice ? 0 : windowWidth / 2 - contentWidth / 2
 
     return {

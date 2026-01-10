@@ -35,7 +35,7 @@ export const NoteListView = () => {
           s.top = '0px'
           s.left = layout.sideSpaceWidth + 'px'
           s.width = layout.contentWidth + 'px'
-          s.minHeight = window.innerHeight+ 'px'
+          s.minHeight = window.innerHeight + 'px'
           s.paddingTop = layout.navBarHeight + 'px'
           s.paddingBottom = layout.statusBarHeight + 'px'
         })
@@ -59,9 +59,8 @@ const NoteContentView = () => {
   const vm = ctx.noteListVM
   return vstack()
     .react(s => {
-      s.gap = '0'
-      s.paddingRight = '70px'
-      s.bgColor = theme().contentBg
+      s.gap = '50px'
+      s.paddingRight = '20px'
     })
     .children(() => {
       NavBar()
@@ -72,17 +71,19 @@ const NoteContentView = () => {
           s.gap = '0'
         })
         .children(() => {
-          PlayAudioBtn()
+          Btn()
             .observe(vm.$state)
             .react(s => {
               const hasAudio = vm.$state.value.selectedNote !== undefined && vm.$state.value.selectedNote.audio_url !== ''
               s.mouseEnabled = hasAudio
-              // s.position = 'relative'
-              // s.top = '135px'
-              s.width = '50px'
-              s.height = '50px'
+              s.position = 'relative'
+              s.left = '-20px'
+              s.icon = MaterialIcon.volume_up
+              s.width = '20px'
+              s.height = '62px'
               s.opacity = hasAudio ? '1' : '0'
             })
+            .onClick(() => vm.playAudio(vm.$state.value.selectedNote?.audio_url ?? ''))
 
           Markdown()
             .observe(vm.$state)
@@ -100,6 +101,9 @@ const NoteContentView = () => {
               //s.showRawText = page.file.showRawText
             })
         })
+
+      spacer()
+      NexPrevNoteNavigator()
     })
 }
 const NotesMenu = () => {
@@ -154,7 +158,7 @@ const NoteRenderer = (n: INote) => {
       s.whiteSpace = 'normal'
       s.textColor = theme().link
       s.paddingVertical = '5px'
-      s.borderLeft = '1px solid ' + theme().text50
+      s.borderLeft = '1px solid ' + theme().border
 
       const text = n.name
       if (searchKey && text) {
@@ -271,9 +275,7 @@ const NavBar = () => {
       s.fontSize = theme().fontSizeXS
       s.fontFamily = FontFamily.MONO
       s.valign = 'center'
-      s.paddingLeft = '50px'
-      s.paddingRight = '0px'
-      s.marginBottom = '50px'
+      s.paddingHorizontal = '20px'
       s.textSelectable = false
     })
     .children(() => {
@@ -309,18 +311,6 @@ const NavBar = () => {
 
       NoteMeta()
     })
-}
-
-const PlayAudioBtn = () => {
-  const ctx = DerTutorContext.self
-  const vm = ctx.noteListVM
-  return Btn()
-    .react(s => {
-      s.icon = MaterialIcon.volume_up
-      s.width = '40px'
-      s.height = '40px'
-    })
-    .onClick(() => vm.playAudio())
 }
 
 const NoteMeta = () => {
@@ -556,13 +546,24 @@ const QuickSearchPanel = () => {
           .whenHovered(s => s.bgColor = theme().text)
       })
 
+      Btn()
+        .observe(vm.$quickSearchResult)
+        .react(s => {
+          const audioUrl = vm.$quickSearchResult.value?.audio_url ?? ''
+          s.mouseEnabled = audioUrl !== ''
+          s.marginTop = '5px'
+          s.icon = MaterialIcon.volume_up
+          s.opacity = audioUrl !== '' ? '1' : '0'
+        })
+        .onClick(() => vm.playAudio(vm.$quickSearchResult.value?.audio_url ?? ''))
+
       Markdown()
         .observe(vm.$quickSearchBuffer)
         .observe(vm.$quickSearchResult)
         .react(s => {
           s.visible = vm.$quickSearchBuffer.value.length > 0
-          s.className = 'dark-small'
-          s.marginTop = '20px'
+          s.className = theme().isLight ? 'light-small' : 'dark-small'
+          s.lineHeight = '1.4'
           s.mode = 'md'
           s.fontFamily = FontFamily.ARTICLE
           s.textColor = theme().text
@@ -570,6 +571,60 @@ const QuickSearchPanel = () => {
           s.text = vm.$quickSearchResult.value?.text ?? ''
           s.fontSize = theme().fontSize
           s.absolutePathPrefix = globalContext.server.baseUrl
+        })
+    })
+}
+
+const NexPrevNoteNavigator = () => {
+  const vm = DerTutorContext.self.noteListVM
+  return hstack()
+    .observe(vm.$state, 'affectsChildrenProps')
+    .observe(vm.$selectedNoteIndex, 'affectsChildrenProps')
+    .react(s => {
+      s.gap = '10px'
+      s.width = '100%'
+      s.marginHorizontal = '20px'
+      s.borderTop = '1px solid' + theme().border
+    })
+    .children(() => {
+      Btn()
+        .react(s => {
+          const page = vm.$state.value.page
+          if (page) {
+            const selectedNoteIndex = vm.$selectedNoteIndex.value
+            const selectedPageIndex = page.page ?? 0
+            s.visible = selectedNoteIndex > 0 || selectedPageIndex > 1
+            s.text = selectedNoteIndex > 0 ? page.items[selectedNoteIndex - 1].name : `Page ${selectedPageIndex - 1}`
+          } else {
+            s.visible = false
+          }
+
+          s.icon = MaterialIcon.arrow_back
+          s.height = '50px'
+        }).onClick(() => {
+          vm.movePrev()
+        })
+
+      spacer()
+
+      Btn()
+        .react(s => {
+          const page = vm.$state.value.page
+          if (page) {
+            const selectedNoteIndex = vm.$selectedNoteIndex.value
+            const selectedPageIndex = page.page ?? 0
+            s.visible = selectedNoteIndex < page.items.length || selectedPageIndex < page.pages
+            s.text = selectedNoteIndex < page.items.length - 1 ? page.items[selectedNoteIndex + 1].name : `Page ${selectedPageIndex + 1}`
+          } else {
+            s.visible = false
+          }
+
+          s.icon = MaterialIcon.arrow_forward
+          s.revert = true
+          s.height = '50px'
+
+        }).onClick(() => {
+          vm.moveNext()
         })
     })
 }

@@ -23,6 +23,7 @@ export function App() {
     })
     .children(() => {
       AuthStatus()
+      Footer()
 
       observer(ctx.$activeVM)
         .onReceive(vm => {
@@ -34,7 +35,7 @@ export function App() {
         })
 
       ActionsHelpView()
-      Footer()
+
       AppErrorInfo()
       ModalView()
     })
@@ -53,8 +54,9 @@ export const ActionsHelpView = () => {
       s.position = 'fixed'
       s.right = '0px'
       s.width = '600px'
-      s.top = layout.navBarHeight + 'px'
-      s.height = (window.innerHeight - layout.statusBarHeight - layout.navBarHeight) + 'px'
+      s.paddingTop = layout.navBarHeight + 'px'
+      s.paddingBottom = layout.statusBarHeight + 'px'
+      s.height = window.innerHeight + 'px'
       s.paddingHorizontal = '20px'
       s.gap = '0px'
       s.bgColor = theme().actionsBg
@@ -134,7 +136,7 @@ const Footer = () => {
       s.width = '100%'
       s.minHeight = globalContext.app.$layout.value.statusBarHeight + 'px'
       s.valign = 'center'
-      s.bgColor = theme().text + '10'
+      //s.bgColor = theme().text + '10'
       //s.blur = '5px'
     })
     .children(() => {

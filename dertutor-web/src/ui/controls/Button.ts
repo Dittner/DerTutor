@@ -35,6 +35,7 @@ export const Icon = <P extends IconProps>() => {
 export interface IconBtnProps extends ButtonProps {
   icon?: MaterialIcon
   iconSize?: string
+  revert?: boolean
 }
 
 export const IconBtn = () => {
@@ -51,6 +52,9 @@ export const IconBtn = () => {
       s.wrap = false
       s.boxSizing = 'border-box'
     })
+    .map(s => {
+      s.flexDirection = s.revert ? 'row-reverse' : 'row'
+    })
     .children(() => {
 
       //icon
@@ -64,7 +68,7 @@ export const IconBtn = () => {
         })
 
       //text
-      $sharedState.value.text && span()
+      span()
         .observe($sharedState)
         .react(s => {
           const ss = $sharedState.value
@@ -72,6 +76,7 @@ export const IconBtn = () => {
           s.textColor = 'inherit'
           s.fontSize = ss.fontSize ?? 'inherit'
           s.fontFamily = 'inherit'
+          s.visible = ss.text !== '' && ss.text !== undefined
         })
     })
 }

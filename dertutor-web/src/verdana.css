@@ -1,5 +1,5 @@
 @font-face {
-    font-family: 'verdana2';
+    font-family: 'verdana';
     src: url('resources/fonts/Verdana/Verdana.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
@@ -7,7 +7,7 @@
 }
 
 @font-face {
-    font-family: 'verdana2';
+    font-family: 'verdana';
     src: url('resources/fonts/Verdana/VerdanaPro-SemiBold.ttf') format('truetype');
     font-weight: bold;
     font-style: normal;
@@ -15,7 +15,7 @@
 }
 
 @font-face {
-    font-family: 'verdana2';
+    font-family: 'verdana';
     src: url('resources/fonts/Verdana/VerdanaPro-Italic.ttf') format('truetype');
     font-weight: normal;
     font-style: italic;
@@ -23,7 +23,7 @@
 }
 
 @font-face {
-    font-family: 'verdana2';
+    font-family: 'verdana';
     src: url('resources/fonts/Verdana/VerdanaPro-SemiBoldItalic.ttf') format('truetype');
     font-weight: bold;
     font-style: italic;

@@ -22,6 +22,7 @@ export interface NoteListState {
 
 export class NoteListVM extends ViewModel<NoteListState> {
   readonly $state = new RXObservableValue<Readonly<NoteListState>>({})
+  readonly $selectedNoteIndex = new RXObservableValue(-1)
 
   readonly $searchBuffer = new RXObservableValue('')
 
@@ -47,13 +48,10 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
     if (state.lang && page && note) {
       const index = page.items.findIndex(child => child.id === note.id)
+      this.$selectedNoteIndex.value = index
       this.ctx.$msg.value = { 'text': index != -1 ? `${index + 1 + (page.page - 1) * page.size}:${page.total}` : '', 'level': 'info' }
-    } else if (!state.lang) {
-      this.navigator.navigateTo({})
-    }
-    else if (!state.page) {
-      this.navigator.navigateTo({ langCode: state.lang.code })
     } else {
+      this.$selectedNoteIndex.value = -1
       this.ctx.$msg.value = { text: '0:0', level: 'info' }
       if (state.searchKey !== undefined) {
         this.focusGlobalSearchInput()
@@ -78,12 +76,12 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add(':d<CR>', 'Delete note (SUPERUSER)', () => this.deleteNote())
     this.actionsList.add('/', 'Search', () => this.focusGlobalSearchInput())
 
-    this.actionsList.add('<Space>', 'Play audio', () => this.playAudio())
+    this.actionsList.add('<Space>', 'Play audio', () => this.playAudio(this.$state.value?.selectedNote?.audio_url || this.$quickSearchResult.value?.audio_url || ''))
     this.actionsList.add(':id<CR>', 'Print ID of note', () => this.printID())
     this.actionsList.add('q', 'Quit', () => this.quit())
   }
 
-  private moveNext() {
+  moveNext() {
     const p = this.$state.value.page
     const n = this.$state.value.selectedNote
     if (!p || !n) return
@@ -97,7 +95,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
     }
   }
 
-  private movePrev() {
+  movePrev() {
     const p = this.$state.value.page
     const n = this.$state.value.selectedNote
     if (!p || !n) return
@@ -278,9 +276,9 @@ export class NoteListVM extends ViewModel<NoteListState> {
     }
   }
 
-  playAudio() {
-    if (this.$state.value.selectedNote?.audio_url)
-      new Audio(this.server.baseUrl + this.$state.value.selectedNote.audio_url).play()
+  playAudio(url: string) {
+    if (url)
+      new Audio(this.server.baseUrl + url).play()
   }
 
   focusGlobalSearchInput() {

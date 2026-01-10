@@ -137,10 +137,10 @@ const LangRenderer = (lang: ILang) => {
       s.textAlign = 'center'
       s.width = '100%'
       s.text = lang.name
-      s.textColor = isHighlighted ? theme().red : theme().text
+      s.textColor = isHighlighted ? theme().red : theme().text50
     })
     .whenHovered(s => {
-      s.textDecoration = 'underline'
+      s.textColor = theme().text
     })
     .whenSelected(s => {
       s.textColor = theme().appBg
@@ -164,11 +164,11 @@ const VocRenderer = (voc: IVoc, index: number) => {
       s.textAlign = 'left'
       s.width = '100%'
       s.text = index + 1 + '. ' + voc.name
-      s.textColor = isSelected ? theme().accent : theme().text
+      s.textColor = isSelected ? theme().accent : theme().text50
       //s.borderColor = theme().appBg
     })
     .whenHovered(s => {
-      s.textDecoration = 'underline'
+      s.textColor = theme().text
     })
     .whenSelected(s => {
       s.textColor = theme().accent
