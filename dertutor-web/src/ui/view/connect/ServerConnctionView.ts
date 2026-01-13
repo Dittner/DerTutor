@@ -1,6 +1,5 @@
 import { p, vstack } from "flinker-dom"
 import { globalContext, MessangerView } from "../../../App"
-import { LayoutLayer } from "../../../app/Application"
 import { FontFamily } from "../../controls/Font"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
@@ -15,7 +14,6 @@ export const ServerConnectionView = () => {
       s.width = '100vw'
       s.height = '100vh'
       s.paddingTop = globalContext.app.$layout.value.navBarHeight  + 'px'
-      s.layer = LayoutLayer.MODAL
       s.mouseEnabled = false
     }).children(() => {
       p()

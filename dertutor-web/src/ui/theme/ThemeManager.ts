@@ -67,7 +67,7 @@ export class ThemeManager {
     window.localStorage.setItem('theme', 'dark')
   }
 
-  switchTheme() {
+  toggleTheme() {
     if (this.$theme.value.id === 'light')
       this.setDarkTheme()
     else if (this.$theme.value.id === 'dark')
@@ -158,7 +158,7 @@ export class ThemeManager {
     const red = '#b9777d'
     const blue = '#4984c8'
     const black = '#121416' //131418
-    const accent = '#a1a3a9'  //9fa786
+    const accent = '#a1a1a1'  //9fa786
     const strong = '#8d95a7'
     return Object.assign({}, t, {
       id: 'dark',
@@ -174,9 +174,9 @@ export class ThemeManager {
       header: '#b3996d',
       em: accent,
       accent,
-      quote: '#989ca7',
+      quote: '#a1a1a1',
       strong,
-      actionsBg: '#22232a',
+      actionsBg: '#222428',
       blue,
       mark: '#dd7d85',
       link: blue,
@@ -196,13 +196,13 @@ export class ThemeManager {
   * */
 
   createSmallTheme(t: GlobalTheme): GlobalTheme {
-    const text = t.isLight ? t.text : '#888888' //707f8b 
+    const text = t.isLight ? t.text : '#808080' //707f8b 
     const accent = '#a5a5a5'  //9fa786
     return Object.assign({}, t, {
       id: t.id + '-small',
       text: text,
       defTextColor: text,
-      text50: text + '88',
+      text50: text,
       strong: t.isLight ? t.strong : accent,
       h1: t.isLight ? t.h1 : accent,
       fontSizeXL: '1rem',

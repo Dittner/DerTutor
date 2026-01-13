@@ -7,7 +7,7 @@ import { Markdown } from "../../controls/Markdown"
 import { globalContext } from "../../../App"
 
 const ACTION_TIPS = `
-## [icon:lightbulb_outline] Tips
+## [icon:emoji_objects] Tips
 ---
 \`\`\`ul
 + You can navigate through menu items using arrows: →, ↓, →, ↑
@@ -29,7 +29,7 @@ export const VocListView = () => {
           s.position = 'fixed'
           s.paddingHorizontal = '20px'
           s.top = layout.navBarHeight + 'px'
-          s.left = layout.sideSpaceWidth + 'px'
+          s.left = layout.leftSideMenuWidth + 'px'
           s.width = layout.contentWidth + 'px'
           s.height = window.innerHeight - layout.navBarHeight - layout.statusBarHeight + 'px'
           s.gap = '0px'

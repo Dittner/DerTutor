@@ -14,17 +14,30 @@ export const NoteListView = () => {
   return div()
     .children(() => {
 
+      Header()
+        .observe(globalContext.app.$layout)
+        .react(s => {
+          const layout = globalContext.app.$layout.value
+          s.position = 'fixed'
+          s.top = '0'
+          s.left = layout.isMobile ? '0' : layout.leftSideMenuWidth + 'px'
+          s.width = layout.contentWidth + 'px'
+          s.height = layout.navBarHeight + 'px'
+          s.layer = '10'
+        })
+
       NotesMenu()
         .observe(globalContext.app.$layout)
         .react(s => {
           const layout = globalContext.app.$layout.value
           s.position = 'fixed'
           s.left = '0'
-          s.width = (layout.isMobile ? layout.contentWidth : layout.sideSpaceWidth) + 'px'
+          s.width = (layout.isMobile ? layout.contentWidth : layout.leftSideMenuWidth) + 'px'
           s.top = layout.navBarHeight + 'px'
-          s.height = window.innerHeight - layout.statusBarHeight - layout.navBarHeight + 'px'
+          s.height = window.innerHeight - layout.navBarHeight + 'px'
           s.className = 'listScrollbar'
           s.enableOwnScroller = true
+          s.borderRight = '1px solid ' + theme().border
         })
 
       NoteContentView()
@@ -33,11 +46,11 @@ export const NoteListView = () => {
           const layout = globalContext.app.$layout.value
           s.position = 'absolute'
           s.top = '0px'
-          s.left = layout.sideSpaceWidth + 'px'
+          s.left = layout.leftSideMenuWidth + 'px'
           s.width = layout.contentWidth + 'px'
           s.minHeight = window.innerHeight + 'px'
-          s.paddingTop = layout.navBarHeight + 'px'
-          s.paddingBottom = layout.statusBarHeight + 'px'
+          s.paddingTop = layout.navBarHeight + 20 + 'px'
+          //s.paddingBottom = layout.statusBarHeight + 'px'
         })
 
       FiltersView()
@@ -46,7 +59,7 @@ export const NoteListView = () => {
           const layout = globalContext.app.$layout.value
           s.position = 'fixed'
           s.right = '5px'
-          s.width = (layout.isMobile ? layout.contentWidth : layout.sideSpaceWidth) + 'px'
+          s.width = (layout.isMobile ? layout.contentWidth : window.innerWidth - layout.contentWidth - layout.leftSideMenuWidth) + 'px'
           s.top = layout.navBarHeight + 'px'
           s.height = window.innerHeight - layout.statusBarHeight - layout.navBarHeight + 'px'
           s.className = 'listScrollbar'
@@ -54,64 +67,109 @@ export const NoteListView = () => {
         })
     })
 }
-const NoteContentView = () => {
-  const ctx = DerTutorContext.self
-  const vm = ctx.noteListVM
-  return vstack()
+
+
+const Header = () => {
+  const vm = DerTutorContext.self.noteListVM
+  return hstack()
     .react(s => {
-      s.gap = '50px'
-      s.paddingRight = '20px'
+      s.gap = '0px'
+      s.fontFamily = FontFamily.APP
+      s.valign = 'center'
+      s.halign = 'left'
+      // s.paddingLeft = '40px'
+      // s.paddingRight = '20px'
     })
     .children(() => {
-      NavBar()
-
-      hstack()
-        .react(s => {
-          s.width = '100%'
-          s.gap = '0'
-        })
-        .children(() => {
-          Btn()
-            .observe(vm.$state)
-            .react(s => {
-              const hasAudio = vm.$state.value.selectedNote !== undefined && vm.$state.value.selectedNote.audio_url !== ''
-              s.mouseEnabled = hasAudio
-              s.position = 'relative'
-              s.left = '-20px'
-              s.icon = MaterialIcon.volume_up
-              s.width = '20px'
-              s.height = '62px'
-              s.opacity = hasAudio ? '1' : '0'
-            })
-            .onClick(() => vm.playAudio(vm.$state.value.selectedNote?.audio_url ?? ''))
-
-          Markdown()
-            .observe(vm.$state)
-            .react(s => {
-              const searchKey = vm.$state.value.searchKey ?? ''
-              s.className = theme().id
-              s.mode = 'md'
-              s.fontFamily = FontFamily.ARTICLE
-              s.textColor = theme().text
-              s.width = '100%'
-              s.mark = searchKey.length > 1 ? searchKey : ''
-              s.text = vm.$state.value.selectedNote?.text ?? ''
-              s.fontSize = theme().fontSize
-              s.absolutePathPrefix = globalContext.server.baseUrl
-              //s.showRawText = page.file.showRawText
-            })
-        })
-
-      spacer()
-      NexPrevNoteNavigator()
+      GlobalSearchView()
     })
 }
+
+const GlobalSearchView = () => {
+  const vm = DerTutorContext.self.noteListVM
+  return hstack()
+    .observe(globalContext.app.$layout)
+    .observe(vm.$searchBufferFocused)
+    .react(s => {
+      const layout = globalContext.app.$layout.value
+      s.gap = '0px'
+      s.fontFamily = FontFamily.APP
+      s.valign = 'center'
+      s.halign = 'left'
+      s.width = layout.contentWidth / 2 + 'px'
+      s.border = '1px solid ' + (vm.$searchBufferFocused.value ? theme().red : theme().border)
+      s.cornerRadius = '4px'
+      s.paddingRight = '5px'
+    })
+    .children(() => {
+
+      Icon()
+        .react(s => {
+          s.value = MaterialIcon.search
+          s.width = '40px'
+          s.textAlign = 'center'
+          s.textColor = theme().text50
+        })
+
+      TextInput(vm.$searchBuffer)
+        .observe(vm.$searchBufferFocused)
+        .react(s => {
+          s.width = '100%'
+          s.fontSize = theme().fontSizeXS
+          s.placeholder = 'SEARCH ⌘K'
+          s.border = 'unset'
+          s.paddingHorizontal = '1px'
+          s.autoFocus = vm.$searchBufferFocused.value
+        })
+        .whenFocused(s => {
+          s.border = 'unset'
+        })
+        .onKeyDown(e => {
+          if (e.key === 'Enter') {
+            vm.startSearch(vm.$searchBuffer.value)
+            document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
+          }
+          else if (e.key === 'Escape') {
+            document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
+          }
+        })
+        .onFocus(() => {
+          vm.$searchBufferFocused.value = true
+          document.activeElement instanceof HTMLInputElement && document.activeElement.select()
+        })
+        .onBlur(() => {
+          vm.$searchBufferFocused.value = false
+        })
+
+      IconBtn()
+        .observe(vm.$searchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
+        .react(s => {
+          s.visible = vm.$searchBuffer.value.length > 0
+          s.icon = MaterialIcon.close
+          s.textColor = theme().appBg
+          s.bgColor = theme().text + 'cc'
+          s.width = '18px'
+          s.height = '18px'
+          s.cornerRadius = '18px'
+        })
+        .whenHovered(s => s.bgColor = theme().text)
+        .onClick(() => {
+          vm.$searchBuffer.value = ''
+          vm.$searchBufferFocused.value = false
+          vm.navigateToLexicon()
+        })
+    })
+}
+
+
+
 const NotesMenu = () => {
   const ctx = DerTutorContext.self
   const vm = ctx.noteListVM
   return vstack()
     .react(s => {
-      s.gap = '0'
+      s.gap = '20px'
+      s.paddingTop = '20px'
     })
     .children(() => {
       Title('')
@@ -133,11 +191,47 @@ const NotesMenu = () => {
           s.className = theme().id
           s.width = '100%'
           s.paddingHorizontal = '20px'
-          s.gap = '0'
+          s.gap = '0px'
         })
 
       NotesPaginator()
 
+    })
+}
+
+const NoteContentView = () => {
+  const ctx = DerTutorContext.self
+  const vm = ctx.noteListVM
+  return vstack()
+    .react(s => {
+      s.gap = '0px'
+    })
+    .children(() => {
+      NavBar()
+
+      Markdown()
+        .observe(vm.$state)
+        .react(s => {
+          const searchKey = vm.$state.value.searchKey ?? ''
+          s.className = theme().id
+          s.mode = 'md'
+          s.fontFamily = FontFamily.ARTICLE
+          s.textColor = theme().text
+          s.width = '100%'
+          s.mark = searchKey.length > 1 ? searchKey : ''
+          s.text = vm.$state.value.selectedNote?.text ?? ''
+          s.fontSize = theme().fontSize
+          s.absolutePathPrefix = globalContext.server.baseUrl
+          s.paddingLeft = '40px'
+          s.paddingRight = '20px'
+          s.paddingTop = '50px'
+          s.paddingBottom = '30px'
+          //s.showRawText = page.file.showRawText
+        })
+
+      spacer()
+
+      NexPrevNoteNavigator()
     })
 }
 
@@ -154,10 +248,10 @@ const NoteRenderer = (n: INote) => {
       s.paddingRight = '5px'
       s.paddingLeft = '20px'
       s.textAlign = 'left'
+      s.paddingVertical = '5px'
       s.wrap = true
       s.whiteSpace = 'normal'
       s.textColor = theme().link
-      s.paddingVertical = '5px'
       s.borderLeft = '1px solid ' + theme().border
 
       const text = n.name
@@ -170,6 +264,7 @@ const NoteRenderer = (n: INote) => {
     })
     .whenHovered(s => {
       s.textColor = theme().link100
+      s.cursor = 'pointer'
     })
     .whenSelected(s => {
       s.textColor = theme().link100
@@ -270,13 +365,12 @@ const NavBar = () => {
       s.width = '100%'
       s.gap = '10px'
       s.whiteSpace = 'nowrap'
-      s.valign = 'center'
+      s.valign = 'top'
       s.halign = 'stretch'
       s.fontSize = theme().fontSizeXS
       s.fontFamily = FontFamily.MONO
-      s.valign = 'center'
-      s.paddingHorizontal = '20px'
-      s.textSelectable = false
+      s.paddingLeft = '40px'
+      s.paddingRight = '20px'
     })
     .children(() => {
       LinkBtn()
@@ -292,6 +386,7 @@ const NavBar = () => {
           const voc = vm.$state.value.voc ?? lang?.vocs.find(v => v.id === vm.$state.value.selectedNote?.voc_id)
           s.visible = lang !== undefined && voc !== undefined
           s.text = ' › '
+          s.paddingVertical = '2px'
           s.textColor = theme().link + 'bb'
         })
 
@@ -307,7 +402,40 @@ const NavBar = () => {
           lang && voc && vm.navigator.navigateTo({ langCode: lang?.code, vocCode: voc && vm.encodeName(voc.name) })
         })
 
+      span()
+        .react(s => {
+          const note = vm.$state.value.selectedNote
+          s.visible = note !== undefined
+          s.text = ' › '
+          s.paddingVertical = '2px'
+          s.textColor = theme().link + 'bb'
+        })
+
+      LinkBtn()
+        .react(s => {
+          const note = vm.$state.value.selectedNote
+          const msg = note ? note.name + ' (' + vm.$noteNummberOfTotal.value + ')' : ''
+          s.fontFamily = FontFamily.APP
+          s.fontSize = theme().fontSizeXS
+          s.text = msg ?? ''
+        })
+        .onClick(() => {
+          window.scrollTo(0, 0)
+        })
+
       spacer()
+
+      Btn()
+        .observe(vm.$state)
+        .react(s => {
+          const hasAudio = vm.$state.value.selectedNote !== undefined && vm.$state.value.selectedNote.audio_url !== ''
+          s.visible = hasAudio
+          s.icon = MaterialIcon.volume_up
+          s.width = '40px'
+          s.height = '50px'
+          s.text = 'Audio'
+        })
+        .onClick(() => vm.playAudio(vm.$state.value.selectedNote?.audio_url ?? ''))
 
       NoteMeta()
     })
@@ -326,10 +454,11 @@ const NoteMeta = () => {
       if (level && tag) s.text += level + ', ' + tag
       else if (level) s.text += level
       else if (tag) s.text += tag
+      s.visible = s.text !== ''
       s.fontFamily = FontFamily.APP
       s.fontSize = theme().fontSizeXS
-      s.fontStyle = 'italic'
-      s.paddingHorizontal = '10px'
+      s.fontWeight = 'bold'
+      s.paddingHorizontal = '20px'
       s.textColor = theme().text
     })
 }
@@ -338,7 +467,9 @@ const FiltersView = () => {
   return vstack()
     .react(s => {
       s.gap = '0'
-      s.paddingHorizontal = '20px'
+      s.paddingLeft = '40px'
+      s.paddingRight = '20px'
+      s.paddingTop = '20px'
     })
     .children(() => {
       Title('Filter by level:')
@@ -351,12 +482,7 @@ const FiltersView = () => {
 
       spacer().react(s => s.height = '20px')
 
-      Title('Filter by text:')
-      FilterByText()
-
-      spacer().react(s => s.height = '20px')
-
-      Title('Quick search /:')
+      Title('Quick search:')
       QuickSearchPanel()
     })
 }
@@ -425,52 +551,6 @@ const TagRenderer = (t: ITag) => {
 }
 
 
-const FilterByText = () => {
-  const vm = DerTutorContext.self.noteListVM
-  return hstack()
-    .react(s => {
-      s.gap = '0px'
-      s.width = '100%'
-      s.fontFamily = FontFamily.APP
-      s.valign = 'center'
-    })
-    .children(() => {
-
-      Icon()
-        .react(s => {
-          s.value = MaterialIcon.filter_list
-          s.position = 'absolute'
-          s.width = '30px'
-          s.textAlign = 'center'
-          s.textColor = theme().text50
-        })
-
-      TextInput(vm.$searchBuffer)
-        .react(s => {
-          s.width = '100%'
-          s.maxWidth = '300px'
-          s.fontSize = theme().fontSizeXS
-          s.paddingLeft = '30px'
-          s.placeholder = 'Enter text to search'
-          s.border = '1px solid ' + theme().border
-        })
-        .whenFocused(s => {
-          s.border = '1px solid ' + theme().red
-        })
-        .onKeyDown(e => {
-          if (e.key === 'Enter') {
-            vm.startSearch(vm.$searchBuffer.value)
-            document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
-          }
-          else if (e.key === 'Escape') {
-            document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
-          }
-        })
-        .onFocus(() => {
-          document.activeElement instanceof HTMLInputElement && document.activeElement.select()
-        })
-    })
-}
 
 const QuickSearchPanel = () => {
   const vm = DerTutorContext.self.noteListVM
@@ -491,7 +571,7 @@ const QuickSearchPanel = () => {
 
         Icon()
           .react(s => {
-            s.value = MaterialIcon.search
+            s.value = MaterialIcon.school
             s.position = 'absolute'
             s.width = '30px'
             s.textAlign = 'center'
@@ -505,7 +585,7 @@ const QuickSearchPanel = () => {
             s.maxWidth = '300px'
             s.autoFocus = vm.$quickSearchFocused.value
             s.fontSize = theme().fontSizeXS
-            s.placeholder = "Enter text to search"
+            s.placeholder = "Enter a word to search /"
             s.border = '1px solid ' + theme().border
             s.textColor = theme().strong
             s.caretColor = theme().accent
@@ -542,8 +622,13 @@ const QuickSearchPanel = () => {
             s.width = '20px'
             s.height = '20px'
             s.cornerRadius = '20px'
-          }).onClick(() => vm.$quickSearchBuffer.value = '')
+          })
           .whenHovered(s => s.bgColor = theme().text)
+          .onClick(() => {
+            vm.$quickSearchBuffer.value = ''
+            vm.$quickSearchFocused.value = false
+            vm.$quickSearchResult.value = undefined
+          })
       })
 
       Btn()
@@ -583,7 +668,9 @@ const NexPrevNoteNavigator = () => {
     .react(s => {
       s.gap = '10px'
       s.width = '100%'
-      s.marginHorizontal = '20px'
+      s.valign = 'center'
+      s.paddingLeft = '40px'
+      s.paddingRight = '20px'
       s.borderTop = '1px solid' + theme().border
     })
     .children(() => {

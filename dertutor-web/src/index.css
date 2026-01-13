@@ -134,10 +134,12 @@ blockquote::before {
     display: block;
 }
 
-img {
-    position: relative;
-    left: 0;
-}
+/* figure {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+} */
 
 /* 
 audio::-webkit-media-controls-panel {

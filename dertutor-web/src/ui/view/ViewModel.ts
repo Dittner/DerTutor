@@ -77,7 +77,7 @@ export class ViewModel<ViewModelState> implements IViewModel {
       this.ctx.$msg.value = undefined
     })
     this.actionsList.add('T', 'Switch theme', () => {
-      themeManager.switchTheme()
+      themeManager.toggleTheme()
       this.ctx.$msg.value = { 'level': 'info', 'text': themeManager.$theme.value.id + ' theme' }
     })
     this.actionsList.add(':auth<CR>', 'Login', () => this.signIn())

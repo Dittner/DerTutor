@@ -1,22 +1,11 @@
 import { RXObservableValue } from 'flinker'
 
-export enum LayoutLayer {
-  MINUS = '-1',
-  ZERO = '0',
-  ONE = '1',
-  HEADER = '10',
-  DOC_LIST = '20',
-  POPUP = '30',
-  MODAL = '40',
-  ERR_MSG = '50',
-}
-
 export interface Layout {
   isMobile: boolean
   navBarHeight: number
   statusBarHeight: number
   contentWidth: number
-  sideSpaceWidth: number
+  leftSideMenuWidth: number
 }
 
 export interface BrowserLocation {
@@ -58,15 +47,15 @@ export class Application {
 
   private getLayout(): Layout {
     const windowWidth = window.innerWidth - 20
-    const contentWidth = this.isMobileDevice ? windowWidth : Math.min(900, windowWidth)
-    const sideSpaceWidth = this.isMobileDevice ? 0 : windowWidth / 2 - contentWidth / 2
+    const contentWidth = this.isMobileDevice ? windowWidth : Math.min(960, windowWidth)
+    const leftSideMenuWidth = this.isMobileDevice ? 0 : (windowWidth - contentWidth) * 0.45
 
     return {
       isMobile: this.isMobileDevice,
       navBarHeight: 60,
       statusBarHeight: 30,
       contentWidth,
-      sideSpaceWidth
+      leftSideMenuWidth
     }
   }
 

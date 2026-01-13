@@ -10,7 +10,6 @@ import { FileWrapper } from "./EditorVM"
 import { TextEditor } from "./TextEditor"
 import { TextFormatter } from "./TextFormatter"
 import { TextInput } from "../../controls/Input"
-import { LayoutLayer } from "../../../app/Application"
 import { MaterialIcon } from "../../icons/MaterialIcon"
 
 export const EditorView = () => {
@@ -26,6 +25,7 @@ export const EditorView = () => {
     Header()
       .react(s => {
         s.position = 'fixed'
+        s.height = globalContext.app.$layout.value.navBarHeight + 'px'
         s.width = '100%'
       })
 
@@ -33,7 +33,7 @@ export const EditorView = () => {
       .observe(vm.$state)
       .bind(vm.$buffer)
       .react(s => {
-        const layout = globalContext.app.$layout.value 
+        const layout = globalContext.app.$layout.value
         s.visible = vm.$state.value.note !== undefined
         s.position = 'fixed'
         s.left = '20px'
@@ -394,8 +394,6 @@ const Header = () => {
     .react(s => {
       s.gap = '20px'
       s.paddingHorizontal = '20px'
-      s.width = '100%'
-      s.height = globalContext.app.$layout.value.navBarHeight + 'px'
       s.halign = 'right'
       s.valign = 'center'
       s.bgColor = theme().appBg
@@ -535,11 +533,8 @@ const VocSelector = () => {
               s.border = theme().border
               s.cornerRadius = '5px'
               s.position = 'absolute'
-              s.layer = LayoutLayer.MODAL
             })
         })
-
-
     })
 }
 

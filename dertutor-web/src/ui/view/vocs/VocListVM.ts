@@ -25,7 +25,6 @@ export class VocListVM extends ViewModel<VocListState> {
     const interactor = new VocListInteractor(ctx)
     super('vocs', ctx, interactor)
     this.addKeybindings()
-    this.$highlightedVoc.pipe().onReceive(_ => this.showSelectedVocIndex())
   }
 
   protected override stateDidChange(state: VocListState) {
@@ -237,15 +236,6 @@ export class VocListVM extends ViewModel<VocListState> {
             .subscribe()
         }
       }
-    }
-  }
-
-  private showSelectedVocIndex() {
-    const lang = this.$selectedLang.value
-    const voc = this.$highlightedVoc.value
-    if (lang && voc) {
-      const index = lang.vocs.findIndex(child => child.id === voc.id)
-      this.ctx.$msg.value = { 'text': index != -1 ? `${index + 1}:${lang.vocs.length}` : '', 'level': 'info' }
     }
   }
 

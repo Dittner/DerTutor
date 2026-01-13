@@ -25,10 +25,12 @@ export class NoteListVM extends ViewModel<NoteListState> {
   readonly $selectedNoteIndex = new RXObservableValue(-1)
 
   readonly $searchBuffer = new RXObservableValue('')
+  readonly $searchBufferFocused = new RXObservableValue(false)
 
   readonly $quickSearchBuffer = new RXObservableValue('')
   readonly $quickSearchFocused = new RXObservableValue(false)
   readonly $quickSearchResult = new RXObservableValue<INote | undefined>(undefined)
+  readonly $noteNummberOfTotal = new RXObservableValue('')
 
 
   constructor(ctx: DerTutorContext) {
@@ -49,10 +51,14 @@ export class NoteListVM extends ViewModel<NoteListState> {
     if (state.lang && page && note) {
       const index = page.items.findIndex(child => child.id === note.id)
       this.$selectedNoteIndex.value = index
-      this.ctx.$msg.value = { 'text': index != -1 ? `${index + 1 + (page.page - 1) * page.size}:${page.total}` : '', 'level': 'info' }
+      this.$noteNummberOfTotal.value = index === -1 ? '' : `${index + 1 + (page.page - 1) * page.size}:${page.total}`
+            this.ctx.$msg.value = { 'text': index != -1 ? `${index + 1 + (page.page - 1) * page.size}:${page.total}` : '', 'level': 'info' }
+
     } else {
       this.$selectedNoteIndex.value = -1
-      this.ctx.$msg.value = { text: '0:0', level: 'info' }
+      this.$noteNummberOfTotal.value = '0:0'
+            this.ctx.$msg.value = { text: '0:0', level: 'info' }
+
       if (state.searchKey !== undefined) {
         this.focusGlobalSearchInput()
       }
@@ -74,7 +80,8 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add('r', 'Rename note (SUPERUSER)', () => this.renameNote())
     this.actionsList.add('e', 'Edit note (SUPERUSER)', () => this.edit())
     this.actionsList.add(':d<CR>', 'Delete note (SUPERUSER)', () => this.deleteNote())
-    this.actionsList.add('/', 'Search', () => this.focusGlobalSearchInput())
+    this.actionsList.add('/', 'Quick Search', () => this.focusGlobalSearchInput())
+    this.actionsList.add('<C-k>', 'Global Search', () => this.$searchBufferFocused.value = true)
 
     this.actionsList.add('<Space>', 'Play audio', () => this.playAudio(this.$state.value?.selectedNote?.audio_url || this.$quickSearchResult.value?.audio_url || ''))
     this.actionsList.add(':id<CR>', 'Print ID of note', () => this.printID())
@@ -332,7 +339,15 @@ export class NoteListVM extends ViewModel<NoteListState> {
   }
 
   startSearch(key: string) {
-    this.navigator.updateWith({ page: 1, searchKey: key })
+    if (key) this.navigator.updateWith({ page: 1, searchKey: key })
+    else this.navigateToLexicon()
+  }
+
+  navigateToLexicon() {
+    if (this.$state.value.lang && this.$state.value.lang.vocs.length > 0) {
+      const voc = this.$state.value.lang.vocs[0]
+      this.navigator.navigateTo({ langCode: this.$state.value.lang.code, vocCode: DomainService.encodeName(voc.name) })
+    }
   }
 
   encodeName(value: string) {

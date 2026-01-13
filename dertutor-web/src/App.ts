@@ -1,4 +1,4 @@
-import { div, hstack, observer, p, span, vlist } from "flinker-dom"
+import { div, hstack, observer, p, spacer, span, vlist } from "flinker-dom"
 import { GlobalContext } from "./app/GlobalContext"
 import { Action } from "./ui/actions/Action"
 import { FontFamily } from "./ui/controls/Font"
@@ -9,6 +9,8 @@ import { NoteListView } from "./ui/view/note/NoteListView"
 import { VocListView } from "./ui/view/vocs/VocListView"
 import { DerTutorContext } from "./DerTutorContext"
 import { LineInput } from "./ui/controls/Input"
+import { Icon } from "./ui/controls/Button"
+import { MaterialIcon } from "./ui/icons/MaterialIcon"
 
 export const globalContext = GlobalContext.init()
 
@@ -22,7 +24,7 @@ export function App() {
       s.width = '100%'
     })
     .children(() => {
-      AuthStatus()
+      Header()
       Footer()
 
       observer(ctx.$activeVM)
@@ -33,9 +35,8 @@ export function App() {
           else if (vm === ctx.editorVM) return EditorView()
           else return undefined
         })
-
+      
       ActionsHelpView()
-
       AppErrorInfo()
       ModalView()
     })
@@ -46,24 +47,25 @@ export const ActionsHelpView = () => {
 
   return div()
     .observe(ctx.$activeVM.pipe().skipNullable().flatMap(vm => vm.$showActions).fork())
-    .observe(ctx.$activeVM, 'recreateChildren')
     .react(s => {
       const vm = ctx.$activeVM.value
       const layout = globalContext.app.$layout.value
       s.visible = vm && vm.$showActions.value
       s.position = 'fixed'
       s.right = '0px'
-      s.width = '600px'
+      s.width = '500px'
       s.paddingTop = layout.navBarHeight + 'px'
       s.paddingBottom = layout.statusBarHeight + 'px'
       s.height = window.innerHeight + 'px'
       s.paddingHorizontal = '20px'
       s.gap = '0px'
       s.bgColor = theme().actionsBg
+      s.layer = '100'
     }).children(() => {
-      const vm = ctx.$activeVM.value
+
       vlist<Action>()
-        .items(() => vm?.actionsList.actions ?? [])
+        .observe(ctx.$activeVM, 'recreateChildren')
+        .items(() => ctx.$activeVM.value?.actionsList.actions ?? [])
         .itemHash(a => a.cmd)
         .itemRenderer(ActionInfoView)
         .react(s => {
@@ -103,22 +105,78 @@ const ActionInfoView = (a: Action) => {
     })
 }
 
-const AuthStatus = () => {
+const Header = () => {
   const ctx = DerTutorContext.self
 
-  return p()
-    .observe(ctx.$user)
+  return hstack()
     .react(s => {
       s.position = 'fixed'
-      s.left = '20px'
-      s.top = '10px'
-      s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().fontSizeXS
-      s.textColor = '#6e6190'
-      if (!ctx.$user.value)
-        s.text = ''
-      else
-        s.text = ctx.$user.value.username + (ctx.$user.value.is_superuser ? ':superuser' : '')
+      s.top = '0px'
+      s.left = '0px'
+      s.width = '100%'
+      s.height = globalContext.app.$layout.value.navBarHeight + 'px'
+      s.valign = 'center'
+      s.paddingHorizontal = '20px'
+      s.layer = '10'
+      s.bgColor = theme().appBg + 'cc'
+      s.borderBottom = '1px solid ' + theme().border
+      s.blur = '10px'
+    })
+    .children(() => {
+      p()
+        .observe(ctx.$user)
+        .react(s => {
+          s.fontFamily = FontFamily.MONO
+          s.fontSize = theme().fontSizeXS
+          s.textColor = '#604d92'
+          if (!ctx.$user.value)
+            s.text = ''
+          else
+            s.text = ctx.$user.value.username + (ctx.$user.value.is_superuser ? ':superuser' : '')
+        })
+
+      spacer()
+
+      hstack()
+        .observe(themeManager.$theme, 'affectsChildrenProps')
+        .react(s => {
+          s.width = '60px'
+          s.height = '30px'
+          s.cornerRadius = '30px'
+          s.paddingHorizontal = '5px'
+          s.valign = 'center'
+          s.gap = '0px'
+          s.border = '1px solid ' + theme().border
+          s.textColor = theme().text + '88'
+          s.popUp = 'Toggle theme (T)'
+        })
+        .children(() => {
+          Icon().react(s => {
+            s.value = MaterialIcon.sunny
+            s.fontSize = theme().fontSizeS
+            s.width = '30px'
+            s.textAlign = 'center'
+            s.textColor = theme().isLight ? theme().text : 'inherit'
+          })
+
+          spacer()
+
+          Icon().react(s => {
+            s.value = MaterialIcon.brightness_3
+            s.fontSize = theme().fontSizeS
+            s.width = '30px'
+            s.textAlign = 'center'
+            s.textColor = !theme().isLight ? theme().text : 'inherit'
+          })
+        })
+        .whenHovered(s => {
+          s.textColor = theme().text
+          s.bgColor = theme().text + '20'
+          s.cursor = 'pointer'
+        })
+        .onClick(() => {
+          themeManager.toggleTheme()
+        })
     })
 }
 
@@ -141,10 +199,7 @@ const Footer = () => {
     })
     .children(() => {
 
-      MessangerView().react(s => {
-        s.width = '100%'
-      })
-
+      MessangerView()
       CmdView()
 
       observer(ctx.$activeVM).onReceive(vm => {
@@ -166,15 +221,18 @@ const Footer = () => {
 export const MessangerView = () => {
   const ctx = DerTutorContext.self
   return p()
+    .observe(globalContext.app.$layout)
     .observe(ctx.$msg)
     .react(s => {
+      const layout = globalContext.app.$layout.value
       const msg = ctx.$msg.value
+      s.visible = !layout.isMobile
       s.fontFamily = FontFamily.MONO
       s.fontSize = theme().fontSizeXS
       s.paddingHorizontal = '20px'
       s.text = msg?.text ?? ''
       //s.bgColor = theme().appBg
-      s.width = '100%'
+      s.width = layout.leftSideMenuWidth + 'px'
 
       if (msg?.level === 'error')
         s.textColor = theme().red
@@ -195,7 +253,9 @@ export const CmdView = () => {
       s.text = ctx.$activeVM.value?.$cmd.value ?? ''
       s.whiteSpace = 'nowrap'
       s.textColor = theme().text50
-      s.paddingHorizontal = '20px'
+      s.paddingHorizontal = '10px'
+      s.width = '100%'
+      s.textAlign = 'right'
     })
 }
 
