@@ -1,3 +1,5 @@
+import { logErr } from "../../../app/Logger"
+
 export class TextFormatter {
   constructor() { }
 
@@ -21,7 +23,7 @@ export class TextFormatter {
       document.execCommand('insertText', false, this.startFormating(text))
       ta.setSelectionRange(cursorPos, cursorPos)
     } catch (e) {
-      console.log('TextFormatter:format: ', e)
+      logErr('TextFormatter:format: ', e)
     }
   }
 

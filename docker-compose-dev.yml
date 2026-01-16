@@ -65,6 +65,7 @@ services:
     restart: unless-stopped
     environment:
       - VITE_DERTUTOR_API_URL=http://localhost:4444/api
+      - VITE_ECHO=true
     depends_on:
       - dertutor-api
     volumes:

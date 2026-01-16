@@ -1,3 +1,5 @@
+import { logErr } from "../../../app/Logger"
+
 export class TextEditorController {
   static scrollToCursor(ta: HTMLTextAreaElement) {
     ta.blur()
@@ -14,7 +16,7 @@ export class TextEditorController {
     const row = value.slice(beginRowIndex, selectionStart)
     const beginRowSpaces = TextEditorController.calcSpaceBefore(row)
 
-    //console.log('Row:' + 'BEGIN' + row + 'END, beginRowSpaces:', beginRowSpaces)
+    //log('Row:' + 'BEGIN' + row + 'END, beginRowSpaces:', beginRowSpaces)
 
     const spaces = '\n' + ' '.repeat(beginRowSpaces)
     // func setRangeText unfortunately clears browser history
@@ -83,7 +85,7 @@ export class TextEditorController {
       let text = ta.value.slice(ta.selectionStart, ta.selectionEnd)
       document.execCommand('insertText', false, text.toUpperCase())
     } catch (e) {
-      console.log('TextEditorController:uppercase: ', e)
+      logErr('TextEditorController:uppercase: ', e)
     }
   }
 
@@ -95,7 +97,7 @@ export class TextEditorController {
       text = text.replace(/\n/g, ' ').replace('  ', ' ')
       document.execCommand('insertText', false, text)
     } catch (e) {
-      console.log('TextEditorController:removeNewLines: ', e)
+      logErr('TextEditorController:removeNewLines: ', e)
     }
   }
 
@@ -125,7 +127,7 @@ export class TextEditorController {
       let text = ta.value.slice(ta.selectionStart, ta.selectionEnd)
       document.execCommand('insertText', false, text.toLowerCase())
     } catch (e) {
-      console.log('TextEditorController:lowercase: ', e)
+      logErr('TextEditorController:lowercase: ', e)
     }
   }
 
@@ -136,7 +138,7 @@ export class TextEditorController {
       let res = '```ol\n' + text.split('\n').map(v => '1. ' + v).join(';\n') + '\n```'
       document.execCommand('insertText', false, res)
     } catch (e) {
-      console.log('TextEditorController:lowercase: ', e)
+      logErr('TextEditorController:lowercase: ', e)
     }
   }
 
@@ -152,7 +154,7 @@ export class TextEditorController {
       document.execCommand('insertText', false, '```\n' + text + '\n```')
       ta.setSelectionRange(selectionStart + 3, selectionStart + 3)
     } catch (e) {
-      console.log('TextEditorController:wrapAsMultilineCode: ', e)
+      logErr('TextEditorController:wrapAsMultilineCode: ', e)
     }
   }
 }

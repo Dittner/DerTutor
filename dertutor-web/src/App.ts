@@ -11,11 +11,12 @@ import { DerTutorContext } from "./DerTutorContext"
 import { LineInput } from "./ui/controls/Input"
 import { Icon } from "./ui/controls/Button"
 import { MaterialIcon } from "./ui/icons/MaterialIcon"
+import { log } from "./app/Logger"
 
 export const globalContext = GlobalContext.init()
 
 export function App() {
-  console.log('new App')
+  log('new App')
   const ctx = DerTutorContext.init()
 
   return div()
@@ -140,7 +141,7 @@ export const ThemeSwitcher = () => {
       s.gap = '0px'
       s.border = '1px solid ' + theme().border
       s.textColor = theme().text + '88'
-      s.popUp = 'Toggle theme (T)'
+      //s.popUp = 'Toggle theme (T)'
     })
     .whenHovered(s => {
       s.textColor = theme().text

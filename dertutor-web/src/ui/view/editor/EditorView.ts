@@ -11,9 +11,10 @@ import { TextEditor } from "./TextEditor"
 import { TextFormatter } from "./TextFormatter"
 import { TextInput } from "../../controls/Input"
 import { MaterialIcon } from "../../icons/MaterialIcon"
+import { log } from "../../../app/Logger"
 
 export const EditorView = () => {
-  console.log('new EditorView')
+  log('new EditorView')
 
   const ctx = DerTutorContext.self
   const vm = ctx.editorVM
@@ -303,7 +304,7 @@ const PendingUploadResources = () => {
         })
         .onChange((e: any) => {
           vm.addResource(e.target.files[0])
-          console.log(e)
+          log(e)
         })
 
       hstack()

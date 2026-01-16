@@ -7,6 +7,7 @@ import { CreateNoteSchema, DeleteNoteSchema, GetPageSchema, RenameNoteSchema, Se
 import { UrlKeys } from "../../../app/URLNavigator"
 import { globalContext } from "../../../App"
 import { Interactor } from "../Interactor"
+import { log } from "../../../app/Logger"
 
 export interface NoteListState {
   allLangs?: ILang[]
@@ -46,7 +47,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
     globalContext.app.$layout.pipe()
       .onReceive(l => {
-        console.log('New layout:', l)
         this.$noteListShown.value = !l.isCompact
         this.$filtersShown.value = !l.isCompact
       })
@@ -190,12 +190,12 @@ export class NoteListVM extends ViewModel<NoteListState> {
         scheme.tag_id = this.navigator.$keys.value.tagId
         scheme.audio_url = ''
 
-        console.log('Creating note, schema:', scheme)
-        console.log('Creating note, json:', JSON.stringify(scheme))
+        log('Creating note, schema:', scheme)
+        log('Creating note, json:', JSON.stringify(scheme))
 
         this.server.createNote(scheme).pipe()
           .onReceive((n: INote | undefined) => {
-            console.log('NoteListVM:applyInput, creating note, result: ', n)
+            log('NoteListVM:applyInput, creating note, result: ', n)
             if (n) {
               this.interactor.clearCache()
               this.navigator.updateWith({ page: 1, noteId: n.id })
@@ -238,7 +238,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
         this.server.renameNote(scheme).pipe()
           .onReceive((note: INote | undefined) => {
-            console.log('NoteListVM:completeRenaming, res: ', note)
+            log('NoteListVM:completeRenaming, res: ', note)
             if (note) {
               this.ctx.$msg.value = { level: 'info', text: 'renamed' }
 
@@ -277,7 +277,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
           const schema = { id: note.id } as DeleteNoteSchema
           this.server.deleteNote(schema).pipe()
             .onReceive(_ => {
-              console.log('NoteListVM:deleteNote complete')
+              log('NoteListVM:deleteNote complete')
               this.ctx.$msg.value = { level: 'info', text: 'deleted' }
 
               const index = page.items.findIndex(child => child.id === note.id) ?? -1
@@ -322,7 +322,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
     this.$quickSearchBuffer.value = name
 
-    console.log('NoteListVM.quickSearch by name:', name)
+    log('NoteListVM.quickSearch by name:', name)
     const scheme = {} as SearchByNameSchema
     scheme.lang_id = this.$state.value.lang.id
     scheme.voc_id = this.$state.value.lang.id //the first vocabularies have the same ids as languages
@@ -330,7 +330,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
     globalContext.server.searchNoteByName(scheme).pipe()
       .onReceive(notes => {
-        console.log('NoteListVM.quickSearch result:', notes)
+        log('NoteListVM.quickSearch result:', notes)
         if (notes.length > 0) {
           this.$quickSearchResult.value = notes[0]
         } else {
@@ -402,7 +402,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
 class NoteListInteractor extends Interactor<NoteListState> {
   constructor(ctx: DerTutorContext) {
     super(ctx)
-    console.log('new NoteListInteractor')
+    log('new NoteListInteractor')
   }
 
   override async load(state: NoteListState, keys: UrlKeys) {
@@ -469,7 +469,7 @@ class NoteListInteractor extends Interactor<NoteListState> {
       scheme.level = keys.level
       scheme.tag_id = keys.tagId
 
-      console.log('Interactor.reloadPage, page:', keys.page)
+      log('Interactor.reloadPage, page:', keys.page)
       state.page = await globalContext.server.loadNotes(scheme).asAwaitable
     } else {
       state.page = this.prevState.page

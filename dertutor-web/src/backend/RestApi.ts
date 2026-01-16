@@ -1,4 +1,5 @@
 import { type AnyRXObservable, RXObservableValue, RXOperation } from 'flinker'
+import { log, logErr } from '../app/Logger'
 
 
 export type HttpMethod = 'HEAD' | 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -67,7 +68,7 @@ export class RestApi {
 
   constructor(baseUrl: string,) {
     this.baseUrl = baseUrl
-    console.log('RestApi, baseUrl: ', this.baseUrl)
+    log('RestApi, baseUrl: ', this.baseUrl)
   }
 
   //--------------------------------------
@@ -75,17 +76,17 @@ export class RestApi {
   //--------------------------------------
 
   ping(): RXOperation<any, RestApiError> {
-    console.log('ping...')
+    log('ping...')
     const cmd = new RestApiCmd(this, 'GET', '')
     const op = cmd.run()
     op.pipe()
       .onReceive(v => {
         this.$isServerAvailable.value = true
-        console.log('RestApi.ping, success')
+        log('RestApi.ping, success')
       })
       .onError(e => {
         this.$isServerAvailable.value = false
-        console.log('RestApi.ping, err:', e)
+        log('RestApi.ping, err:', e)
       })
     return op
   }
@@ -127,7 +128,7 @@ export class RestApi {
   async sendRequest(method: HttpMethod, path: string, body: string | FormData | null = null, headers: any | null = null): Promise<[Response | null, any | null]> {
     try {
       const url = path.indexOf('http') === 0 ? path : this.baseUrl + path
-      console.log('===>', method + ':', url)
+      log('===>', method + ':', url)
       const response = await fetch(url, {
         method,
         headers: headers ?? this.headers,
@@ -135,7 +136,7 @@ export class RestApi {
         body
       })
 
-      console.log('<===', response.status, method, path)
+      log('<===', response.status, method, path)
 
       if (response.ok) {
         if (response.status === 204) {
@@ -152,7 +153,7 @@ export class RestApi {
     } catch (e: any) {
       const url = path.indexOf('http') === 0 ? path : this.baseUrl + path
       const msg = 'Failed to ' + method + ' resource: ' + url
-      console.log(msg, '. Details:', e)
+      logErr(msg, '. Details:', e)
       return [null, null]
     }
   }
@@ -167,8 +168,8 @@ export class RestApi {
         'detail' in details && (msg = details['detail'])
       }
 
-      console.log('Response status:', response.status)
-      console.log('Problem details:', details)
+      log('Response status:', response.status)
+      log('Problem details:', details)
       if (response.status === 401 || response.status === 403) {
         this.$isUserAuthenticated.value = false
         throw new RestApiError('notAuthorized', response.status, msg || 'User not authorized')

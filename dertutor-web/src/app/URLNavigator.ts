@@ -2,6 +2,7 @@ import { RXObservableValue } from "flinker"
 import { globalContext } from "../App"
 import { Application, BrowserLocation, UpdateUrlMode } from "./Application"
 import { delay } from "./Utils"
+import { log, logErr } from "./Logger"
 
 export interface UrlKeys {
   readonly langCode?: string
@@ -20,7 +21,7 @@ export class URLNavigator {
   constructor(app: Application) {
     app.$location.pipe()
       .onReceive(location => {
-        console.log('URLNavigator: received new location')
+        log('URLNavigator: received new location')
         this.$keys.value = this.parseUrl(location)
       })
       .subscribe()
@@ -29,7 +30,7 @@ export class URLNavigator {
   //url=/en/lexicon?page=1&note=20&level=0&tag=0&edit
   //url=/en/search?key=some_text&page=1&note=20&edit
   private parseUrl(location: BrowserLocation): UrlKeys {
-    console.log('new url:', location.path + location.queries)
+    log('new url:', location.path + location.queries)
     const path = location.path.startsWith('/') ? location.path.slice(1) : location.path
     const values = path.split('/')
     const params = new URLSearchParams(location.queries)
@@ -84,7 +85,7 @@ export class URLNavigator {
     } else {
       this.infiniteLoopDetected = true
       globalContext.app.$err.value = 'Infinite loop is detected'
-      console.error('URLNavigator: Infinite loop is detected, keys:', this.$keys.value)
+      logErr('URLNavigator: Infinite loop is detected, keys:', this.$keys.value)
     }
   }
 }

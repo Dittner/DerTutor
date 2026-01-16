@@ -1,5 +1,6 @@
 import { RXOperation } from "flinker"
 import { RestApi, RestApiError, Runnable } from "../RestApi"
+import { log } from "../../app/Logger"
 
 export class UploadFileCmd implements Runnable {
   private readonly api: RestApi
@@ -23,7 +24,7 @@ export class UploadFileCmd implements Runnable {
   }
 
   private async startLoading(op: RXOperation<any, RestApiError>) {
-    console.log('UploadFileCmd:startLoading, f=', this.file)
+    log('UploadFileCmd:startLoading, f=', this.file)
     const formData = new FormData();
     formData.append('file', this.file, this.fileName)
 

@@ -4,6 +4,7 @@ import { DerTutorContext } from "../../../DerTutorContext";
 import { ViewModel } from "../ViewModel";
 import { UrlKeys } from "../../../app/URLNavigator";
 import { Interactor } from "../Interactor";
+import { log } from "../../../app/Logger";
 
 export interface ServerConnectionState {
   hasConnection?: boolean
@@ -19,7 +20,6 @@ export class ServerConnectionVM extends ViewModel<ServerConnectionState> {
 
   protected override stateDidChange(state: ServerConnectionState) {
     if (!this.activate) return
-    console.log('Connection.stateDidChange:', state)
     this.$logs.value = state.logs ?? ''
     state.hasConnection && this.navigator.updateWith({}) //reload page without clearing url
   }
@@ -28,7 +28,7 @@ export class ServerConnectionVM extends ViewModel<ServerConnectionState> {
 class ServerConnectionInteractor extends Interactor<ServerConnectionState> {
   constructor(ctx: DerTutorContext) {
     super(ctx)
-    console.log('new ServerConnectionInteractor')
+    log('new ServerConnectionInteractor')
   }
 
   override async load(state: ServerConnectionState, keys: UrlKeys) {

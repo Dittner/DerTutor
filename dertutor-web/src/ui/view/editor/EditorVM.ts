@@ -8,6 +8,7 @@ import { UrlKeys } from "../../../app/URLNavigator"
 import { Interactor } from "../Interactor"
 import { globalContext } from "../../../App"
 import { TextReplacer } from "./TextReplacer"
+import { log } from "../../../app/Logger"
 
 export interface EditorState {
   allLangs?: ILang[]
@@ -83,7 +84,7 @@ export class EditorVM extends ViewModel<EditorState> {
     }
   }
 
-  override async onKeyDown(e: KeyboardEvent): Promise<void> {
+  override onKeyDown(e: KeyboardEvent) {
     if (this.isActive) {
       if (e.key === 'Escape') {
         if (globalContext.app.$dropdownState.value !== '') globalContext.app.$dropdownState.value = ''
@@ -215,7 +216,7 @@ export class EditorVM extends ViewModel<EditorState> {
       for (const w of this.$filesPendingUpload.value) {
         const mf = await this.server.uploadFile(note.id, w.file, w.$name.value).asAwaitable
         mediaFiles.push(mf)
-        console.log('Result of uploaded edia file:', mf)
+        log('Result of uploaded edia file:', mf)
       }
       this.$state.value = { ...this.$state.value, note: { ...note, media: mediaFiles } }
       this.$mediaFiles.value = mediaFiles
@@ -241,7 +242,7 @@ export class EditorVM extends ViewModel<EditorState> {
     this.server.deleteFile({ uid: mf.uid }).pipe()
       .onReceive((data: any[]) => {
         this.ctx.$msg.value = { text: this.noteToString(note) + ', deleted', level: 'info' }
-        console.log('EditorVM:deleteMediaFile, complete, data: ', data)
+        log('EditorVM:deleteMediaFile, complete, data: ', data)
         const index = note.media?.indexOf(mf) ?? -1
         if (index !== -1) {
           note.media && note.media.splice(index, 1)
@@ -272,7 +273,7 @@ export class EditorVM extends ViewModel<EditorState> {
 class EditorInteractor extends Interactor<EditorState> {
   constructor(ctx: DerTutorContext) {
     super(ctx)
-    console.log('new NoteListInteractor')
+    log('new NoteListInteractor')
   }
 
   override async load(state: EditorState, keys: UrlKeys) {

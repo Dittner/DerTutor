@@ -1,13 +1,14 @@
 import { textarea } from "flinker-dom"
 import { TextEditorController } from "./TextEditorController"
 import { TextFormatter } from "./TextFormatter"
+import { log } from "../../../app/Logger"
 
 export const TextEditor = (formatter: TextFormatter) => {
-  console.log('new TextEditor')
+  log('new TextEditor')
 
   const keyDownFn = (e: KeyboardEvent) => {
     const ta = e.currentTarget as HTMLTextAreaElement
-    //console.log('e.keyCode = ', e.keyCode)
+    //log('e.keyCode = ', e.keyCode)
 
     // Ctrl+Shift+U
     if (e.ctrlKey && e.shiftKey && e.keyCode === 85) {

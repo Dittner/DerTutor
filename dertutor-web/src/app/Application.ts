@@ -1,4 +1,5 @@
 import { RXObservableValue } from 'flinker'
+import { log, logErr, logWarn } from './Logger'
 
 export interface Layout {
   isMobile: boolean
@@ -38,8 +39,8 @@ export class Application {
       .onReceive(_ => this.$layout.value = this.getLayout())
       .subscribe()
 
-    console.log('isMobileDevice: ' + this.isMobileDevice)
-    console.log('localStorage, theme: ' + window.localStorage.getItem('theme'))
+    log('isMobileDevice: ' + this.isMobileDevice)
+    log('localStorage, theme: ' + window.localStorage.getItem('theme'))
     window.addEventListener('resize', () => { this.$windowWidth.value = window.innerWidth })
     window.addEventListener('scroll', () => this.$scrollY.value = window.scrollY, false);
     this.watchHistoryEvents()
@@ -52,7 +53,7 @@ export class Application {
     const contentWidth = isCompact ? windowWidth : this.isMobileDevice ? windowWidth : Math.min(960, windowWidth - 600)
     const leftSideMenuWidth = this.isMobileDevice ? 0 : (windowWidth - contentWidth) * 0.45
     
-    console.log('Layout is changed, wid:', window.innerWidth)
+    log('Layout is changed, wid:', window.innerWidth)
 
     return {
       isMobile: this.isMobileDevice,
@@ -74,13 +75,13 @@ export class Application {
     window.history.pushState = function (...args) {
       pushState.apply(window.history, args)
       window.dispatchEvent(new Event('pushState'))
-      console.log('!!!! cur location:', document.location.pathname)
+      log('!!!! cur location:', document.location.pathname)
     }
 
     window.history.replaceState = function (...args) {
       replaceState.apply(window.history, args)
       window.dispatchEvent(new Event('replaceState'))
-      console.log('!!!! cur location:', document.location.pathname)
+      log('!!!! cur location:', document.location.pathname)
     }
 
     window.addEventListener('popstate', () => { this.updateLocation() })
@@ -98,12 +99,12 @@ export class Application {
       if (navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(value);
       } else {
-        console.warn('Clipboard API or writeText is not available in this browser.');
+        logWarn('Clipboard API or writeText is not available in this browser.');
         // Fallback for older browsers if necessary (e.g., using document.execCommand('copy'))
         // This fallback is more complex and often requires creating a temporary element.
       }
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      logErr('Failed to copy text: ', err);
     }
   }
 }

@@ -1,6 +1,7 @@
 import { RXObservableValue } from "flinker"
 import { UrlKeys } from "../../app/URLNavigator"
 import { DerTutorContext } from "../../DerTutorContext"
+import { log } from "../../app/Logger"
 
 export class Interactor<State> {
   readonly ctx: DerTutorContext
@@ -23,7 +24,7 @@ export class Interactor<State> {
 
   async run(keys: UrlKeys) {
     if (this.isLoading) {
-      console.log('Got keys when loading')
+      log('Got keys when loading')
       this.newKeys = keys
       return
     }
@@ -50,7 +51,7 @@ export class Interactor<State> {
       }
 
     } catch (e: any) {
-      console.log('Error:', e)
+      log('Error:', e)
       this.errorDidCatch(e, state)
       this.$state.value = {} as State
     } finally {

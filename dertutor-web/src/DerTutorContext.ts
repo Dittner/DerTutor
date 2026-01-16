@@ -6,6 +6,7 @@ import { VocListVM } from './ui/view/vocs/VocListVM'
 import { EditorVM } from './ui/view/editor/EditorVM'
 import { ILang, IUser } from './domain/DomainModel'
 import { globalContext } from './App'
+import { log, logErr } from './app/Logger'
 
 export interface Message {
   readonly level?: 'warning' | 'error' | 'info'
@@ -35,7 +36,7 @@ export class DerTutorContext {
   }
 
   private constructor() {
-    console.log('new DertutorContext')
+    log('new DertutorContext')
     this.connectionVM = new ServerConnectionVM(this)
     this.vocListVM = new VocListVM(this)
     this.noteListVM = new NoteListVM(this)
@@ -48,16 +49,20 @@ export class DerTutorContext {
         this.$user.value = undefined
     })
 
-    globalContext.server.loadCurrentUser().pipe().onReceive(value => {
-      this.$user.value = value
-    })
+    globalContext.server.loadCurrentUser().pipe()
+      .onReceive(value => {
+        this.$user.value = value
+      }).onError(e => {
+        logErr('User not loaded, err:', e)
+      })
+      .subscribe()
 
     document.addEventListener('keydown', this.onKeyDown.bind(this))
   }
 
   onKeyDown(e: KeyboardEvent): void {
     if (e.repeat) return
-    console.log('KeyDown')
+    log('KeyDown')
     if (document.activeElement?.tagName !== 'INPUT')
       this.$activeVM.value?.onKeyDown(e)
   }

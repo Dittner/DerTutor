@@ -9,6 +9,7 @@ import { Interactor } from "./Interactor"
 import { InputBufferController } from "../controls/Input"
 import { AuthenticateSchema } from "../../backend/Schema"
 import { IUser } from "../../domain/DomainModel"
+import { log } from "../../app/Logger"
 
 export type ViewModelID = 'connection' | 'vocs' | 'notes' | 'editor'
 export interface IViewModel {
@@ -54,7 +55,7 @@ export class ViewModel<ViewModelState> implements IViewModel {
   }
 
   activate(): void {
-    console.log(`VM <${this.id}> is activated`)
+    log(`VM <${this.id}> is activated`)
     this.interactor.clearCache()
   }
 
@@ -86,9 +87,9 @@ export class ViewModel<ViewModelState> implements IViewModel {
   }
 
   private cmdBuffer = ''
-  async onKeyDown(e: KeyboardEvent): Promise<void> {
+  onKeyDown(e: KeyboardEvent) {
     if (!this.isActive || this.actionsList.actions.length === 0 || e.key === 'Shift') return
-    //console.log('key:', e.key, ', code:', e.code, ', keycode:', e.keyCode)
+    //log('key:', e.key, ', code:', e.code, ', keycode:', e.keyCode)
 
     if (this.inputMode.$isActive.value) {
       this.inputMode.onKeyDown(e)
@@ -140,7 +141,7 @@ export class ViewModel<ViewModelState> implements IViewModel {
       const schema = { username: name, password: pwd } as AuthenticateSchema
       this.server.signIn(schema).pipe()
         .onReceive((user: IUser) => {
-          console.log('ViewModel:signIn, success:', user)
+          log('ViewModel:signIn, success:', user)
           if (user) {
             this.ctx.$msg.value = { text: 'authenticated' }
             this.ctx.$user.value = user

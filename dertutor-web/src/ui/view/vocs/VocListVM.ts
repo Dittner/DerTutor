@@ -7,6 +7,7 @@ import { CreateVocSchema, DeleteVocSchema, RenameVocSchema } from "../../../back
 import { UrlKeys } from "../../../app/URLNavigator"
 import { globalContext } from "../../../App"
 import { Interactor } from "../Interactor"
+import { log } from "../../../app/Logger"
 
 
 export interface VocListState {
@@ -136,7 +137,7 @@ export class VocListVM extends ViewModel<VocListState> {
 
         this.server.createVoc(schema).pipe()
           .onReceive((data: IVoc) => {
-            console.log('VocListVM:applyInput, creating voc, result: ', data)
+            log('VocListVM:applyInput, creating voc, result: ', data)
             if (data) {
               lang.vocs.push(data)
               this.$selectedLang.value = undefined
@@ -177,7 +178,7 @@ export class VocListVM extends ViewModel<VocListState> {
         const schema = { id: voc.id, name: newName } as RenameVocSchema
         this.server.renameVoc(schema).pipe()
           .onReceive((data: IVoc) => {
-            console.log('VocListVM:applyInput, renaming voc, result: ', data)
+            log('VocListVM:applyInput, renaming voc, result: ', data)
             if (data) {
               this.ctx.$msg.value = { text: 'renamed' }
               const ind = lang.vocs.findIndex(v => v.id === voc.id)
@@ -204,7 +205,7 @@ export class VocListVM extends ViewModel<VocListState> {
     if (this.inputMode.$isActive.value) return
     if (!this.$highlightedVoc.value) return
 
-    const res = await this.inputMode.activate('Delete [yes|no]?', 'no').asAwaitable
+    const res = await this.inputMode.activate('Delete? [yes|no]', 'no').asAwaitable
 
     if (!res.isCanceled) {
       const lang = this.$selectedLang.value
@@ -216,7 +217,7 @@ export class VocListVM extends ViewModel<VocListState> {
           const schema = { id: voc.id } as DeleteVocSchema
           this.server.deleteVoc(schema).pipe()
             .onReceive(_ => {
-              console.log('VocListVM:deleteNote complete')
+              log('VocListVM:deleteNote complete')
               this.ctx.$msg.value = { level: 'info', text: 'deleted' }
               this.moveCursor(1)
               if (this.$highlightedVoc.value === voc)
@@ -247,7 +248,7 @@ export class VocListVM extends ViewModel<VocListState> {
 class VocListInteractor extends Interactor<VocListState> {
   constructor(ctx: DerTutorContext) {
     super(ctx)
-    console.log('new VocListInteractor')
+    log('new VocListInteractor')
   }
 
   override async load(state: VocListState, keys: UrlKeys) {
