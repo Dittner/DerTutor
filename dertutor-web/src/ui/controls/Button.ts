@@ -76,6 +76,8 @@ export const IconBtn = () => {
           s.textColor = 'inherit'
           s.fontSize = ss.fontSize ?? 'inherit'
           s.fontFamily = 'inherit'
+          s.overflow = 'hidden'
+          s.textOverflow = 'ellipsis'
           s.visible = ss.text !== '' && ss.text !== undefined
         })
     })
@@ -116,6 +118,8 @@ export const Btn = () => {
       s.gap = '2px'
       s.textColor = theme().text50
       s.cornerRadius = '4px'
+      s.overflow = 'hidden'
+      s.textOverflow = 'ellipsis'
     })
     .whenHovered(s => {
       s.textColor = theme().text

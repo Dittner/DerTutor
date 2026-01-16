@@ -27,6 +27,7 @@ export const EditorView = () => {
         s.position = 'fixed'
         s.height = globalContext.app.$layout.value.navBarHeight + 'px'
         s.width = '100%'
+        s.layer = '1000'
       })
 
     TextEditor(formatter)
@@ -45,7 +46,7 @@ export const EditorView = () => {
         s.padding = '10px'
         s.fontFamily = FontFamily.MONO
         s.fontSize = '18px'
-        s.height = window.innerHeight - layout.statusBarHeight - layout.navBarHeight - 20 + 'px'
+        s.height = window.innerHeight - layout.statusBarHeight - layout.navBarHeight + 'px'
         s.border = '1px solid ' + theme().border
       })
       .whenFocused(s => {

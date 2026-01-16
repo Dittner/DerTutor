@@ -97,11 +97,10 @@ export class VocListVM extends ViewModel<VocListState> {
   }
 
   applySelection() {
-    if (this.$selectedLang.value && this.$highlightedVoc.value) {
+    if (this.$highlightedLang.value && !this.$highlightedVoc.value) {
+      this.navigator.navigateTo({ langCode: this.$highlightedLang.value.code })
+    } else if (this.$selectedLang.value && this.$highlightedVoc.value) {
       this.navigator.navigateTo({ langCode: this.$selectedLang.value.code, vocCode: this.encodeName(this.$highlightedVoc.value) })
-    } else if (this.$highlightedLang.value) {
-      this.$selectedLang.value = this.$highlightedLang.value
-      this.$highlightedVoc.value = this.$highlightedLang.value.vocs.length > 0 ? this.$highlightedLang.value.vocs[0] : undefined
     }
   }
 
@@ -240,11 +239,7 @@ export class VocListVM extends ViewModel<VocListState> {
   }
 
   private quit() {
-    if (this.$selectedLang.value) {
-      this.$highlightedVoc.value = undefined
-      this.$highlightedLang.value = this.$selectedLang.value
-      this.$selectedLang.value = undefined
-    }
+    if (this.$selectedLang.value) this.navigator.navigateTo({})
   }
 }
 

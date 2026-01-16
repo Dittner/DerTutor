@@ -24,6 +24,9 @@ export class NoteListVM extends ViewModel<NoteListState> {
   readonly $state = new RXObservableValue<Readonly<NoteListState>>({})
   readonly $selectedNoteIndex = new RXObservableValue(-1)
 
+  readonly $noteListShown = new RXObservableValue(true)
+  readonly $filtersShown = new RXObservableValue(true)
+
   readonly $searchBuffer = new RXObservableValue('')
   readonly $searchBufferFocused = new RXObservableValue(false)
 
@@ -37,6 +40,17 @@ export class NoteListVM extends ViewModel<NoteListState> {
     const interactor = new NoteListInteractor(ctx)
     super('notes', ctx, interactor)
     this.addKeybindings()
+
+    //this.$noteListShown = new RXObservableValue(!globalContext.app.$layout.value.isCompact)
+    //this.$filtersShown = new RXObservableValue(!globalContext.app.$layout.value.isCompact)
+
+    globalContext.app.$layout.pipe()
+      .onReceive(l => {
+        console.log('New layout:', l)
+        this.$noteListShown.value = !l.isCompact
+        this.$filtersShown.value = !l.isCompact
+      })
+      .subscribe()
   }
 
   protected override stateDidChange(state: NoteListState) {
@@ -52,19 +66,22 @@ export class NoteListVM extends ViewModel<NoteListState> {
       const index = page.items.findIndex(child => child.id === note.id)
       this.$selectedNoteIndex.value = index
       this.$noteNummberOfTotal.value = index === -1 ? '' : `${index + 1 + (page.page - 1) * page.size}:${page.total}`
-            this.ctx.$msg.value = { 'text': index != -1 ? `${index + 1 + (page.page - 1) * page.size}:${page.total}` : '', 'level': 'info' }
+      //this.ctx.$msg.value = { 'text': index != -1 ? `${index + 1 + (page.page - 1) * page.size}:${page.total}` : '', 'level': 'info' }
 
     } else {
       this.$selectedNoteIndex.value = -1
       this.$noteNummberOfTotal.value = '0:0'
-            this.ctx.$msg.value = { text: '0:0', level: 'info' }
+      //this.ctx.$msg.value = { text: '0:0', level: 'info' }
 
       if (state.searchKey !== undefined) {
         this.focusGlobalSearchInput()
       }
     }
 
+    this.ctx.$msg.value = undefined
     window.scrollTo(0, 0)
+    this.$noteListShown.value = !globalContext.app.$layout.value.isCompact
+    this.$filtersShown.value = !globalContext.app.$layout.value.isCompact
   }
 
   private addKeybindings() {
@@ -340,7 +357,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
   startSearch(key: string) {
     if (key) this.navigator.updateWith({ page: 1, searchKey: key })
-    else this.navigateToLexicon()
+    else if (this.$state.value.searchKey) this.navigateToLexicon()
   }
 
   navigateToLexicon() {

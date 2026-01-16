@@ -56,6 +56,8 @@ export class DerTutorContext {
   }
 
   onKeyDown(e: KeyboardEvent): void {
+    if (e.repeat) return
+    console.log('KeyDown')
     if (document.activeElement?.tagName !== 'INPUT')
       this.$activeVM.value?.onKeyDown(e)
   }
@@ -75,12 +77,12 @@ export class DerTutorRouter {
         else
           newVM = ctx.vocListVM
 
-        if(ctx.$activeVM.value !== newVM) {
+        if (ctx.$activeVM.value !== newVM) {
           ctx.$activeVM.value?.deactivate()
           ctx.$activeVM.value = newVM
           newVM.activate()
         }
-        
+
         ctx.$activeVM.value.urlDidChange(keys)
       })
       .subscribe()

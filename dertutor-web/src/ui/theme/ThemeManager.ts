@@ -19,7 +19,6 @@ export interface GlobalTheme {
   text: string
   text50: string
   red: string
-  red100: string
   green: string
   em: string
   accent: string
@@ -34,6 +33,7 @@ export interface GlobalTheme {
   mark: string
   btn: string
   border: string
+  navBarBg: string
   transparent: string
   h1: string
   header: string
@@ -101,12 +101,12 @@ export class ThemeManager {
   * */
 
   createLightTheme(): GlobalTheme {
-    const black = '#000000'
+    const black = '#111111'
     const white = '#ffFFff'//efeee8
-    const red = '#ac2f2f'
-    const header = '#bd4593'
+    const red = '#bd4593'
+    const header = black
     const blue = '#425865'
-    const border = black + '40'
+    const border = black + '20'
     return {
       id: 'light',
       isLight: true,
@@ -126,21 +126,21 @@ export class ThemeManager {
       btn: '#4a0078',
       border,
       strong: black,
-      text: '#555555',
+      text: '#444444',
       text50: '#55555588',
       red,
-      red100: '#a42e2e',
       green: '#7198a9',
       actionsBg: '#f0f0f0',
       h1: black,
       header,
       em: black,
-      accent: '#a42e2e',
+      accent: red,
       quote: black,
       blue,
       link: '#005b90',
-      link100: '#a42e2e',
+      link100: '#bd4593',
       editor: black,
+      navBarBg: '#f0f0f0',
       transparent: '#00000000',
       info: '#026655',
       warn: '#a56a26',
@@ -154,7 +154,7 @@ export class ThemeManager {
   * */
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#777e8e' //707786 
+    const text = '#6e7483' //707786 
     const red = '#b9777d'
     const blue = '#4984c8'
     const black = '#121416' //131418
@@ -174,9 +174,9 @@ export class ThemeManager {
       header: '#b3996d',
       em: accent,
       accent,
-      quote: '#a1a1a1',
+      quote: strong, //738d9a
       strong,
-      actionsBg: '#222428',
+      actionsBg: '#1c2023',
       blue,
       mark: '#dd7d85',
       link: blue,
@@ -184,8 +184,9 @@ export class ThemeManager {
       btn: '#c693c3',
       info: '#5b9898',
       warn: '#a27988',
-      border: '#2f3238',
-      editor: '#969dad' //839295
+      border: '#24292d',
+      editor: '#969dad', //839295
+      navBarBg: '#1c2023cc'
     })
   }
 
@@ -438,7 +439,7 @@ export class ThemeManager {
       paddingHorizontal: '20px',
       fontSize: 'inherit',
       textColor: t.quote,
-      borderLeft: '1px solid ' + t.quote + '88'
+      borderLeft: '1px solid ' + t.quote + '88',
     }
     buildRule(blockquoteProps, parentSelector, 'blockquote')
 
@@ -446,12 +447,15 @@ export class ThemeManager {
       width: '100%',
       paddingHorizontal: '20px',
       fontSize: 'inherit',
+      fontWeight: 'inherit',
       textColor: 'inherit',
+      fontStyle: 'italic'
     }
 
     buildRule(blockquoteContentProps, parentSelector, 'blockquote p')
     blockquoteContentProps.fontStyle = 'italic'
     blockquoteContentProps.textAlign = 'right'
+    blockquoteContentProps.paddingVertical = '10px'
     buildRule(blockquoteContentProps, parentSelector, 'blockquote footer')
 
     /******************************/

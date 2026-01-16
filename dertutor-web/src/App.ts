@@ -24,9 +24,6 @@ export function App() {
       s.width = '100%'
     })
     .children(() => {
-      Header()
-      Footer()
-
       observer(ctx.$activeVM)
         .onReceive(vm => {
           if (vm === ctx.connectionVM) return ServerConnectionView()
@@ -35,7 +32,9 @@ export function App() {
           else if (vm === ctx.editorVM) return EditorView()
           else return undefined
         })
-      
+
+      UserAuthStatus()
+      Footer()
       ActionsHelpView()
       AppErrorInfo()
       ModalView()
@@ -105,86 +104,80 @@ const ActionInfoView = (a: Action) => {
     })
 }
 
-const Header = () => {
+const UserAuthStatus = () => {
   const ctx = DerTutorContext.self
 
-  return hstack()
+  return p()
+    .observe(globalContext.app.$layout)
+    .observe(ctx.$user)
     .react(s => {
+      const layout = globalContext.app.$layout.value
       s.position = 'fixed'
       s.top = '0px'
-      s.left = '0px'
-      s.width = '100%'
-      s.height = globalContext.app.$layout.value.navBarHeight + 'px'
+      s.right = '120px'
+      s.height = layout.navBarHeight + 'px'
+      s.lineHeight = layout.navBarHeight + 'px'
+      s.visible = !layout.isCompact
+      s.fontFamily = FontFamily.MONO
+      s.fontSize = theme().fontSizeXS
+      s.textColor = '#604d92'
+      s.layer = '100'
+      if (!ctx.$user.value)
+        s.text = ''
+      else
+        s.text = ctx.$user.value.username + (ctx.$user.value.is_superuser ? ':superuser' : '')
+    })
+}
+
+export const ThemeSwitcher = () => {
+  return hstack()
+    .observe(themeManager.$theme, 'affectsChildrenProps')
+    .react(s => {
+      s.height = '40px'
+      s.cornerRadius = '40px'
+      s.paddingHorizontal = '10px'
       s.valign = 'center'
-      s.paddingHorizontal = '20px'
-      s.layer = '10'
-      s.bgColor = theme().appBg + 'cc'
-      s.borderBottom = '1px solid ' + theme().border
-      s.blur = '10px'
+      s.gap = '0px'
+      s.border = '1px solid ' + theme().border
+      s.textColor = theme().text + '88'
+      s.popUp = 'Toggle theme (T)'
+    })
+    .whenHovered(s => {
+      s.textColor = theme().text
+      s.bgColor = theme().appBg + '88'
+      s.border = '1px solid ' + theme().border
+      s.cursor = 'pointer'
+    })
+    .onClick(() => {
+      themeManager.toggleTheme()
     })
     .children(() => {
-      p()
-        .observe(ctx.$user)
-        .react(s => {
-          s.fontFamily = FontFamily.MONO
-          s.fontSize = theme().fontSizeXS
-          s.textColor = '#604d92'
-          if (!ctx.$user.value)
-            s.text = ''
-          else
-            s.text = ctx.$user.value.username + (ctx.$user.value.is_superuser ? ':superuser' : '')
-        })
+      Icon().react(s => {
+        s.value = MaterialIcon.sunny
+        //s.fontSize = theme().fontSizeS
+        s.textAlign = 'center'
+        s.textColor = theme().isLight ? theme().text : 'inherit'
+      })
 
       spacer()
 
-      hstack()
-        .observe(themeManager.$theme, 'affectsChildrenProps')
-        .react(s => {
-          s.width = '60px'
-          s.height = '30px'
-          s.cornerRadius = '30px'
-          s.paddingHorizontal = '5px'
-          s.valign = 'center'
-          s.gap = '0px'
-          s.border = '1px solid ' + theme().border
-          s.textColor = theme().text + '88'
-          s.popUp = 'Toggle theme (T)'
-        })
-        .children(() => {
-          Icon().react(s => {
-            s.value = MaterialIcon.sunny
-            s.fontSize = theme().fontSizeS
-            s.width = '30px'
-            s.textAlign = 'center'
-            s.textColor = theme().isLight ? theme().text : 'inherit'
-          })
-
-          spacer()
-
-          Icon().react(s => {
-            s.value = MaterialIcon.brightness_3
-            s.fontSize = theme().fontSizeS
-            s.width = '30px'
-            s.textAlign = 'center'
-            s.textColor = !theme().isLight ? theme().text : 'inherit'
-          })
-        })
-        .whenHovered(s => {
-          s.textColor = theme().text
-          s.bgColor = theme().text + '20'
-          s.cursor = 'pointer'
-        })
-        .onClick(() => {
-          themeManager.toggleTheme()
-        })
+      Icon().react(s => {
+        s.value = MaterialIcon.brightness_3
+        //s.fontSize = theme().fontSizeS
+        s.textAlign = 'center'
+        s.textColor = !theme().isLight ? theme().text : 'inherit'
+      })
     })
+
 }
 
 const Footer = () => {
   const ctx = DerTutorContext.self
 
   return hstack()
+    .observe(globalContext.app.$layout)
     .react(s => {
+      const layout = globalContext.app.$layout.value
       s.position = 'fixed'
       s.bottom = '0'
       s.left = '0'
@@ -194,8 +187,9 @@ const Footer = () => {
       s.width = '100%'
       s.minHeight = globalContext.app.$layout.value.statusBarHeight + 'px'
       s.valign = 'center'
-      //s.bgColor = theme().text + '10'
-      //s.blur = '5px'
+      //s.blur = '10px'
+      s.layer = '100'
+      s.bgColor = layout.isCompact ? theme().appBg + '88' : theme().transparent
     })
     .children(() => {
 
@@ -229,10 +223,9 @@ export const MessangerView = () => {
       s.visible = !layout.isMobile
       s.fontFamily = FontFamily.MONO
       s.fontSize = theme().fontSizeXS
-      s.paddingHorizontal = '20px'
+      s.paddingHorizontal = layout.isCompact ? '40px' : '20px'
       s.text = msg?.text ?? ''
-      //s.bgColor = theme().appBg
-      s.width = layout.leftSideMenuWidth + 'px'
+      s.width = '100%'
 
       if (msg?.level === 'error')
         s.textColor = theme().red

@@ -2,6 +2,7 @@ import { RXObservableValue } from 'flinker'
 
 export interface Layout {
   isMobile: boolean
+  isCompact: boolean
   navBarHeight: number
   statusBarHeight: number
   contentWidth: number
@@ -47,11 +48,15 @@ export class Application {
 
   private getLayout(): Layout {
     const windowWidth = window.innerWidth - 20
-    const contentWidth = this.isMobileDevice ? windowWidth : Math.min(960, windowWidth)
+    const isCompact = this.isMobileDevice || windowWidth < 1200
+    const contentWidth = isCompact ? windowWidth : this.isMobileDevice ? windowWidth : Math.min(960, windowWidth - 600)
     const leftSideMenuWidth = this.isMobileDevice ? 0 : (windowWidth - contentWidth) * 0.45
+    
+    console.log('Layout is changed, wid:', window.innerWidth)
 
     return {
       isMobile: this.isMobileDevice,
+      isCompact,
       navBarHeight: 60,
       statusBarHeight: 30,
       contentWidth,
