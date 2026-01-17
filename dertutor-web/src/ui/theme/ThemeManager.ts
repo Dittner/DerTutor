@@ -102,9 +102,10 @@ export class ThemeManager {
 
   createLightTheme(): GlobalTheme {
     const black = '#111111'
+    const text = '#4a5557'
     const white = '#ffFFff'//efeee8
     const red = '#bd4593'
-    const header = black
+    const header = '#32677c'
     const blue = '#425865'
     const border = black + '20'
     return {
@@ -112,12 +113,12 @@ export class ThemeManager {
       isLight: true,
 
       fontSizeXL: '1.6rem',
-      fontSizeL: '1.2rem',
+      fontSizeL: '1.1rem',
       fontSizeM: '1.1rem',
       fontSize: '1rem',
       defFontSize: 'inherit',
       fontSizeS: '0.9rem',
-      fontSizeXS: '0.7rem',
+      fontSizeXS: '0.75rem',
 
       defFontWeight: 'normal',
       defTextColor: 'inherit',
@@ -126,8 +127,8 @@ export class ThemeManager {
       btn: '#4a0078',
       border,
       strong: black,
-      text: '#444444',
-      text50: '#55555588',
+      text,
+      text50: text + '88',
       red,
       green: '#7198a9',
       actionsBg: '#f0f0f0',
@@ -135,12 +136,12 @@ export class ThemeManager {
       header,
       em: black,
       accent: red,
-      quote: black,
+      quote: '#32677c',
       blue,
       link: '#005b90',
       link100: '#bd4593',
       editor: black,
-      navBarBg: '#f0f0f0',
+      navBarBg: '#eeEEee',
       transparent: '#00000000',
       info: '#026655',
       warn: '#a56a26',
@@ -154,12 +155,12 @@ export class ThemeManager {
   * */
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#6e7483' //707786 
     const red = '#b9777d'
     const blue = '#4984c8'
     const black = '#121416' //131418
-    const accent = '#a1a1a1'  //9fa786
-    const strong = '#8d95a7'
+    const accent = '#b3baa3'  //9fa786
+    const strong = '#a3abbe'
+    const text = '#818898' //707786 
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
@@ -168,13 +169,12 @@ export class ThemeManager {
       text,
       text50: text + 'aa',
       red,
-      red100: '#e7979e',
       green: '#5b9898',
       h1: '#b1bace',
       header: '#b3996d',
       em: accent,
       accent,
-      quote: strong, //738d9a
+      quote: '#a1a1a1',
       strong,
       actionsBg: '#1c2023',
       blue,
@@ -184,9 +184,9 @@ export class ThemeManager {
       btn: '#c693c3',
       info: '#5b9898',
       warn: '#a27988',
-      border: '#24292d',
+      border: '#2d3338',
       editor: '#969dad', //839295
-      navBarBg: '#1c2023cc'
+      navBarBg: '#121416'
     })
   }
 
@@ -234,7 +234,8 @@ export class ThemeManager {
       fontSize: t.fontSizeXL,
       fontWeight: '500',
       textColor: t.h1,
-      paddingTop: headerPadingTop
+      paddingTop: headerPadingTop,
+      //paddingBottom: '20px'
     }
     buildRule(h1Props, parentSelector, 'h1')
 
@@ -260,6 +261,7 @@ export class ThemeManager {
       fontWeight: 'bold',
       textAlign: 'left',
       textColor: t.header,
+      borderBottom: '1px solid ' + t.header
     }
     buildRule(h4Props, parentSelector, 'h4')
 
@@ -285,7 +287,8 @@ export class ThemeManager {
       fontFamily: 'inherit',
       fontSize: t.defFontSize,
       fontWeight: t.defFontWeight,
-      textColor: t.defTextColor
+      textColor: t.defTextColor,
+      
     }
     buildRule(globalProps, parentSelector, 'div')
     buildRule(globalProps, parentSelector, 'p')
@@ -299,9 +302,10 @@ export class ThemeManager {
       //fontFamily: '--font-family-article-bi',
       fontSize: 'inherit',
       textColor: t.strong,
-      fontWeight: 'inherit',
+      fontWeight: t.isLight ? 'bold' : 'inherit',
       fontStyle: 'inherit'
     }
+
     buildRule(strongProps, parentSelector, 'strong')
     strongProps.width = '100%'
     buildRule(strongProps, parentSelector, 'div.de')
@@ -342,7 +346,7 @@ export class ThemeManager {
       textColor: 'inherit',
       margin: '0px',
       marginLeft: '20px',
-      padding: '0px'
+      padding: '0px',
     }
     buildRule(listProps, parentSelector, 'ul')
 
@@ -449,7 +453,7 @@ export class ThemeManager {
       fontSize: 'inherit',
       fontWeight: 'inherit',
       textColor: 'inherit',
-      fontStyle: 'italic'
+      //fontStyle: 'italic'
     }
 
     buildRule(blockquoteContentProps, parentSelector, 'blockquote p')
@@ -502,8 +506,8 @@ export class ThemeManager {
     const hrProps: UIComponentProps = {
       width: '100%',
       height: '1px',
-      border: '1px solid ' + t.header,
-      marginBottom: '20px',
+      border: '1px solid ' + t.border,
+      //marginBottom: '20px',
     }
     buildRule(hrProps, parentSelector, 'hr')
 
@@ -534,6 +538,18 @@ export class ThemeManager {
       bgColor: t.border
     }
     buildRule(audioControlsProps, parentSelector, 'audio::-webkit-media-controls-panel')
+
+    /******************************/
+    // ru translation
+    /******************************/
+
+    const ruParagraphProps: UIComponentProps = {
+      fontWeight: 'inherit',
+      fontSize: t.defFontSize,
+      textColor: t.isLight ? 'inherit' : t.text50,
+      fontStyle: t.isLight ? 'italic' : 'inherit'
+    }
+    buildRule(ruParagraphProps, parentSelector, 'p.md-ru')
 
     /******************************/
     // alignment

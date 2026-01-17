@@ -66,7 +66,7 @@ export const TextInput = (inputBinding: RXObservableValue<string>) => {
       s.border = '1px solid ' + theme().border
     })
     .whenFocused(s => {
-      s.border = '1px solid ' + theme().mark
+      s.border = '1px solid ' + theme().accent
     })
     .whenPlaceholderShown(s => {
       s.textColor = theme().text50

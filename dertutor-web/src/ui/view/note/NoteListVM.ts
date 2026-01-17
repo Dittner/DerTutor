@@ -24,6 +24,8 @@ export interface NoteListState {
 export class NoteListVM extends ViewModel<NoteListState> {
   readonly $state = new RXObservableValue<Readonly<NoteListState>>({})
   readonly $selectedNoteIndex = new RXObservableValue(-1)
+  readonly $lang = new RXObservableValue<ILang | undefined>(undefined)
+  readonly $vocabulariesShown = new RXObservableValue(false)
 
   readonly $noteListShown = new RXObservableValue(true)
   readonly $filtersShown = new RXObservableValue(true)
@@ -57,7 +59,9 @@ export class NoteListVM extends ViewModel<NoteListState> {
     if (!this.activate) return
 
     this.$state.value = state
+    this.$lang.value = state.lang
     this.$searchBuffer.value = state.searchKey ?? ''
+    this.$vocabulariesShown.value = false
 
     const page = state.page
     const note = state.selectedNote
@@ -145,7 +149,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
       this.reloadWithNote(p.items[0])
   }
 
-  private quit() {
+  quit() {
     this.navigator.navigateTo({ langCode: this.$state.value.lang?.code })
   }
 
@@ -369,6 +373,12 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
   encodeName(value: string) {
     return DomainService.encodeName(value)
+  }
+
+  clearQuickSearchResults() {
+    this.$quickSearchBuffer.value = ''
+    this.$quickSearchFocused.value = false
+    this.$quickSearchResult.value = undefined
   }
 
   reloadWithNote(n: INote) {

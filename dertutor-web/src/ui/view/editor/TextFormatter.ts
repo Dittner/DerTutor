@@ -49,9 +49,9 @@ export class TextFormatter {
 
   removeExtraSpacesInTheMiddle(s: string): string {
     return s
-      .replace(/\n +/g, '\n')
       .replace(/ +/g, ' ')
       .replace(/ +,/g, ',')
+      .replace(/ +$/gm, '')
   }
 
   replaceHyphenWithDash(s: string): string {
@@ -65,7 +65,7 @@ export class TextFormatter {
   removeHyphenAndSpace(s: string): string {
     return s
       .replace(/^[-–] /gm, '— ')
-      .replace(/[-–]$/gm, '—')
+      .replace(/ [-–]$/gm, '—')
       .replaceAll('\n- ', '\n— ')
       .replace(/([А-я])- \n/g, '$1')
   }

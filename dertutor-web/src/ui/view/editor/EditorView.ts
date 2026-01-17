@@ -373,6 +373,7 @@ const FileView = (w: FileWrapper) => {
           s.fontSize = theme().fontSizeXS
           s.textColor = theme().text
           s.bgColor = undefined
+          s.paddingHorizontal = '10px'
           s.autoCorrect = 'off'
           s.autoComplete = 'off'
         })
@@ -461,10 +462,14 @@ const ReplacePanel = () => {
     .children(() => {
       TextInput(vm.textReplacer.$replaceFrom).react(s => {
         s.placeholder = 'From:'
+        s.paddingHorizontal = '10px'
+        s.textColor = theme().accent
       })
 
       TextInput(vm.textReplacer.$replaceTo).react(s => {
         s.placeholder = 'To:'
+        s.paddingHorizontal = '10px'
+        s.textColor = theme().accent
       })
 
       spacer()
@@ -531,10 +536,10 @@ const VocSelector = () => {
               s.width = '400px'
               s.marginTop = '30px'
               s.gap = '0'
-              s.bgColor = theme().border
-              s.border = theme().border
-              s.cornerRadius = '5px'
+              s.bgColor = theme().navBarBg
+              s.border = '1px solid ' + theme().border
               s.position = 'absolute'
+              s.layer = '100'
             })
         })
     })
@@ -548,11 +553,11 @@ const VocRenderer = (voc: IVoc, index: number) => {
       s.fontSize = theme().fontSizeXS
       s.isSelected = vm.$selectedVocId.value === voc.id
       s.text = index + 1 + '. ' + voc.name
-      s.textColor = theme().text50
+      s.textColor = theme().text
       s.paddingVertical = '5px'
     })
     .whenHovered(s => {
-      s.textColor = theme().text
+      s.textColor = theme().strong
     })
     .whenSelected(s => {
       s.textColor = theme().accent

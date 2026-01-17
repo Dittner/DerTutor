@@ -91,8 +91,8 @@ blockquote {
 } */
 
 ::selection {
-    color: #111111;
-    background: #de93becc;
+    /* color: #88ceb5; */
+    background: #00cb8440;
 }
 
 table {
@@ -111,6 +111,10 @@ ol>li:before {
     content: counter(list) ". ";
     opacity: 0.6;
     counter-increment: list;
+}
+
+ul {
+    list-style-type: circle;
 }
 
 blockquote::before {

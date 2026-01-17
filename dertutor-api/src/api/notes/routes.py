@@ -56,6 +56,36 @@ async def update_note(session: AsyncSession, note: NoteUpdate):
     return await NotesDAO.update_one(session, note.id, **note.model_dump())
 
 
+@router.patch('/notes/format_all', response_model=str | None)
+@open_session
+@only_superuser
+async def update_all_notes(session: AsyncSession, voc_id: int):
+    notes = await NotesDAO.find_all(session, voc_id=voc_id)
+    for n in notes:
+        new_text = format_note_text(n.text)
+        if new_text != n.text:
+            n.text = new_text
+            await NotesDAO.update_one(session, n.id, text=n.text)
+    return 'ok'
+
+
+def format_note_text(t: str):
+    delim = '## E.g.\n'
+    s = t.split(delim)
+    if len(s) > 1:
+        body = s[1]
+        body = body.replace('~', '+')
+        examples = body.split('\n')
+        for i, item in enumerate(examples):
+            if len(item) > 0 and not item.startswith('+'):
+                examples[i] = '~ ' + item
+
+        s[1] = '```ul\n' + '\n'.join(examples) + '\n```'
+        return delim.join(s)
+    else:
+        return t
+
+
 @router.patch('/notes/rename', response_model=NoteRead | None)
 @open_session
 @only_superuser

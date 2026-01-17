@@ -82,7 +82,7 @@ export class ViewModel<ViewModelState> implements IViewModel {
       this.ctx.$msg.value = { 'level': 'info', 'text': themeManager.$theme.value.id + ' theme' }
     })
     this.actionsList.add(':auth<CR>', 'Login', () => this.signIn())
-    this.actionsList.add(':logout<CR>', 'Logout', () => this.signOut())
+    this.actionsList.add(':unauth<CR>', 'Logout', () => this.signOut())
     this.actionsList.add('.', 'Repeat last action', () => this.lastExecutedAction?.handler())
   }
 

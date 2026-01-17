@@ -9,8 +9,8 @@ import { globalContext, ThemeSwitcher } from "../../../App"
 const CONTENT_PADDING = '40px'
 
 const ACTION_TIPS = `
-## [icon:emoji_objects] Tips
----
+#### [icon:emoji_objects] Tips
+
 \`\`\`ul
 + You can navigate through menu items using arrows: →, ↓, →, ↑
 + To see more shortkeys, press ?
@@ -173,14 +173,14 @@ const VocRenderer = (voc: IVoc, index: number) => {
       s.width = '100%'
       s.paddingVertical = '5px'
       s.text = index + 1 + '. ' + voc.name
-      s.textColor = isSelected ? theme().accent : theme().text
+      s.textColor = isSelected ? theme().accent : theme().text50
       //s.borderColor = theme().appBg
     })
     .whenHovered(s => {
       s.textColor = theme().strong
     })
     .whenSelected(s => {
-      s.textColor = theme().accent
+      s.textColor = theme().strong
       //s.borderColor = theme().accent
     })
     .onClick(() => {
