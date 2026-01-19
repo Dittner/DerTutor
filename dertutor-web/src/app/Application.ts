@@ -7,6 +7,7 @@ export interface Layout {
   navBarHeight: number
   statusBarHeight: number
   contentWidth: number
+  paddingHorizontal: number
   leftSideMenuWidth: number
 }
 
@@ -48,9 +49,9 @@ export class Application {
   }
 
   private getLayout(): Layout {
-    const windowWidth = window.innerWidth - 20
+    const windowWidth = window.innerWidth
     const isCompact = this.isMobileDevice || windowWidth < 1200
-    const contentWidth = isCompact ? windowWidth : this.isMobileDevice ? windowWidth : Math.min(960, windowWidth - 600)
+    const contentWidth = isCompact ? windowWidth : this.isMobileDevice ? windowWidth : Math.min(1000, windowWidth - 600)
     const leftSideMenuWidth = this.isMobileDevice ? 0 : (windowWidth - contentWidth) * 0.45
     
     log('Layout is changed, wid:', window.innerWidth)
@@ -58,8 +59,9 @@ export class Application {
     return {
       isMobile: this.isMobileDevice,
       isCompact,
-      navBarHeight: 60,
+      navBarHeight: 70,
       statusBarHeight: 30,
+      paddingHorizontal: isCompact ? 20 : 60,
       contentWidth,
       leftSideMenuWidth
     }

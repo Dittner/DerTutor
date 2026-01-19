@@ -77,7 +77,7 @@ export class ViewModel<ViewModelState> implements IViewModel {
       this.$showActions.value = false
       this.ctx.$msg.value = undefined
     })
-    this.actionsList.add('T', 'Switch theme', () => {
+    this.actionsList.add('t', 'Switch theme', () => {
       themeManager.toggleTheme()
       this.ctx.$msg.value = { 'level': 'info', 'text': themeManager.$theme.value.id + ' theme' }
     })
@@ -88,7 +88,7 @@ export class ViewModel<ViewModelState> implements IViewModel {
 
   private cmdBuffer = ''
   onKeyDown(e: KeyboardEvent) {
-    if (!this.isActive || this.actionsList.actions.length === 0 || e.key === 'Shift') return
+    if (!this.isActive) return
     //log('key:', e.key, ', code:', e.code, ', keycode:', e.keyCode)
 
     if (this.inputMode.$isActive.value) {
@@ -96,6 +96,9 @@ export class ViewModel<ViewModelState> implements IViewModel {
       e.preventDefault()
       return
     }
+
+    if (e.repeat) return
+    if (this.actionsList.actions.length === 0 || e.key === 'Shift') return
 
     const code = parseKeyToCode(e)
     this.cmdBuffer += code

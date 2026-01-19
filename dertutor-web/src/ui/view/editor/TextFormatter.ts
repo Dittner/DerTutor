@@ -17,11 +17,18 @@ export class TextFormatter {
         startAt = 0
         stopAt = ta.value.length
       }
-      ta.selectionStart = startAt
-      ta.selectionEnd = stopAt
-      let text = ta.value.slice(startAt, stopAt)
-      document.execCommand('insertText', false, this.startFormating(text))
-      ta.setSelectionRange(cursorPos, cursorPos)
+
+      const text = ta.value.slice(startAt, stopAt)
+      const formattedText = this.startFormating(text)
+      if (formattedText !== text) {
+        ta.selectionStart = startAt
+        ta.selectionEnd = stopAt
+        document.execCommand('insertText', false, formattedText)
+        ta.setSelectionRange(cursorPos, cursorPos)
+        ta.blur()
+        ta.focus()
+      }
+
     } catch (e) {
       logErr('TextFormatter:format: ', e)
     }

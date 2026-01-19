@@ -61,8 +61,6 @@ export class DerTutorContext {
   }
 
   onKeyDown(e: KeyboardEvent): void {
-    if (e.repeat) return
-    log('KeyDown')
     if (document.activeElement?.tagName !== 'INPUT')
       this.$activeVM.value?.onKeyDown(e)
   }

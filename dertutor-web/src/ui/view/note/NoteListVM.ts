@@ -101,7 +101,8 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add('r', 'Rename note (SUPERUSER)', () => this.renameNote())
     this.actionsList.add('e', 'Edit note (SUPERUSER)', () => this.edit())
     this.actionsList.add(':d<CR>', 'Delete note (SUPERUSER)', () => this.deleteNote())
-    this.actionsList.add('/', 'Quick Search', () => this.focusGlobalSearchInput())
+    this.actionsList.add('/', 'Quick Search', () => this.focusQuickSearchInput())
+    this.actionsList.add('f', 'Global Search', () => this.$searchBufferFocused.value = true)
     this.actionsList.add('<C-k>', 'Global Search', () => this.$searchBufferFocused.value = true)
 
     this.actionsList.add('<Space>', 'Play audio', () => this.playAudio(this.$state.value?.selectedNote?.audio_url || this.$quickSearchResult.value?.audio_url || ''))
@@ -189,7 +190,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
         scheme.lang_id = lang.id
         scheme.voc_id = voc.id
         scheme.name = name
-        scheme.text = '# ' + name + '\n\n' + (lang.code === 'en' ? '## E.g.\n' : '## Bsp.\n')
+        scheme.text = '# ' + name + '\n\n' + (lang.code === 'en' ? '## E.g.\n```ul\n```' : '## Bsp.\n```ul\n```')
         scheme.level = this.navigator.$keys.value.level
         scheme.tag_id = this.navigator.$keys.value.tagId
         scheme.audio_url = ''
@@ -310,6 +311,10 @@ export class NoteListVM extends ViewModel<NoteListState> {
   }
 
   focusGlobalSearchInput() {
+    this.$searchBufferFocused.value = true
+  }
+
+  focusQuickSearchInput() {
     const selectedText = window.getSelection()?.toString() ?? ''
     if (selectedText) this.$quickSearchBuffer.value = selectedText
     this.$quickSearchFocused.value = true

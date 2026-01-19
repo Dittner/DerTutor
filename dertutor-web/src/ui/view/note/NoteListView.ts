@@ -10,7 +10,6 @@ import { theme } from "../../theme/ThemeManager"
 import { Title } from "../../controls/Text"
 import { TextInput } from "../../controls/Input"
 
-const CONTENT_PADDING = 40
 export const NoteListView = () => {
   const vm = DerTutorContext.self.noteListVM
   return div()
@@ -27,8 +26,7 @@ export const NoteListView = () => {
           s.width = '100%'
           s.height = layout.navBarHeight + 'px'
           s.layer = '10'
-          s.paddingLeft = (layout.isCompact ? CONTENT_PADDING - 10 : 0) + 'px'
-          s.paddingRight = (layout.isCompact ? CONTENT_PADDING - 10 : window.innerWidth - layout.leftSideMenuWidth - layout.contentWidth + 10) + 'px'
+          s.paddingHorizontal = '10px'
         })
 
       NotesMenu()
@@ -43,9 +41,10 @@ export const NoteListView = () => {
           s.top = layout.navBarHeight + 'px'
           s.height = window.innerHeight - layout.navBarHeight + 'px'
           s.className = 'listScrollbar'
-          s.enableOwnScroller = true
-          s.borderRight = '1px solid ' + theme().border
-          s.bgColor = layout.isCompact ? theme().appBg : theme().transparent
+          s.enableOwnScroller = false
+          s.disableHorizontalScroll = true
+          //s.borderRight = '1px solid ' + theme().border
+          s.bgColor = theme().appBg
           s.layer = '1'
         })
 
@@ -54,12 +53,16 @@ export const NoteListView = () => {
         .react(s => {
           const layout = globalContext.app.$layout.value
           s.position = 'absolute'
-          s.top = '0px'
+          s.top = layout.navBarHeight + 'px'
+          s.paddingTop = '20px'
           s.left = layout.isCompact ? '0' : layout.leftSideMenuWidth + 'px'
-          s.width = layout.contentWidth + 'px'
-          s.minHeight = window.innerHeight + 'px'
-          s.paddingTop = layout.navBarHeight + 20 + 'px'
+          //s.width = layout.isCompact ? '100%' : (layout.contentWidth + 'px')
+          s.width = layout.isCompact ? '100%' : layout.contentWidth + 'px'
+          s.minHeight = window.innerHeight - layout.navBarHeight + 'px'
+          s.paddingHorizontal = layout.paddingHorizontal + 'px'
           s.paddingBottom = layout.statusBarHeight + 'px'
+          s.bgColor = theme().articleBg
+          //s.cornerRadius = '10px 10px 0px 0px'
         })
 
 
@@ -70,14 +73,15 @@ export const NoteListView = () => {
           const layout = globalContext.app.$layout.value
           s.visible = vm.$filtersShown.value
           s.position = 'fixed'
-          s.right = '5px'
+          s.left = layout.isCompact ? '0px' : (layout.contentWidth + layout.leftSideMenuWidth + 'px')
           s.width = (layout.isCompact ? layout.contentWidth : window.innerWidth - layout.contentWidth - layout.leftSideMenuWidth) + 'px'
           s.top = layout.navBarHeight + 'px'
           s.height = window.innerHeight - layout.statusBarHeight - layout.navBarHeight + 'px'
+          s.paddingHorizontal = layout.paddingHorizontal + 'px'
           s.className = 'listScrollbar'
           s.enableOwnScroller = true
-          s.layer = '2'
-          s.bgColor = layout.isCompact ? theme().appBg : theme().transparent
+          s.bgColor = theme().appBg
+          s.layer = '1'
         })
     })
 }
@@ -94,7 +98,6 @@ const Header = () => {
       s.borderBottom = '1px solid ' + theme().border
       s.halign = 'left'
       s.blur = '10px'
-      //s.paddingHorizontal = '40px'
     })
     .children(() => {
 
@@ -103,8 +106,8 @@ const Header = () => {
         .react(s => {
           const layout = globalContext.app.$layout.value
           s.visible = !layout.isCompact
-          s.width = layout.leftSideMenuWidth + CONTENT_PADDING - 20 + 'px'
-          s.paddingLeft = '20px'
+          s.width = layout.leftSideMenuWidth - 20 + 'px'
+          s.paddingLeft = '10px'
           s.valign = 'center'
           s.gap = '10px'
         })
@@ -145,18 +148,22 @@ const Header = () => {
             .itemRenderer(VocRenderer)
             .itemHash((item: IVoc) => item.id + item.name)
             .react(s => {
+              const layout = globalContext.app.$layout.value
               s.position = 'absolute'
-              s.top = globalContext.app.$layout.value.navBarHeight + 'px'
+              s.top = layout.navBarHeight + 'px'
 
               s.layer = '100'
               s.visible = vm.$vocabulariesShown.value
               s.fontFamily = FontFamily.APP
               s.fontSize = theme().fontSizeXS
-              s.width = globalContext.app.$layout.value.leftSideMenuWidth - CONTENT_PADDING + 'px'
+              s.width = '250px'
+              s.maxWidth = globalContext.app.$layout.value.leftSideMenuWidth - layout.paddingHorizontal + 'px'
               s.gap = '0'
-              s.bgColor = theme().navBarBg
+              s.bgColor = theme().articleBg
               s.border = '1px solid ' + theme().border
-              s.padding = '10px'
+              s.padding = '12px'
+              s.shadow = '0px 6px 6px 3px #00000010'
+              s.cornerRadius = '4px'
             })
             .onMouseLeave(() => vm.$vocabulariesShown.value = false)
         })
@@ -164,8 +171,9 @@ const Header = () => {
 
       HeaderBtn()
         .react(s => {
-          s.icon = MaterialIcon.language
+          s.icon = MaterialIcon.arrow_back
           s.popUp = 'Go back'
+          s.width = '50px'
         })
         .onClick(() => {
           vm.quit()
@@ -219,13 +227,13 @@ const VocRenderer = (voc: IVoc, index: number) => {
       s.width = '100%'
       s.paddingVertical = '3px'
       s.fontSize = theme().fontSizeXS
-      s.text = index + 1 + '. ' + voc.name
+      s.text = `${index + 1}. ${voc.name}`
       s.textColor = theme().text
       //s.borderColor = theme().appBg
       s.textSelectable = false
     })
     .whenHovered(s => {
-      s.textColor = theme().strong
+      s.textColor = theme().isLight ? theme().link100 : theme().strong
       s.cursor = 'pointer'
     })
     .onClick(() => {
@@ -264,7 +272,7 @@ const GlobalSearchView = () => {
       s.maxWidth = '400px'
       s.height = '35px'
       s.border = '1px solid ' + (vm.$searchBufferFocused.value ? theme().red : theme().transparent)
-      s.bgColor = vm.$searchBufferFocused.value ? theme().red + '20' : theme().text + '20'
+      s.bgColor = vm.$searchBufferFocused.value ? theme().red + '10' : theme().text + '20'
       s.cornerRadius = '4px'
       s.paddingRight = '5px'
     })
@@ -318,11 +326,12 @@ const GlobalSearchView = () => {
         .react(s => {
           s.visible = vm.$searchBuffer.value.length > 0
           s.icon = MaterialIcon.close
+          s.iconSize = theme().fontSizeXS
           s.textColor = theme().appBg
           s.bgColor = theme().text + 'cc'
-          s.width = '18px'
-          s.height = '18px'
-          s.cornerRadius = '18px'
+          s.width = '15px'
+          s.height = '15px'
+          s.cornerRadius = '15px'
         })
         .whenHovered(s => s.bgColor = theme().text)
         .onClick(() => {
@@ -334,7 +343,6 @@ const GlobalSearchView = () => {
 }
 
 
-
 const NotesMenu = () => {
   const ctx = DerTutorContext.self
   const vm = ctx.noteListVM
@@ -342,8 +350,10 @@ const NotesMenu = () => {
     .react(s => {
       s.gap = '20px'
       s.paddingTop = '20px'
+      s.width = '100%'
     })
     .children(() => {
+
       Title('')
         .observe(vm.$state)
         .react(s => {
@@ -395,7 +405,8 @@ const NoteContentView = () => {
           s.text = vm.$state.value.selectedNote?.text ?? ''
           s.fontSize = theme().fontSize
           s.absolutePathPrefix = globalContext.server.baseUrl
-          s.paddingHorizontal = CONTENT_PADDING + 'px'
+          //s.overflow = 'clip'
+
           //s.showRawText = page.file.showRawText
         })
 
@@ -446,8 +457,7 @@ const NoteRenderer = (n: INote) => {
 }
 
 const NotesPaginator = () => {
-  const ctx = DerTutorContext.self
-  const vm = ctx.noteListVM
+  const vm = DerTutorContext.self.noteListVM
   return hstack()
     .observe(vm.$state, 'affectsChildrenProps')
     .react(s => {
@@ -460,6 +470,18 @@ const NotesPaginator = () => {
       s.fontFamily = FontFamily.MONO
     })
     .children(() => {
+
+      Btn()
+        .react(s => {
+          const p = vm.$state.value.page
+          s.isDisabled = !p || p.page <= 1
+          s.text = '«'
+          s.wrap = false
+          s.paddingHorizontal = '10px'
+          s.borderColor = theme().border
+          s.popUp = 'Previous page'
+        })
+        .onClick(() => vm.$state.value.page && vm.navigator.updateWith({ page: vm.$state.value.page?.page - 1 }))
 
       Btn()
         .react(s => {
@@ -523,6 +545,18 @@ const NotesPaginator = () => {
           const p = vm.$state.value.page
           p && vm.navigator.updateWith({ page: p.pages })
         })
+
+      Btn()
+        .react(s => {
+          const p = vm.$state.value.page
+          s.isDisabled = !p || p.page >= p.pages
+          s.text = '»'
+          s.wrap = false
+          s.paddingHorizontal = '10px'
+          s.borderColor = theme().border
+          s.popUp = 'Next page'
+        })
+        .onClick(() => vm.$state.value.page && vm.navigator.updateWith({ page: vm.$state.value.page?.page + 1 }))
     })
 }
 
@@ -536,9 +570,9 @@ const NavBar = () => {
       s.gap = '10px'
       s.whiteSpace = 'nowrap'
       s.valign = 'top'
+      s.halign = 'left'
       s.fontSize = theme().fontSizeXS
       s.fontFamily = FontFamily.MONO
-      s.paddingHorizontal = CONTENT_PADDING + 'px'
     })
     .children(() => {
       hstack()
@@ -548,6 +582,29 @@ const NavBar = () => {
           s.valign = 'top'
         })
         .children(() => {
+          IconBtn()
+            .react(s => {
+              s.icon = MaterialIcon.home
+              s.iconSize = theme().fontSizeS
+              s.textColor = theme().link
+              s.wrap = false
+              s.fontFamily = FontFamily.APP
+              s.fontSize = theme().fontSizeXS
+              s.paddingVertical = '5px'
+            })
+            .whenHovered(s => s.textColor = theme().link100)
+            .onClick(() => {
+              vm.$state.value.lang && vm.navigator.navigateTo({})
+            })
+
+          span()
+            .react(s => {
+              s.text = ' › '
+              s.paddingVertical = '2px'
+              s.textColor = theme().link + 'bb'
+              s.textSelectable = false
+            })
+
           LinkBtn()
             .react(s => {
               s.text = vm.$state.value.lang?.name ?? ''
@@ -563,6 +620,7 @@ const NavBar = () => {
               s.text = ' › '
               s.paddingVertical = '2px'
               s.textColor = theme().link + 'bb'
+              s.textSelectable = false
             })
 
           LinkBtn()
@@ -588,7 +646,7 @@ const NavBar = () => {
           s.textColor = theme().text50
           s.text = vm.$noteNummberOfTotal.value
           s.textAlign = 'center'
-          s.width = '100%'
+          s.width = '50%'
         })
 
       hstack()
@@ -644,8 +702,6 @@ const FiltersView = () => {
   return vstack()
     .react(s => {
       s.gap = '0'
-      s.paddingLeft = '80px'
-      s.paddingRight = '20px'
       s.paddingTop = '20px'
     })
     .children(() => {
@@ -833,11 +889,12 @@ const QuickSearchInput = () => {
         .react(s => {
           s.opacity = vm.$quickSearchBuffer.value.length > 0 ? '1' : '0'
           s.icon = MaterialIcon.close
+          s.iconSize = theme().fontSizeXS
           s.textColor = theme().appBg
           s.bgColor = theme().text + 'cc'
-          s.width = '18px'
-          s.height = '18px'
-          s.cornerRadius = '18px'
+          s.width = '15px'
+          s.height = '15px'
+          s.cornerRadius = '15px'
         })
         .whenHovered(s => s.bgColor = theme().text)
         .onClick(() => {
@@ -855,7 +912,6 @@ const NexPrevNoteNavigator = () => {
       s.gap = '10px'
       s.width = '100%'
       s.valign = 'center'
-      s.paddingHorizontal = CONTENT_PADDING - 10 + 'px'
     })
     .children(() => {
       Btn()
@@ -870,6 +926,7 @@ const NexPrevNoteNavigator = () => {
             s.visible = false
           }
 
+          s.paddingHorizontal = '0'
           s.icon = MaterialIcon.arrow_back
           s.height = '40px'
           s.textColor = theme().link

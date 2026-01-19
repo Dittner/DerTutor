@@ -177,7 +177,7 @@ const VocRenderer = (voc: IVoc, index: number) => {
       //s.borderColor = theme().appBg
     })
     .whenHovered(s => {
-      s.textColor = theme().strong
+      s.textColor = theme().text
     })
     .whenSelected(s => {
       s.textColor = theme().strong

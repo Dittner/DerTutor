@@ -533,34 +533,37 @@ const VocSelector = () => {
               s.fontFamily = FontFamily.MONO
               s.fontSize = theme().fontSizeXS
               s.padding = '20px'
-              s.width = '400px'
+              s.width = '250px'
               s.marginTop = '30px'
               s.gap = '0'
-              s.bgColor = theme().navBarBg
+              s.bgColor = theme().articleBg
               s.border = '1px solid ' + theme().border
               s.position = 'absolute'
+              s.cornerRadius = '4px'
               s.layer = '100'
             })
         })
     })
 }
 
-const VocRenderer = (voc: IVoc, index: number) => {
+const VocRenderer = (voc: IVoc, index:number) => {
   const vm = DerTutorContext.self.editorVM
   return btn()
     .react(s => {
       s.wrap = false
       s.fontSize = theme().fontSizeXS
       s.isSelected = vm.$selectedVocId.value === voc.id
-      s.text = index + 1 + '. ' + voc.name
-      s.textColor = theme().text
+      s.text = `${index+ 1}. ${voc.name}`
+      s.width = '100%'
+      s.textAlign = 'left'
+      s.textColor = theme().text50
       s.paddingVertical = '5px'
     })
     .whenHovered(s => {
-      s.textColor = theme().strong
+      s.textColor = theme().text
     })
     .whenSelected(s => {
-      s.textColor = theme().accent
+      s.textColor = theme().strong
     })
     .onClick(() => {
       vm.$selectedVocId.value = voc.id
