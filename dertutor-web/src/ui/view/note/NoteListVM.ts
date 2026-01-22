@@ -29,6 +29,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
   readonly $noteListShown = new RXObservableValue(true)
   readonly $filtersShown = new RXObservableValue(true)
+  readonly $taskAnswerShown = new RXObservableValue(false)
 
   readonly $searchBuffer = new RXObservableValue('')
   readonly $searchBufferFocused = new RXObservableValue(false)
@@ -62,6 +63,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.$lang.value = state.lang
     this.$searchBuffer.value = state.searchKey ?? ''
     this.$vocabulariesShown.value = false
+    this.$taskAnswerShown.value = false
 
     const page = state.page
     const note = state.selectedNote
@@ -102,10 +104,11 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add('e', 'Edit note (SUPERUSER)', () => this.edit())
     this.actionsList.add(':d<CR>', 'Delete note (SUPERUSER)', () => this.deleteNote())
     this.actionsList.add('/', 'Quick Search', () => this.focusQuickSearchInput())
-    this.actionsList.add('f', 'Global Search', () => this.$searchBufferFocused.value = true)
-    this.actionsList.add('<C-k>', 'Global Search', () => this.$searchBufferFocused.value = true)
+    this.actionsList.add('f', 'Global Search', () => this.focusGlobalSearchInput())
+    this.actionsList.add('<C-k>', 'Global Search', () => this.focusGlobalSearchInput())
 
     this.actionsList.add('<Space>', 'Play audio', () => this.playAudio(this.$state.value?.selectedNote?.audio_url || this.$quickSearchResult.value?.audio_url || ''))
+    this.actionsList.add('<CR>', 'Show answer to the task', () => this.$taskAnswerShown.value = !this.$taskAnswerShown.value)
     this.actionsList.add(':id<CR>', 'Print ID of note', () => this.printID())
     this.actionsList.add('q', 'Quit', () => this.quit())
   }
@@ -311,6 +314,8 @@ export class NoteListVM extends ViewModel<NoteListState> {
   }
 
   focusGlobalSearchInput() {
+    const selectedText = window.getSelection()?.toString() ?? ''
+    if (selectedText) this.$searchBuffer.value = selectedText
     this.$searchBufferFocused.value = true
   }
 

@@ -41,8 +41,8 @@ class BaseDAO[T]:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=cls.model.__name__ + ' not found')
 
     @classmethod
-    async def find_all(cls, session: AsyncSession, **filter_by: str | int | bool) -> list[T]:
-        query = select(cls.model).filter_by(**filter_by)
+    async def find_all(cls, session: AsyncSession, order_by: list[str], **filter_by: str | int | bool) -> list[T]:
+        query = select(cls.model).filter_by(**filter_by).order_by(*order_by)
         result = await session.execute(query)
         return list(result.scalars().all())
 

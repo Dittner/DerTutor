@@ -1,11 +1,13 @@
 import { DertutorServer } from "../backend/DertutorServer"
 import { Application } from "./Application"
+import { LocaleManager } from "./LocaleManager"
 import { URLNavigator } from "./URLNavigator"
 import { generateUID } from "./Utils"
 
 export class GlobalContext {
   readonly uid = generateUID()
   readonly app: Application
+  readonly localeManager: LocaleManager
   readonly server: DertutorServer
   readonly navigator: URLNavigator
 
@@ -19,6 +21,7 @@ export class GlobalContext {
   }
 
   private constructor() {
+    this.localeManager = new LocaleManager()
     this.app = new Application()
     this.navigator = new URLNavigator(this.app)
     this.server = new DertutorServer()

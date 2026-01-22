@@ -13,7 +13,7 @@ log = logging.getLogger('uvicorn')
 @router.get('/langs', response_model=list[LangRead])
 @open_session
 async def get_languages(session: AsyncSession):
-    return await LangsDAO.find_all(session)
+    return await LangsDAO.find_all(session, ['id'])
 
 
 @router.get('/langs/full', response_model=list[LangReadFull])

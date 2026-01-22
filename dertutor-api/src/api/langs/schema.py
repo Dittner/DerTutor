@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from src.api.vocs.schema import VocRead
 
 
 class LangCreate(BaseModel):
@@ -14,12 +15,6 @@ class LangRead(BaseModel):
 
 class LangDelete(BaseModel):
     id: int
-
-
-class VocRead(BaseModel):
-    id: int
-    lang_id: int
-    name: str
 
 
 class TagRead(BaseModel):

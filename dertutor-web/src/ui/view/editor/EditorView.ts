@@ -1,7 +1,7 @@
 import { btn, div, hlist, hstack, input, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { globalContext } from "../../../App"
 import { IMediaFile, ITag, IVoc } from "../../../domain/DomainModel"
-import { Btn, Icon, LinkBtn, RedBtn } from "../../controls/Button"
+import { AccentBtn, Btn, Icon, IconBtn, LinkBtn, RedBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { Markdown } from "../../controls/Markdown"
 import { DerTutorContext } from "../../../DerTutorContext"
@@ -12,6 +12,7 @@ import { TextFormatter } from "./TextFormatter"
 import { TextInput } from "../../controls/Input"
 import { MaterialIcon } from "../../icons/MaterialIcon"
 import { log } from "../../../app/Logger"
+import { Text } from "../../controls/Text"
 
 export const EditorView = () => {
   log('new EditorView')
@@ -111,13 +112,13 @@ const Panel = (title: string) => {
       s.halign = 'stretch'
     })
     .children(() => {
-      p()
+      Text()
         .react(s => {
           s.fontSize = theme().fontSizeXS
           s.fontFamily = FontFamily.APP
           s.minWidth = '150px'
           s.textColor = theme().text
-          s.text = title + ':'
+          s.localizedText = title
           s.textSelectable = false
         })
     })
@@ -125,7 +126,7 @@ const Panel = (title: string) => {
 
 const LevelsPanel = () => {
   const vm = DerTutorContext.self.editorVM
-  return Panel('Level')
+  return Panel('Level:')
     .children(() => {
       hlist<number>()
         .observe(vm.$level, 'affectsChildrenProps')
@@ -152,7 +153,7 @@ const LevelRenderer = (level: number) => {
 
 const TagSelector = () => {
   const vm = DerTutorContext.self.editorVM
-  return Panel('Tag')
+  return Panel('Tag:')
     .observe(vm.$state, 'recreateChildren')
     .observe(vm.$tagId, 'affectsChildrenProps')
     .children(() => {
@@ -193,7 +194,7 @@ const TagRenderer = (t: ITag) => {
 
 const PronunciationPanel = () => {
   const vm = DerTutorContext.self.editorVM
-  return Panel('Pronunciation')
+  return Panel('Pronunciation:')
     .children(() => {
       vstack()
         .observe(vm.$audioUrl)
@@ -223,7 +224,7 @@ const PronunciationPanel = () => {
         .observe(vm.$audioUrl)
         .react(s => {
           s.visible = vm.$audioUrl.value === ''
-          s.text = 'Load Audio'
+          s.localizedText = 'Load Audio'
         })
         .onClick(() => vm.loadAudioLink())
 
@@ -231,7 +232,7 @@ const PronunciationPanel = () => {
         .observe(vm.$audioUrl)
         .react(s => {
           s.visible = vm.$audioUrl.value !== ''
-          s.text = 'Delete'
+          s.localizedText = 'Delete'
         })
         .onClick(() => vm.$audioUrl.value = '')
     })
@@ -255,7 +256,7 @@ const MediaFileList = () => {
 
 const MediaFileView = (mf: IMediaFile) => {
   const vm = DerTutorContext.self.editorVM
-  return Panel('Media')
+  return Panel('Media:')
     .children(() => {
       vstack()
         .react(s => {
@@ -271,10 +272,18 @@ const MediaFileView = (mf: IMediaFile) => {
             s.text = mf.name + ' '
           })
 
-          LinkBtn()
+          IconBtn()
             .react(s => {
               s.text = mf.url + ''
-              s.popUp = 'Copy link'
+              s.localizedPopUp = 'Copy link'
+              s.revert = true
+              s.icon = MaterialIcon.content_copy
+              s.fontSize = theme().fontSizeXS
+              s.iconSize = theme().fontSizeS
+              s.textColor = theme().link
+            })
+            .whenHovered(s => {
+              s.textColor = theme().link100
             })
             .onClick(() => globalContext.app.copyTextToClipboard(mf.url))
         })
@@ -316,7 +325,7 @@ const PendingUploadResources = () => {
         .children(() => {
           AccentBtn()
             .react(s => {
-              s.text = 'Choose a media-file'
+              s.localizedText = 'Choose a media-file'
             })
             .onClick(() => chooser.dom.click())
 
@@ -332,7 +341,7 @@ const PendingUploadResources = () => {
             .observe(vm.$filesPendingUpload)
             .react(s => {
               s.visible = vm.$filesPendingUpload.value.length > 0
-              s.text = 'Upload all'
+              s.localizedText = 'Upload all'
             })
             .onClick(() => vm.uploadAll())
         })
@@ -357,7 +366,7 @@ const PendingUploadFileList = () => {
 
 const FileView = (w: FileWrapper) => {
   const vm = DerTutorContext.self.editorVM
-  return Panel('File')
+  return Panel('File:')
     .react(s => {
       s.bgColor = theme().red + '10'
     })
@@ -384,7 +393,7 @@ const FileView = (w: FileWrapper) => {
 
       RedBtn()
         .react(s => {
-          s.text = 'Cancel'
+          s.localizedText = 'Cancel'
         })
         .onClick(() => vm.deletePendingUploadFile(w))
     })
@@ -406,7 +415,7 @@ const Header = () => {
         .observe(vm.$hasChanges)
         .react(s => {
           s.isDisabled = !vm.$hasChanges.value
-          s.text = 'Save'
+          s.localizedText = 'Save'
           s.popUp = 'Ctrl + Shift + S'
         })
         .onClick(() => vm.save())
@@ -415,7 +424,7 @@ const Header = () => {
         .observe(vm.$hasChanges)
         .react(s => {
           s.isDisabled = !vm.$hasChanges.value
-          s.text = 'Discard Changes'
+          s.localizedText = 'Discard Changes'
         })
         .onClick(() => vm.discardChanges())
 
@@ -429,36 +438,19 @@ const Header = () => {
 
       AccentBtn()
         .react(s => {
-          s.text = 'Quit'
+          s.localizedText = 'Quit'
           s.popUp = 'ESC'
         })
         .onClick(() => vm.quit())
     })
 }
 
-const AccentBtn = () => {
-  return btn()
-    .react(s => {
-      s.fontFamily = FontFamily.APP
-      s.fontSize = theme().fontSizeXS
-      s.minHeight = '25px'
-      s.gap = '2px'
-      s.textColor = theme().btn + 'cc'
-      s.cornerRadius = '4px'
-    })
-    .whenHovered(s => {
-      s.textColor = theme().btn
-    })
-    .whenSelected(s => {
-      s.textColor = theme().accent
-      s.bgColor = theme().header
-    })
-}
+
 
 
 const ReplacePanel = () => {
   const vm = DerTutorContext.self.editorVM
-  return Panel('Replace')
+  return Panel('Replace:')
     .children(() => {
       TextInput(vm.textReplacer.$replaceFrom).react(s => {
         s.placeholder = 'From:'
@@ -478,7 +470,7 @@ const ReplacePanel = () => {
         .observe(vm.textReplacer.$replaceFrom.pipe().map(value => value.length > 0).removeDuplicates().fork())
         .react(s => {
           s.isDisabled = vm.textReplacer.$replaceFrom.value.length === 0
-          s.text = 'Replace all'
+          s.localizedText = 'Replace all'
         })
         .onClick(() => vm.replaceAll(vm.textReplacer.$replaceFrom.value, vm.textReplacer.$replaceTo.value))
     })
@@ -487,7 +479,7 @@ const ReplacePanel = () => {
 const VocSelector = () => {
   const vm = DerTutorContext.self.editorVM
   const dropdownId = 'EditorView.VocSelector'
-  return Panel('Vocabulary')
+  return Panel('Vocabulary:')
     .children(() => {
       spacer()
 

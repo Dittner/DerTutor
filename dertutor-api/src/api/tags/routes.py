@@ -13,7 +13,7 @@ log = logging.getLogger('uvicorn')
 @router.get('/tags', response_model=list[TagRead])
 @open_session
 async def get_tags(session: AsyncSession, lang_id: int):
-    return await TagsDAO.find_all(session, lang_id=lang_id)
+    return await TagsDAO.find_all(session, ['id'], lang_id=lang_id)
 
 
 @router.post('/tags', response_model=TagRead)

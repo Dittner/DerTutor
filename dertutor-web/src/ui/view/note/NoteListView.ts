@@ -1,12 +1,12 @@
 import { btn, div, hlist, hstack, image, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { INote, ITag, IVoc } from "../../../domain/DomainModel"
-import { Btn, Icon, IconBtn, LinkBtn } from "../../controls/Button"
+import { AccentBtn, Btn, Icon, IconBtn, LinkBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { globalContext, ThemeSwitcher } from "../../../App"
 import { Markdown } from "../../controls/Markdown"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { MaterialIcon } from "../../icons/MaterialIcon"
-import { theme } from "../../theme/ThemeManager"
+import { smallTheme, theme } from "../../theme/ThemeManager"
 import { Title } from "../../controls/Text"
 import { TextInput } from "../../controls/Input"
 
@@ -41,8 +41,9 @@ export const NoteListView = () => {
           s.top = layout.navBarHeight + 'px'
           s.height = window.innerHeight - layout.navBarHeight + 'px'
           s.className = 'listScrollbar'
-          s.enableOwnScroller = false
+          s.enableOwnScroller = true
           s.disableHorizontalScroll = true
+          s.paddingBottom = layout.statusBarHeight + 'px'
           //s.borderRight = '1px solid ' + theme().border
           s.bgColor = theme().appBg
           s.layer = '1'
@@ -124,12 +125,12 @@ const Header = () => {
             })
 
           IconBtn()
-            .observe(vm.$vocabulariesShown, 'affectsProps')
+            .observe(vm.$vocabulariesShown)
             .react(s => {
               s.isSelected = vm.$vocabulariesShown.value
               s.icon = MaterialIcon.keyboard_arrow_down
               s.textColor = theme().text50
-              s.text = 'Vocabularies'
+              s.localizedText = 'Vocabularies'
               s.revert = true
               s.height = '40px'
               s.paddingHorizontal = '0'
@@ -138,7 +139,10 @@ const Header = () => {
             })
             .whenHovered(s => s.textColor = theme().text)
             .whenSelected(s => s.textColor = theme().text)
-            .onMouseOver(() => vm.$vocabulariesShown.value = true)
+            .onClick(e => {
+              e.stopImmediatePropagation()
+              vm.$vocabulariesShown.value = !vm.$vocabulariesShown.value
+            })
 
           vlist<IVoc>()
             .observe(vm.$lang, 'recreateChildren')
@@ -165,14 +169,13 @@ const Header = () => {
               s.shadow = '0px 6px 6px 3px #00000010'
               s.cornerRadius = '4px'
             })
-            .onMouseLeave(() => vm.$vocabulariesShown.value = false)
         })
 
 
       HeaderBtn()
         .react(s => {
           s.icon = MaterialIcon.arrow_back
-          s.popUp = 'Go back'
+          s.localizedPopUp = 'Go back'
           s.width = '50px'
         })
         .onClick(() => {
@@ -271,8 +274,8 @@ const GlobalSearchView = () => {
       s.width = '100%'
       s.maxWidth = '400px'
       s.height = '35px'
-      s.border = '1px solid ' + (vm.$searchBufferFocused.value ? theme().red : theme().transparent)
-      s.bgColor = vm.$searchBufferFocused.value ? theme().red + '10' : theme().text + '20'
+      s.border = '1px solid ' + (vm.$searchBufferFocused.value ? theme().red : theme().border)
+      s.bgColor = vm.$searchBufferFocused.value ? theme().red + '10' : theme().border + '40'
       s.cornerRadius = '4px'
       s.paddingRight = '5px'
     })
@@ -296,7 +299,7 @@ const GlobalSearchView = () => {
         .react(s => {
           s.width = '100%'
           s.fontSize = theme().fontSizeS
-          s.placeholder = 'SEARCH ⌘K'
+          s.localizedPlaceholder = 'Search...'
           s.border = 'unset'
           s.textColor = theme().isLight ? theme().text : theme().mark
           s.autoFocus = vm.$searchBufferFocused.value
@@ -306,6 +309,7 @@ const GlobalSearchView = () => {
         })
         .onKeyDown(e => {
           if (e.key === 'Enter') {
+            e.stopImmediatePropagation()
             vm.startSearch(vm.$searchBuffer.value)
             document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
           }
@@ -339,6 +343,18 @@ const GlobalSearchView = () => {
           vm.$searchBufferFocused.value = false
           vm.startSearch('')
         })
+
+      p()
+        .observe(vm.$searchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
+        .react(s => {
+          s.visible = vm.$searchBuffer.value.length === 0
+          s.textColor = theme().text50
+          s.text = '⌘k, f'
+          s.wrap = false
+          s.whiteSpace = 'nowrap'
+          s.fontSize = theme().fontSize
+          s.fontFamily = FontFamily.APP
+        })
     })
 }
 
@@ -358,7 +374,7 @@ const NotesMenu = () => {
         .observe(vm.$state)
         .react(s => {
           const p = vm.$state.value.page
-          s.text = p && p.pages > 0 ? `Page: ${p.page} of ${p.pages}` : 'No pages'
+          s.localizedText = p && p.pages > 0 ? `Page: ${p.page} of ${p.pages}` : 'No data'
           s.paddingLeft = '20px'
         })
 
@@ -393,8 +409,10 @@ const NoteContentView = () => {
 
       Markdown()
         .observe(vm.$state)
+        .observe(vm.$taskAnswerShown)
         .react(s => {
           const searchKey = vm.$state.value.searchKey ?? ''
+          const text = vm.$state.value.selectedNote?.text ?? ''
           s.className = theme().id
           s.mode = 'md'
           s.fontFamily = FontFamily.ARTICLE
@@ -402,17 +420,25 @@ const NoteContentView = () => {
           s.width = '100%'
           s.maxWidth = '900px'
           s.mark = searchKey.length > 1 ? searchKey : ''
-          s.text = vm.$state.value.selectedNote?.text ?? ''
+          s.text = text.replace(/(\?\?([^?]+)\?\?)/g, vm.$taskAnswerShown.value ? '$2' : '\\_\\_\\_')
           s.fontSize = theme().fontSize
           s.absolutePathPrefix = globalContext.server.baseUrl
-          //s.overflow = 'clip'
-
-          //s.showRawText = page.file.showRawText
         })
+
+      AccentBtn()
+        .observe(vm.$state)
+        .observe(vm.$taskAnswerShown)
+        .react(s => {
+          const note = vm.$state.value.selectedNote
+          s.visible = note && vm.$taskAnswerShown.value === false && note.text.includes('??')
+          s.localizedText = 'Show answer'
+          s.popUp = 'Enter'
+        })
+        .onClick(() => vm.$taskAnswerShown.value = true)
 
       spacer()
 
-      NexPrevNoteNavigator()
+      NextPrevNoteNavigator()
     })
 }
 
@@ -440,7 +466,7 @@ const NoteRenderer = (n: INote) => {
         const keyIndex = text.toLowerCase().indexOf(searchKey.toLowerCase())
         s.htmlText = keyIndex !== -1 ? text.slice(0, keyIndex) + '<mark>' + text.slice(keyIndex, keyIndex + searchKey.length) + '</mark>' + (text.slice(keyIndex + searchKey.length) ?? '') : text
       } else {
-        s.text = text
+        s.text = text.length > 80 ? text.substring(0, 80) + '...' : text
       }
     })
     .whenHovered(s => {
@@ -479,7 +505,7 @@ const NotesPaginator = () => {
           s.wrap = false
           s.paddingHorizontal = '10px'
           s.borderColor = theme().border
-          s.popUp = 'Previous page'
+          s.localizedPopUp = 'Previous page'
         })
         .onClick(() => vm.$state.value.page && vm.navigator.updateWith({ page: vm.$state.value.page?.page - 1 }))
 
@@ -489,7 +515,7 @@ const NotesPaginator = () => {
           s.visible = p && p.page > 1
           s.text = '1'
           s.wrap = false
-          s.popUp = 'First page'
+          s.localizedPopUp = 'First page'
         })
         .onClick(() => vm.navigator.updateWith({ page: 1 }))
 
@@ -499,7 +525,7 @@ const NotesPaginator = () => {
           s.visible = p && p.page > 2
           s.text = p ? `${p.page - 1}` : ''
           s.wrap = false
-          s.popUp = 'Prev page'
+          s.localizedPopUp = 'Previous page'
           //s.href = vm.getPageLink(p ? p.page + 1 : 1)
         })
         .onClick(() => {
@@ -525,7 +551,7 @@ const NotesPaginator = () => {
           s.visible = p && p.page < p.pages - 1
           s.text = p ? `${p.page + 1}` : ''
           s.wrap = false
-          s.popUp = 'Next page'
+          s.localizedPopUp = 'Next page'
           //s.href = vm.getPageLink(p ? p.page + 1 : 1)
         })
         .onClick(() => {
@@ -539,7 +565,7 @@ const NotesPaginator = () => {
           s.visible = p && p.page < p.pages
           s.text = p ? `${p.pages}` : ''
           s.wrap = false
-          s.popUp = 'Last page'
+          s.localizedPopUp = 'Last page'
         })
         .onClick(() => {
           const p = vm.$state.value.page
@@ -554,7 +580,7 @@ const NotesPaginator = () => {
           s.wrap = false
           s.paddingHorizontal = '10px'
           s.borderColor = theme().border
-          s.popUp = 'Next page'
+          s.localizedPopUp = 'Next page'
         })
         .onClick(() => vm.$state.value.page && vm.navigator.updateWith({ page: vm.$state.value.page?.page + 1 }))
     })
@@ -783,8 +809,6 @@ const TagRenderer = (t: ITag) => {
     .onClick(() => vm.navigator.updateWith({ page: 1, tagId: vm.$state.value.tagId === t.id ? undefined : t.id }))
 }
 
-
-
 const QuickSearchPanel = () => {
   const vm = DerTutorContext.self.noteListVM
   return vstack()
@@ -818,7 +842,7 @@ const QuickSearchPanel = () => {
           s.lineHeight = '1.4'
           s.mode = 'md'
           s.fontFamily = FontFamily.ARTICLE
-          s.textColor = theme().text
+          s.textColor = smallTheme().text
           s.width = '100%'
           s.text = vm.$quickSearchResult.value?.text ?? ''
           s.fontSize = '0.8rem'
@@ -860,7 +884,7 @@ const QuickSearchInput = () => {
           s.maxWidth = '300px'
           s.autoFocus = vm.$quickSearchFocused.value
           s.fontSize = theme().fontSizeXS
-          s.placeholder = "Enter a word to search /"
+          s.localizedPlaceholder = "Enter a word to search /"
           s.border = 'unset'
           s.textColor = theme().strong
           s.caretColor = theme().accent
@@ -875,6 +899,7 @@ const QuickSearchInput = () => {
         })
         .onKeyDown(e => {
           if (e.key === 'Enter') {
+            e.stopImmediatePropagation()
             vm.quickSearch(vm.$quickSearchBuffer.value)
             document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
           }
@@ -903,7 +928,7 @@ const QuickSearchInput = () => {
     })
 }
 
-const NexPrevNoteNavigator = () => {
+const NextPrevNoteNavigator = () => {
   const vm = DerTutorContext.self.noteListVM
   return hstack()
     .observe(vm.$state, 'affectsChildrenProps')
@@ -921,13 +946,15 @@ const NexPrevNoteNavigator = () => {
             const selectedNoteIndex = vm.$selectedNoteIndex.value
             const selectedPageIndex = page.page ?? 0
             s.visible = selectedNoteIndex > 0 || selectedPageIndex > 1
-            s.text = selectedNoteIndex > 0 ? page.items[selectedNoteIndex - 1].name : `Page ${selectedPageIndex - 1}`
+            s.localizedText = selectedNoteIndex > 0 ? page.items[selectedNoteIndex - 1].name : `Page ${selectedPageIndex - 1}`
           } else {
             s.visible = false
           }
 
           s.paddingHorizontal = '0'
           s.icon = MaterialIcon.arrow_back
+          s.halign = 'left'
+          s.width = '50%'
           s.height = '40px'
           s.textColor = theme().link
         })
@@ -948,7 +975,7 @@ const NexPrevNoteNavigator = () => {
             const selectedPageIndex = page.page ?? 0
             s.visible = selectedNoteIndex < page.items.length || selectedPageIndex < page.pages
             if (selectedNoteIndex < page.items.length - 1) s.text = page.items[selectedNoteIndex + 1].name
-            else if (selectedPageIndex < page.pages) s.text = `Page ${selectedPageIndex + 1}`
+            else if (selectedPageIndex < page.pages) s.localizedText = `Page ${selectedPageIndex + 1}`
             else s.text = ''
           }
 
@@ -956,6 +983,8 @@ const NexPrevNoteNavigator = () => {
 
           s.icon = MaterialIcon.arrow_forward
           s.revert = true
+          s.halign = 'left'
+          s.width = '50%'
           s.height = '40px'
           s.textColor = theme().link
         })

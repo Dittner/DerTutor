@@ -21,6 +21,7 @@ export function App() {
 
   return div()
     .observe(themeManager.$theme, 'affectsProps', 'affectsChildrenProps')
+    .observe(globalContext.localeManager.$locale, 'affectsProps', 'affectsChildrenProps')
     .react(s => {
       s.width = '100%'
     })
@@ -141,7 +142,6 @@ export const ThemeSwitcher = () => {
       s.gap = '0px'
       s.border = '1px solid ' + theme().border
       s.textColor = theme().text + '88'
-      //s.popUp = 'Toggle theme (T)'
     })
     .whenHovered(s => {
       s.textColor = theme().text
@@ -227,6 +227,8 @@ export const MessangerView = () => {
       s.paddingHorizontal = layout.isCompact ? '40px' : '20px'
       s.text = msg?.text ?? ''
       s.width = '100%'
+      s.wrap = false
+      s.whiteSpace = 'nowrap'
 
       if (msg?.level === 'error')
         s.textColor = theme().red

@@ -1,8 +1,9 @@
 import { RXObservableValue } from "flinker"
-import { btn, ButtonProps, link, span, TextProps } from "flinker-dom"
+import { btn, ButtonProps, link, span, StackHAlign, TextProps } from "flinker-dom"
 import { MaterialIcon } from "../icons/MaterialIcon"
 import { theme } from "../theme/ThemeManager"
 import { FontFamily } from "./Font"
+import { globalContext } from "../../App"
 
 /*
 *
@@ -35,7 +36,10 @@ export const Icon = <P extends IconProps>() => {
 export interface IconBtnProps extends ButtonProps {
   icon?: MaterialIcon
   iconSize?: string
+  localizedText?: string
+  localizedPopUp?: string
   revert?: boolean
+  halign?: StackHAlign
 }
 
 export const IconBtn = () => {
@@ -54,6 +58,9 @@ export const IconBtn = () => {
     })
     .map(s => {
       s.flexDirection = s.revert ? 'row-reverse' : 'row'
+      s.justifyContent = s.halign === 'left' ? 'flex-start' : s.halign === 'right' ? 'flex-end' : 'center'
+      if (s.localizedPopUp)
+        s.popUp = globalContext.localeManager.translate(s.localizedPopUp)
     })
     .children(() => {
 
@@ -72,13 +79,13 @@ export const IconBtn = () => {
         .observe($sharedState)
         .react(s => {
           const ss = $sharedState.value
-          s.text = ss.text
+          s.text = ss.localizedText ? globalContext.localeManager.translate(ss.localizedText) : ss.text
           s.textColor = 'inherit'
           s.fontSize = ss.fontSize ?? 'inherit'
           s.fontFamily = 'inherit'
           s.overflow = 'hidden'
           s.textOverflow = 'ellipsis'
-          s.visible = ss.text !== '' && ss.text !== undefined
+          s.visible = s.text !== '' && s.text !== undefined
         })
     })
 }
@@ -167,5 +174,31 @@ export const Link = () => {
     .whenSelected(s => {
       s.textColor = theme().appBg
       s.bgColor = theme().link
+    })
+}
+
+/*
+*
+* AccentBtn
+*
+**/
+
+
+export const AccentBtn = () => {
+  return IconBtn()
+    .react(s => {
+      s.fontFamily = FontFamily.APP
+      s.fontSize = theme().fontSizeXS
+      s.minHeight = '25px'
+      s.gap = '2px'
+      s.textColor = theme().btn + 'cc'
+      s.cornerRadius = '4px'
+    })
+    .whenHovered(s => {
+      s.textColor = theme().btn
+    })
+    .whenSelected(s => {
+      s.textColor = theme().accent
+      s.bgColor = theme().header
     })
 }

@@ -16,7 +16,7 @@ log = logging.getLogger('uvicorn')
 @open_session
 @only_superuser
 async def get_users(session: AsyncSession):
-    return await UserDAO.find_all(session)
+    return await UserDAO.find_all(session, ['id'])
 
 
 @router.get('/users/me', response_model=UserRead)

@@ -13,7 +13,6 @@ export interface GlobalTheme {
   fontSizeS: string
   fontSizeXS: string
   defFontWeight: FontWeight
-  defTextColor: string
   appBg: string
   actionsBg: string
   text: string
@@ -48,9 +47,11 @@ export class ThemeManager {
   private readonly _lightSmallTheme: GlobalTheme
 
   readonly $theme: RXObservableValue<GlobalTheme>
+  readonly $smallTheme: RXObservableValue<GlobalTheme>
 
   setLightTheme() {
     this.$theme.value = this._lightTheme
+    this.$smallTheme.value = this._lightSmallTheme
     const html = document.querySelector('html')
     if (html) {
       html.style.colorScheme = 'dark'
@@ -61,6 +62,7 @@ export class ThemeManager {
 
   setDarkTheme() {
     this.$theme.value = this._darkTheme
+    this.$smallTheme.value = this._darkSmallTheme
     const html = document.querySelector('html')
     if (html) {
       html.style.colorScheme = 'dark'
@@ -81,7 +83,8 @@ export class ThemeManager {
     this._darkTheme = this.createDarkTheme(this._lightTheme)
     this._lightSmallTheme = this.createSmallTheme(this._lightTheme)
     this._darkSmallTheme = this.createSmallTheme(this._darkTheme)
-    this.$theme = new RXObservableValue(this._lightTheme)
+    this.$theme = new RXObservableValue(this._darkTheme)
+    this.$smallTheme = new RXObservableValue(this._darkSmallTheme)
 
     this.buildThemeSelectors(this._lightTheme)
     this.buildThemeSelectors(this._darkTheme)
@@ -115,16 +118,15 @@ export class ThemeManager {
       id: 'light',
       isLight: true,
 
-      fontSizeXL: '1.6rem',
+      fontSizeXL: '1.5rem',
       fontSizeL: '1.1rem',
       fontSizeM: '1.1rem',
       fontSize: '1rem',
       defFontSize: 'inherit',
       fontSizeS: '0.9rem',
-      fontSizeXS: '0.75rem',
+      fontSizeXS: '0.7rem',
 
       defFontWeight: 'normal',
-      defTextColor: 'inherit',
       appBg,
       mark: '#a11a44',
       btn: '#4a0078',
@@ -161,9 +163,9 @@ export class ThemeManager {
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
     const red = '#b9777d'
-    const blue = '#4984c8'
+    const blue = '#4984c8' //4984c8
     const black = '#0c0d0f' //121416
-    const accent = '#b3baa3'  //9fa786
+    const accent = '#c0caa8'  //b8c892 c693c3
     const strong = '#a3abbe'
     const text = '#787f92' //707786
     const appBg = black
@@ -176,7 +178,7 @@ export class ThemeManager {
       text50: text + 'aa',
       red,
       green: '#5b9898',
-      h1: '#b1bace',
+      h1: '#a9b1c2',
       header: '#b3996d',
       em: accent,
       accent,
@@ -220,7 +222,7 @@ export class ThemeManager {
       defFontSize: '0.8rem',
       fontSizeS: '0.7rem',
       fontSizeXS: '0.7rem',
-
+      info: '#779685',
       isLight: t.isLight,
     })
   }
@@ -295,7 +297,7 @@ export class ThemeManager {
       fontFamily: 'inherit',
       fontSize: t.defFontSize,
       fontWeight: t.defFontWeight,
-      textColor: t.defTextColor,
+      textColor: 'inherit',
     }
     buildRule(globalProps, parentSelector, 'div')
     buildRule(globalProps, parentSelector, 'p')
@@ -315,6 +317,7 @@ export class ThemeManager {
 
     buildRule(strongProps, parentSelector, 'strong')
     strongProps.width = '100%'
+    strongProps.textColor = '#ff0000'
     buildRule(strongProps, parentSelector, 'div.de')
     buildRule(strongProps, parentSelector, 'div.en')
 
@@ -340,7 +343,7 @@ export class ThemeManager {
     const listItemProps: UIComponentProps = {
       fontSize: t.defFontSize,
       fontWeight: t.defFontWeight,
-      textColor: t.defTextColor,
+      textColor: 'inherit',
       margin: '0px',
       padding: '0px'
     }
@@ -366,7 +369,7 @@ export class ThemeManager {
       fontSize: t.fontSizeS,
       textColor: 'inherit',
       fontWeight: t.defFontWeight,
-      border: '1px solid ' + t.text50,
+      borderColor: t.border,
     }
     buildRule(tableProps, parentSelector, 'table')
 
@@ -374,7 +377,7 @@ export class ThemeManager {
       fontSize: 'inherit',
       textColor: 'inherit',
       fontWeight: 'inherit',
-      border: '1px solid ' + t.text50,
+      borderColor: t.border,
       padding: '10px'
     }
 
@@ -556,7 +559,7 @@ export class ThemeManager {
       textColor: t.isLight ? 'inherit' : t.text50,
       fontStyle: t.isLight ? 'italic' : 'inherit'
     }
-    buildRule(ruParagraphProps, parentSelector, 'p.md-ru')
+    buildRule(ruParagraphProps, parentSelector, '.md-ru')
 
     /******************************/
     // alignment
@@ -609,20 +612,17 @@ export class ThemeManager {
     buildRule({ fontSize: 'inherit', textColor: 'inherit' }, parentSelector, 'div.poem div')
 
     /******************************/
-    // info
+    // note
     /******************************/
 
-    const infoProps: UIComponentProps = {
+    const noteProps: UIComponentProps = {
       width: '100%',
       fontSize: t.fontSizeS,
-      fontWeight: t.defFontWeight,
       textColor: t.info,
       paddingHorizontal: '20px',
-      //bgColor: '#e5f0df',
       borderLeft: '1px solid ' + t.info + '88'
     }
-    buildRule(infoProps, parentSelector, 'div.info')
-    buildRule({ fontSize: 'inherit', textColor: 'inherit' }, parentSelector, 'div.info div')
+    buildRule(noteProps, parentSelector, '.md-note')
 
     /******************************/
     // warn
@@ -649,3 +649,4 @@ export class ThemeManager {
 
 export const themeManager = new ThemeManager()
 export const theme = () => themeManager.$theme.value
+export const smallTheme = () => themeManager.$smallTheme.value

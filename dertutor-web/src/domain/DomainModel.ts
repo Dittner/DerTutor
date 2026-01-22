@@ -17,6 +17,8 @@ export interface IVoc {
   readonly id: number
   readonly lang_id: number
   readonly name: string
+  readonly order: number
+  readonly description: string
 }
 
 export interface ITag {

@@ -43,6 +43,8 @@ class Voc(Base):
     __tablename__ = 'vocs'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
+    order: Mapped[int] = mapped_column(Integer)
+    description: Mapped[str] = mapped_column(String(10000), default='')
     lang_id: Mapped[int] = mapped_column(ForeignKey('langs.id'))
     notes: Mapped[list['Note']] = relationship(cascade='all, delete')
     __table_args__ = (UniqueConstraint('lang_id', 'name'),)

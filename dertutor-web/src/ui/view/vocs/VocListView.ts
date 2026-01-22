@@ -8,13 +8,23 @@ import { globalContext, ThemeSwitcher } from "../../../App"
 
 const CONTENT_PADDING = '40px'
 
-const ACTION_TIPS = `
+const EN_ACTION_TIPS = `
 #### [icon:emoji_objects] Tips
 
 \`\`\`ul
 + You can navigate through menu items using arrows: →, ↓, →, ↑
-+ To see more shortkeys, press ?
-+ To create/edit/delete notes, you must have superuser rights.
++ To see more shortcuts, press: ?
++ To create/edit/delete notes, you must log in as superuser...
+\`\`\`
+`
+
+const DE_ACTION_TIPS = `
+#### [icon:emoji_objects] Tipps
+
+\`\`\`ul
++ Sie können mithilfe der Pfeilzeichen durch die Menüpunkte navigieren: →, ↓, →, ↑
++ Um weitere Tastenkombinationen anzuzeigen, drücken Sie: ?
++ Zum Erstellen/Bearbeiten/Löschen von Notizen müssen Sie sich als Superuser anmelden.
 \`\`\`
 `
 
@@ -89,7 +99,7 @@ export const VocListView = () => {
               s.mode = 'md'
               s.fontSize = theme().fontSizeXS
               s.textColor = theme().header
-              s.text = ACTION_TIPS.trim()
+              s.text = globalContext.localeManager.$locale.value === 'de' ? DE_ACTION_TIPS.trim() : EN_ACTION_TIPS.trim()
               s.paddingHorizontal = CONTENT_PADDING
             })
         })

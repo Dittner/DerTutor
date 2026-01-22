@@ -18,7 +18,7 @@ log = logging.getLogger('uvicorn')
 @router.get('/media', response_model=list[MediaRead])
 @open_session
 async def get_all_media_files(session: AsyncSession, note_id: int):
-    return await MediaDAO.find_all(session, note_id=note_id)
+    return await MediaDAO.find_all(session, ['id'], note_id=note_id)
 
 
 @router.post('/media/uploadfile', response_model=MediaRead)

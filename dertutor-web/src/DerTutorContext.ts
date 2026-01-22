@@ -7,6 +7,7 @@ import { EditorVM } from './ui/view/editor/EditorVM'
 import { ILang, IUser } from './domain/DomainModel'
 import { globalContext } from './App'
 import { log, logErr } from './app/Logger'
+import { Locale } from './app/LocaleManager'
 
 export interface Message {
   readonly level?: 'warning' | 'error' | 'info'
@@ -54,6 +55,15 @@ export class DerTutorContext {
         this.$user.value = value
       }).onError(e => {
         logErr('User not loaded, err:', e)
+      })
+      .subscribe()
+
+    globalContext.navigator.$keys.pipe()
+      .map(keys => keys.langCode as Locale)
+      .skipNullable()
+      .removeDuplicates()
+      .onReceive(langCode => {
+        globalContext.localeManager.$locale.value = langCode
       })
       .subscribe()
 

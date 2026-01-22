@@ -1,5 +1,5 @@
 import { RXObservableValue } from "flinker"
-import { hstack, input, p, span, StackProps, vstack } from "flinker-dom"
+import { hstack, input, InputProps, p, span, StackProps, vstack } from "flinker-dom"
 import { theme } from "../theme/ThemeManager"
 import { FontFamily } from "./Font"
 import { globalContext } from "../../App"
@@ -53,8 +53,12 @@ export const TitledTextInput = (inputBinding: RXObservableValue<string>) => {
     })
 }
 
+export interface LocalizedInputProps extends InputProps {
+  localizedPlaceholder?: string
+}
+
 export const TextInput = (inputBinding: RXObservableValue<string>) => {
-  return input()
+  return input<LocalizedInputProps>()
     .bind(inputBinding)
     .react(s => {
       s.type = 'text'
@@ -64,6 +68,10 @@ export const TextInput = (inputBinding: RXObservableValue<string>) => {
       s.autoCorrect = 'off'
       s.autoComplete = 'off'
       s.border = '1px solid ' + theme().border
+    })
+    .map(s => {
+      if (s.localizedPlaceholder)
+        s.placeholder = globalContext.localeManager.translate(s.localizedPlaceholder)
     })
     .whenFocused(s => {
       s.border = '1px solid ' + theme().accent
@@ -96,8 +104,8 @@ export class InputBufferController {
     }
   }
 
-  private umlautLetter(ch:string) {
-    switch(ch) {
+  private umlautLetter(ch: string) {
+    switch (ch) {
       case 'a': return 'ä'
       case 'A': return 'Ä'
       case 'u': return 'ü'

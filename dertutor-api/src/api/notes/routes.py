@@ -60,7 +60,7 @@ async def update_note(session: AsyncSession, note: NoteUpdate):
 @open_session
 @only_superuser
 async def update_all_notes(session: AsyncSession, voc_id: int):
-    notes = await NotesDAO.find_all(session, voc_id=voc_id)
+    notes = await NotesDAO.find_all(session, ['id'], voc_id=voc_id)
     for n in notes:
         new_text = format_note_text(n.text)
         if new_text != n.text:

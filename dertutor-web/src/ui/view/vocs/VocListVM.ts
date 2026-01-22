@@ -8,6 +8,7 @@ import { UrlKeys } from "../../../app/URLNavigator"
 import { globalContext } from "../../../App"
 import { Interactor } from "../Interactor"
 import { log } from "../../../app/Logger"
+import { sortByKey } from "../../../app/Utils"
 
 
 export interface VocListState {
@@ -258,8 +259,11 @@ class VocListInteractor extends Interactor<VocListState> {
   }
 
   private async loadLangs(state: VocListState, keys: UrlKeys) {
-    if (this.ctx.$allLangs.value.length === 0)
-      this.ctx.$allLangs.value = await globalContext.server.loadAllLangs().asAwaitable
+    if (this.ctx.$allLangs.value.length === 0) {
+      const allLangs = await globalContext.server.loadAllLangs().asAwaitable
+      allLangs.forEach(l => l.vocs.sort(sortByKey('order')))
+      this.ctx.$allLangs.value = allLangs
+    }
     state.allLangs = this.ctx.$allLangs.value
   }
 
