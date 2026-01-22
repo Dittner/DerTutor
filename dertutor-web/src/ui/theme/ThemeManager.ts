@@ -107,13 +107,13 @@ export class ThemeManager {
 
   createLightTheme(): GlobalTheme {
     const black = '#111111'
-    const text = '#4a5557'
+    const text = '#33393a'
     const white = '#ffFFff'
-    const red = '#bd4593'
+    const red = '#bd4571'
     const header = '#4185a0'
     const blue = '#425865'
-    const border = black + '20'
-    const appBg = '#f8f8f8'
+    const border = black + '40'
+    const appBg = '#f5f5f5'
     return {
       id: 'light',
       isLight: true,
@@ -143,9 +143,9 @@ export class ThemeManager {
       quote: '#32677c',
       blue,
       link: '#005b90',
-      link100: '#bd4593',
+      link100: red,
       editor: black,
-      navBarBg: '#ffFFff',
+      navBarBg: appBg,
       actionsBg: '#f0f0f0',
       articleBg: '#ffFFff',
       inputFocusedBg: '#eeEEee',
@@ -184,7 +184,7 @@ export class ThemeManager {
       accent,
       quote: '#6a87a0', //a1a1a1
       strong,
-      actionsBg: '#1c2023',
+      
       blue,
       mark: '#dd7d85',
       link: blue,
@@ -194,7 +194,8 @@ export class ThemeManager {
       warn: '#a27988',
       border: '#2d3338',
       editor: '#969dad', //839295
-      navBarBg: appBg, //1d2125
+      actionsBg: '#1c2023',
+      navBarBg: appBg, //1c1f22
       articleBg: '#121416', //1d2125
       inputFocusedBg: '#a5a5a5'
     })

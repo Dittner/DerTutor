@@ -5,6 +5,7 @@ import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
 import { Markdown } from "../../controls/Markdown"
 import { globalContext, ThemeSwitcher } from "../../../App"
+import { localeManager } from "../../../app/LocaleManager"
 
 const CONTENT_PADDING = '40px'
 
@@ -99,7 +100,7 @@ export const VocListView = () => {
               s.mode = 'md'
               s.fontSize = theme().fontSizeXS
               s.textColor = theme().header
-              s.text = globalContext.localeManager.$locale.value === 'de' ? DE_ACTION_TIPS.trim() : EN_ACTION_TIPS.trim()
+              s.text = localeManager.$locale.value === 'de' ? DE_ACTION_TIPS.trim() : EN_ACTION_TIPS.trim()
               s.paddingHorizontal = CONTENT_PADDING
             })
         })

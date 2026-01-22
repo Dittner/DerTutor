@@ -54,7 +54,7 @@ export class VocListVM extends ViewModel<VocListState> {
     this.actionsList.add(':d<CR>', 'Delete vocabulary (SUPERUSER)', () => this.deleteVoc())
     this.actionsList.add('q', 'Quit', () => this.quit())
 
-    this.actionsList.add('<CR>', 'Go [Enter]', () => this.applySelection())
+    this.actionsList.add('<CR>', 'Go', () => this.applySelection())
     this.actionsList.add(':id<CR>', 'Print ID of the selected item', () => this.printID())
   }
 

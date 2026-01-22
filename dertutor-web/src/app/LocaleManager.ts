@@ -61,3 +61,8 @@ class LocaleTranslator {
     return value
   }
 }
+
+export const localeManager = new LocaleManager()
+export const translate = (value: string): string => {
+  return localeManager.translate(value)
+}

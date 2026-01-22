@@ -12,7 +12,7 @@ import { TextFormatter } from "./TextFormatter"
 import { TextInput } from "../../controls/Input"
 import { MaterialIcon } from "../../icons/MaterialIcon"
 import { log } from "../../../app/Logger"
-import { Text } from "../../controls/Text"
+import { translate } from "../../../app/LocaleManager"
 
 export const EditorView = () => {
   log('new EditorView')
@@ -112,13 +112,13 @@ const Panel = (title: string) => {
       s.halign = 'stretch'
     })
     .children(() => {
-      Text()
+      p()
         .react(s => {
           s.fontSize = theme().fontSizeXS
           s.fontFamily = FontFamily.APP
           s.minWidth = '150px'
           s.textColor = theme().text
-          s.localizedText = title
+          s.text = translate(title)
           s.textSelectable = false
         })
     })
@@ -224,7 +224,7 @@ const PronunciationPanel = () => {
         .observe(vm.$audioUrl)
         .react(s => {
           s.visible = vm.$audioUrl.value === ''
-          s.localizedText = 'Load Audio'
+          s.text = translate('Load Audio')
         })
         .onClick(() => vm.loadAudioLink())
 
@@ -232,7 +232,7 @@ const PronunciationPanel = () => {
         .observe(vm.$audioUrl)
         .react(s => {
           s.visible = vm.$audioUrl.value !== ''
-          s.localizedText = 'Delete'
+          s.text = translate('Delete')
         })
         .onClick(() => vm.$audioUrl.value = '')
     })
@@ -275,7 +275,7 @@ const MediaFileView = (mf: IMediaFile) => {
           IconBtn()
             .react(s => {
               s.text = mf.url + ''
-              s.localizedPopUp = 'Copy link'
+              s.popUp = translate('Copy link')
               s.revert = true
               s.icon = MaterialIcon.content_copy
               s.fontSize = theme().fontSizeXS
@@ -325,7 +325,7 @@ const PendingUploadResources = () => {
         .children(() => {
           AccentBtn()
             .react(s => {
-              s.localizedText = 'Choose a media-file'
+              s.text = translate('Choose a media-file')
             })
             .onClick(() => chooser.dom.click())
 
@@ -341,7 +341,7 @@ const PendingUploadResources = () => {
             .observe(vm.$filesPendingUpload)
             .react(s => {
               s.visible = vm.$filesPendingUpload.value.length > 0
-              s.localizedText = 'Upload all'
+              s.text = translate('Upload all')
             })
             .onClick(() => vm.uploadAll())
         })
@@ -393,7 +393,7 @@ const FileView = (w: FileWrapper) => {
 
       RedBtn()
         .react(s => {
-          s.localizedText = 'Cancel'
+          s.text = translate('Cancel')
         })
         .onClick(() => vm.deletePendingUploadFile(w))
     })
@@ -415,7 +415,7 @@ const Header = () => {
         .observe(vm.$hasChanges)
         .react(s => {
           s.isDisabled = !vm.$hasChanges.value
-          s.localizedText = 'Save'
+          s.text = translate('Save')
           s.popUp = 'Ctrl + Shift + S'
         })
         .onClick(() => vm.save())
@@ -424,7 +424,7 @@ const Header = () => {
         .observe(vm.$hasChanges)
         .react(s => {
           s.isDisabled = !vm.$hasChanges.value
-          s.localizedText = 'Discard Changes'
+          s.text = translate('Discard Changes')
         })
         .onClick(() => vm.discardChanges())
 
@@ -438,7 +438,7 @@ const Header = () => {
 
       AccentBtn()
         .react(s => {
-          s.localizedText = 'Quit'
+          s.text = translate('Quit')
           s.popUp = 'ESC'
         })
         .onClick(() => vm.quit())
@@ -470,7 +470,7 @@ const ReplacePanel = () => {
         .observe(vm.textReplacer.$replaceFrom.pipe().map(value => value.length > 0).removeDuplicates().fork())
         .react(s => {
           s.isDisabled = vm.textReplacer.$replaceFrom.value.length === 0
-          s.localizedText = 'Replace all'
+          s.text = translate('Replace all')
         })
         .onClick(() => vm.replaceAll(vm.textReplacer.$replaceFrom.value, vm.textReplacer.$replaceTo.value))
     })

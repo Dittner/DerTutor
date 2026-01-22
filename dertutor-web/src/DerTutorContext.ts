@@ -7,7 +7,7 @@ import { EditorVM } from './ui/view/editor/EditorVM'
 import { ILang, IUser } from './domain/DomainModel'
 import { globalContext } from './App'
 import { log, logErr } from './app/Logger'
-import { Locale } from './app/LocaleManager'
+import { Locale, localeManager } from './app/LocaleManager'
 
 export interface Message {
   readonly level?: 'warning' | 'error' | 'info'
@@ -63,7 +63,7 @@ export class DerTutorContext {
       .skipNullable()
       .removeDuplicates()
       .onReceive(langCode => {
-        globalContext.localeManager.$locale.value = langCode
+        localeManager.$locale.value = langCode
       })
       .subscribe()
 

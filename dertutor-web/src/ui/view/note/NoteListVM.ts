@@ -8,6 +8,7 @@ import { UrlKeys } from "../../../app/URLNavigator"
 import { globalContext } from "../../../App"
 import { Interactor } from "../Interactor"
 import { log } from "../../../app/Logger"
+import { translate } from "../../../app/LocaleManager"
 
 export interface NoteListState {
   allLangs?: ILang[]
@@ -182,7 +183,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
       return
     }
 
-    const res = await this.inputMode.activate('New:', '').asAwaitable
+    const res = await this.inputMode.activate('Name:', '').asAwaitable
 
     if (!res.isCanceled) {
       const lang = this.$state.value.lang
@@ -224,7 +225,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
       return
     }
 
-    const res = await this.inputMode.activate('Rename:', this.$state.value.selectedNote.name).asAwaitable
+    const res = await this.inputMode.activate(translate('Rename:'), this.$state.value.selectedNote.name).asAwaitable
 
     if (!res.isCanceled) {
       const page = this.$state.value.page
@@ -273,7 +274,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
     if (!this.$state.value.page) return
     if (!this.$state.value.selectedNote) return
 
-    const res = await this.inputMode.activate('Delete [yes|no]?', 'no').asAwaitable
+    const res = await this.inputMode.activate(translate('Delete [yes|no]?'), translate('no')).asAwaitable
 
     if (!res.isCanceled) {
       const page = this.$state.value.page
@@ -281,7 +282,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
       if (page && note) {
         const answer = res.value.trim().toLocaleLowerCase()
-        if (answer === 'y' || answer === 'yes') {
+        if (answer === 'y' || answer === 'yes' || answer === 'ja' || answer === 'j') {
           const schema = { id: note.id } as DeleteNoteSchema
           this.server.deleteNote(schema).pipe()
             .onReceive(_ => {

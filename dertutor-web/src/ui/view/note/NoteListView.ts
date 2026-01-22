@@ -9,6 +9,7 @@ import { MaterialIcon } from "../../icons/MaterialIcon"
 import { smallTheme, theme } from "../../theme/ThemeManager"
 import { Title } from "../../controls/Text"
 import { TextInput } from "../../controls/Input"
+import { translate } from "../../../app/LocaleManager"
 
 export const NoteListView = () => {
   const vm = DerTutorContext.self.noteListVM
@@ -26,7 +27,6 @@ export const NoteListView = () => {
           s.width = '100%'
           s.height = layout.navBarHeight + 'px'
           s.layer = '10'
-          s.paddingHorizontal = '10px'
         })
 
       NotesMenu()
@@ -91,6 +91,7 @@ export const NoteListView = () => {
 const Header = () => {
   const vm = DerTutorContext.self.noteListVM
   return hstack()
+    .observe(globalContext.app.$layout, 'affectsChildrenProps')
     .react(s => {
       s.gap = '10px'
       s.fontFamily = FontFamily.APP
@@ -103,103 +104,62 @@ const Header = () => {
     .children(() => {
 
       hstack()
-        .observe(globalContext.app.$layout)
         .react(s => {
           const layout = globalContext.app.$layout.value
           s.visible = !layout.isCompact
-          s.width = layout.leftSideMenuWidth - 20 + 'px'
-          s.paddingLeft = '10px'
           s.valign = 'center'
-          s.gap = '10px'
+          s.halign = 'left'
+          s.height = '100%'
+          s.width = layout.leftSideMenuWidth - 10 + 'px'
+          s.paddingHorizontal = '20px'
+        }).children(() => {
+          VocDropdown()
         })
-        .children(() => {
 
-          image()
-            .observe(vm.$lang)
+      hstack()
+        .react(s => {
+          const layout = globalContext.app.$layout.value
+          s.valign = 'center'
+          s.halign = 'left'
+          s.height = '100%'
+          s.width = layout.contentWidth + 'px'
+          s.gap = '10px'
+          //s.paddingHorizontal = layout.paddingHorizontal + 'px'
+        }).children(() => {
+          HeaderBtn()
             .react(s => {
-              s.src = vm.$lang.value?.code === 'de' ? '/src/resources/de_flag.svg' : '/src/resources/en_flag.svg'
-              s.width = '18px'
-              s.height = '18px'
-              s.cornerRadius = '18px'
-              s.border = '1px solid ' + theme().border
+              s.icon = MaterialIcon.arrow_back
+              s.popUp = translate('Go back')
+              s.width = '50px'
+            })
+            .onClick(() => {
+              vm.quit()
             })
 
-          IconBtn()
-            .observe(vm.$vocabulariesShown)
+          HeaderBtn()
+            .observe(vm.$noteListShown)
             .react(s => {
-              s.isSelected = vm.$vocabulariesShown.value
-              s.icon = MaterialIcon.keyboard_arrow_down
-              s.textColor = theme().text50
-              s.localizedText = 'Vocabularies'
-              s.revert = true
-              s.height = '40px'
-              s.paddingHorizontal = '0'
-              s.cornerRadius = '4px'
-              s.iconSize = '1.2rem'
+              s.visible = globalContext.app.$layout.value.isCompact
+              s.isSelected = vm.$noteListShown.value
+              s.icon = MaterialIcon.menu
             })
-            .whenHovered(s => s.textColor = theme().text)
-            .whenSelected(s => s.textColor = theme().text)
-            .onClick(e => {
-              e.stopImmediatePropagation()
-              vm.$vocabulariesShown.value = !vm.$vocabulariesShown.value
+            .onClick(() => {
+              vm.$noteListShown.value = !vm.$noteListShown.value
             })
 
-          vlist<IVoc>()
-            .observe(vm.$lang, 'recreateChildren')
-            .observe(vm.$vocabulariesShown, 'affectsProps')
-            .observe(globalContext.app.$layout, 'affectsProps')
-            .items(() => vm.$lang.value?.vocs ?? [])
-            .itemRenderer(VocRenderer)
-            .itemHash((item: IVoc) => item.id + item.name)
+          GlobalSearchView()
+            .observe(globalContext.app.$layout)
             .react(s => {
               const layout = globalContext.app.$layout.value
-              s.position = 'absolute'
-              s.top = layout.navBarHeight + 'px'
-
-              s.layer = '100'
-              s.visible = vm.$vocabulariesShown.value
-              s.fontFamily = FontFamily.APP
-              s.fontSize = theme().fontSizeXS
-              s.width = '250px'
-              s.maxWidth = globalContext.app.$layout.value.leftSideMenuWidth - layout.paddingHorizontal + 'px'
-              s.gap = '0'
-              s.bgColor = theme().articleBg
-              s.border = '1px solid ' + theme().border
-              s.padding = '12px'
-              s.shadow = '0px 6px 6px 3px #00000010'
-              s.cornerRadius = '4px'
+              s.width = layout.isCompact ? '100%' : layout.leftSideMenuWidth - 20 + 'px'
+              //s.height = layout.isCompact ? '35px' : layout.navBarHeight + 'px'
             })
-        })
 
-
-      HeaderBtn()
-        .react(s => {
-          s.icon = MaterialIcon.arrow_back
-          s.localizedPopUp = 'Go back'
-          s.width = '50px'
         })
-        .onClick(() => {
-          vm.quit()
-        })
-
-      HeaderBtn()
-        .observe(globalContext.app.$layout)
-        .observe(vm.$noteListShown)
-        .react(s => {
-          s.visible = globalContext.app.$layout.value.isCompact
-          s.isSelected = vm.$noteListShown.value
-          s.icon = MaterialIcon.menu
-        })
-        .onClick(() => {
-          vm.$noteListShown.value = !vm.$noteListShown.value
-        })
-
-      GlobalSearchView()
 
       spacer()
 
       HeaderBtn()
-        .observe(globalContext.app.$layout)
         .observe(vm.$filtersShown)
         .react(s => {
           s.visible = globalContext.app.$layout.value.isCompact
@@ -211,7 +171,6 @@ const Header = () => {
         })
 
       ThemeSwitcher()
-        .observe(globalContext.app.$layout)
         .react(s => {
           s.visible = !globalContext.app.$layout.value.isCompact
           s.position = 'absolute'
@@ -221,6 +180,73 @@ const Header = () => {
 }
 
 
+const VocDropdown = () => {
+  const vm = DerTutorContext.self.noteListVM
+  return hstack()
+    .react(s => {
+      s.valign = 'center'
+      s.gap = '10px'
+    })
+    .children(() => {
+
+      image()
+        .observe(vm.$lang)
+        .react(s => {
+          s.src = vm.$lang.value?.code === 'de' ? '/src/resources/de_flag.svg' : '/src/resources/en_flag.svg'
+          s.width = '18px'
+          s.height = '18px'
+          s.cornerRadius = '18px'
+          s.border = '1px solid ' + theme().border
+        })
+
+      IconBtn()
+        .observe(vm.$vocabulariesShown)
+        .react(s => {
+          s.isSelected = vm.$vocabulariesShown.value
+          s.icon = MaterialIcon.keyboard_arrow_down
+          s.textColor = theme().text50
+          s.text = translate('Vocabularies')
+          s.revert = true
+          s.height = '40px'
+          s.paddingHorizontal = '0'
+          s.cornerRadius = '4px'
+          s.iconSize = '1.2rem'
+        })
+        .whenHovered(s => s.textColor = theme().text)
+        .whenSelected(s => s.textColor = theme().text)
+        .onClick(e => {
+          e.stopImmediatePropagation()
+          vm.$vocabulariesShown.value = !vm.$vocabulariesShown.value
+        })
+
+      vlist<IVoc>()
+        .observe(vm.$lang, 'recreateChildren')
+        .observe(vm.$vocabulariesShown, 'affectsProps')
+        .observe(globalContext.app.$layout, 'affectsProps')
+        .items(() => vm.$lang.value?.vocs ?? [])
+        .itemRenderer(VocRenderer)
+        .itemHash((item: IVoc) => item.id + item.name)
+        .react(s => {
+          const layout = globalContext.app.$layout.value
+          s.position = 'absolute'
+          s.top = layout.navBarHeight + 'px'
+
+          s.layer = '100'
+          s.visible = vm.$vocabulariesShown.value
+          s.fontFamily = FontFamily.APP
+          s.fontSize = theme().fontSizeXS
+          s.width = '250px'
+          s.maxWidth = globalContext.app.$layout.value.leftSideMenuWidth - layout.paddingHorizontal + 'px'
+          s.gap = '0'
+          s.bgColor = theme().appBg
+          s.border = '1px solid ' + theme().border
+          s.padding = '12px'
+          s.shadow = '0px 6px 6px 3px #00000010'
+          s.cornerRadius = '4px'
+        })
+    })
+
+}
 const VocRenderer = (voc: IVoc, index: number) => {
   const vm = DerTutorContext.self.noteListVM
   return p()
@@ -270,14 +296,12 @@ const GlobalSearchView = () => {
       s.gap = '0px'
       s.fontFamily = FontFamily.APP
       s.valign = 'center'
-      s.halign = 'right'
       s.width = '100%'
-      s.maxWidth = '400px'
       s.height = '35px'
       s.border = '1px solid ' + (vm.$searchBufferFocused.value ? theme().red : theme().border)
-      s.bgColor = vm.$searchBufferFocused.value ? theme().red + '10' : theme().border + '40'
+      s.bgColor = vm.$searchBufferFocused.value ? theme().red + '10' : theme().border + '10'
       s.cornerRadius = '4px'
-      s.paddingRight = '5px'
+      s.paddingHorizontal = '5px'
     })
     .children(() => {
 
@@ -299,7 +323,7 @@ const GlobalSearchView = () => {
         .react(s => {
           s.width = '100%'
           s.fontSize = theme().fontSizeS
-          s.localizedPlaceholder = 'Search...'
+          s.placeholder = translate('Search...')
           s.border = 'unset'
           s.textColor = theme().isLight ? theme().text : theme().mark
           s.autoFocus = vm.$searchBufferFocused.value
@@ -344,17 +368,34 @@ const GlobalSearchView = () => {
           vm.startSearch('')
         })
 
-      p()
+      KeyboardKey('⌘k')
         .observe(vm.$searchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
         .react(s => {
           s.visible = vm.$searchBuffer.value.length === 0
-          s.textColor = theme().text50
-          s.text = '⌘k, f'
-          s.wrap = false
-          s.whiteSpace = 'nowrap'
-          s.fontSize = theme().fontSize
-          s.fontFamily = FontFamily.APP
         })
+
+      KeyboardKey('f')
+        .observe(vm.$searchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
+        .react(s => {
+          s.visible = vm.$searchBuffer.value.length === 0
+          s.marginLeft = '5px'
+        })
+    })
+}
+
+const KeyboardKey = (value: string) => {
+  return p()
+    .react(s => {
+      s.textColor = theme().text50
+      s.text = value
+      s.wrap = false
+      s.whiteSpace = 'nowrap'
+      s.fontSize = theme().fontSizeXS
+      s.fontFamily = FontFamily.ARTICLE
+      s.borderColor = theme().border + '88'
+      s.bgColor = theme().border + '40'
+      s.paddingHorizontal = '8px'
+      s.cornerRadius = '4px'
     })
 }
 
@@ -374,7 +415,7 @@ const NotesMenu = () => {
         .observe(vm.$state)
         .react(s => {
           const p = vm.$state.value.page
-          s.localizedText = p && p.pages > 0 ? `Page: ${p.page} of ${p.pages}` : 'No data'
+          s.text = p && p.pages > 0 ? translate(`Page: ${p.page} of ${p.pages}`) : translate('No data')
           s.paddingLeft = '20px'
         })
 
@@ -431,7 +472,7 @@ const NoteContentView = () => {
         .react(s => {
           const note = vm.$state.value.selectedNote
           s.visible = note && vm.$taskAnswerShown.value === false && note.text.includes('??')
-          s.localizedText = 'Show answer'
+          s.text = translate('Show answer')
           s.popUp = 'Enter'
         })
         .onClick(() => vm.$taskAnswerShown.value = true)
@@ -505,7 +546,7 @@ const NotesPaginator = () => {
           s.wrap = false
           s.paddingHorizontal = '10px'
           s.borderColor = theme().border
-          s.localizedPopUp = 'Previous page'
+          s.popUp = translate('Previous page')
         })
         .onClick(() => vm.$state.value.page && vm.navigator.updateWith({ page: vm.$state.value.page?.page - 1 }))
 
@@ -515,7 +556,7 @@ const NotesPaginator = () => {
           s.visible = p && p.page > 1
           s.text = '1'
           s.wrap = false
-          s.localizedPopUp = 'First page'
+          s.popUp = translate('First page')
         })
         .onClick(() => vm.navigator.updateWith({ page: 1 }))
 
@@ -525,7 +566,7 @@ const NotesPaginator = () => {
           s.visible = p && p.page > 2
           s.text = p ? `${p.page - 1}` : ''
           s.wrap = false
-          s.localizedPopUp = 'Previous page'
+          s.popUp = translate('Previous page')
           //s.href = vm.getPageLink(p ? p.page + 1 : 1)
         })
         .onClick(() => {
@@ -551,7 +592,7 @@ const NotesPaginator = () => {
           s.visible = p && p.page < p.pages - 1
           s.text = p ? `${p.page + 1}` : ''
           s.wrap = false
-          s.localizedPopUp = 'Next page'
+          s.popUp = translate('Next page')
           //s.href = vm.getPageLink(p ? p.page + 1 : 1)
         })
         .onClick(() => {
@@ -565,7 +606,7 @@ const NotesPaginator = () => {
           s.visible = p && p.page < p.pages
           s.text = p ? `${p.pages}` : ''
           s.wrap = false
-          s.localizedPopUp = 'Last page'
+          s.popUp = translate('Last page')
         })
         .onClick(() => {
           const p = vm.$state.value.page
@@ -580,7 +621,7 @@ const NotesPaginator = () => {
           s.wrap = false
           s.paddingHorizontal = '10px'
           s.borderColor = theme().border
-          s.localizedPopUp = 'Next page'
+          s.popUp = translate('Next page')
         })
         .onClick(() => vm.$state.value.page && vm.navigator.updateWith({ page: vm.$state.value.page?.page + 1 }))
     })
@@ -858,11 +899,11 @@ const QuickSearchInput = () => {
     .react(s => {
       s.fontFamily = FontFamily.APP
       s.valign = 'center'
-      s.halign = 'left'
+      s.halign = 'stretch'
       s.width = '100%'
       s.gap = '5px'
       s.maxWidth = '300px'
-      s.height = '40px'
+      s.height = '35px'
       s.border = '1px solid ' + (vm.$quickSearchFocused.value ? theme().accent : theme().border)
       s.cornerRadius = '4px'
       s.paddingHorizontal = '5px'
@@ -873,6 +914,7 @@ const QuickSearchInput = () => {
         .react(s => {
           s.value = MaterialIcon.search
           s.width = '30px'
+          s.maxWidth = '30px'
           s.textAlign = 'center'
           s.textColor = theme().text50
         })
@@ -881,10 +923,10 @@ const QuickSearchInput = () => {
         .observe(vm.$quickSearchFocused)
         .react(s => {
           s.width = '100%'
-          s.maxWidth = '300px'
+          //s.maxWidth = '300px'
           s.autoFocus = vm.$quickSearchFocused.value
           s.fontSize = theme().fontSizeXS
-          s.localizedPlaceholder = "Enter a word to search /"
+          s.placeholder = translate('Enter a word to search')
           s.border = 'unset'
           s.textColor = theme().strong
           s.caretColor = theme().accent
@@ -909,10 +951,16 @@ const QuickSearchInput = () => {
           }
         })
 
+      KeyboardKey('/')
+        .observe(vm.$quickSearchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
+        .react(s => {
+          s.visible = vm.$quickSearchBuffer.value.length === 0
+        })
+
       IconBtn()
         .observe(vm.$quickSearchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
         .react(s => {
-          s.opacity = vm.$quickSearchBuffer.value.length > 0 ? '1' : '0'
+          s.visible = vm.$quickSearchBuffer.value.length > 0
           s.icon = MaterialIcon.close
           s.iconSize = theme().fontSizeXS
           s.textColor = theme().appBg
@@ -946,7 +994,7 @@ const NextPrevNoteNavigator = () => {
             const selectedNoteIndex = vm.$selectedNoteIndex.value
             const selectedPageIndex = page.page ?? 0
             s.visible = selectedNoteIndex > 0 || selectedPageIndex > 1
-            s.localizedText = selectedNoteIndex > 0 ? page.items[selectedNoteIndex - 1].name : `Page ${selectedPageIndex - 1}`
+            s.text = selectedNoteIndex > 0 ? page.items[selectedNoteIndex - 1].name : translate(`Page ${selectedPageIndex - 1}`)
           } else {
             s.visible = false
           }
@@ -975,7 +1023,7 @@ const NextPrevNoteNavigator = () => {
             const selectedPageIndex = page.page ?? 0
             s.visible = selectedNoteIndex < page.items.length || selectedPageIndex < page.pages
             if (selectedNoteIndex < page.items.length - 1) s.text = page.items[selectedNoteIndex + 1].name
-            else if (selectedPageIndex < page.pages) s.localizedText = `Page ${selectedPageIndex + 1}`
+            else if (selectedPageIndex < page.pages) s.text = translate(`Page ${selectedPageIndex + 1}`)
             else s.text = ''
           }
 

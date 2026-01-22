@@ -10,6 +10,7 @@ import { InputBufferController } from "../controls/Input"
 import { AuthenticateSchema } from "../../backend/Schema"
 import { IUser } from "../../domain/DomainModel"
 import { log } from "../../app/Logger"
+import { translate } from "../../app/LocaleManager"
 
 export type ViewModelID = 'connection' | 'vocs' | 'notes' | 'editor'
 export interface IViewModel {
@@ -122,13 +123,12 @@ export class ViewModel<ViewModelState> implements IViewModel {
 
   private showActions() {
     this.$showActions.value = true
-    this.ctx.$msg.value = { text: 'Shortkeys (Press ESC to hide)' }
   }
 
   private async signIn() {
     if (this.inputMode.$isActive.value) return
     if (this.ctx.$user.value) {
-      this.ctx.$msg.value = { text: 'Already authenticated' }
+      this.ctx.$msg.value = { text: translate('Already authenticated') }
       return
     }
 

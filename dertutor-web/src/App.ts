@@ -1,4 +1,4 @@
-import { div, hstack, observer, p, spacer, span, vlist } from "flinker-dom"
+import { div, hstack, observer, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { GlobalContext } from "./app/GlobalContext"
 import { Action } from "./ui/actions/Action"
 import { FontFamily } from "./ui/controls/Font"
@@ -12,6 +12,7 @@ import { LineInput } from "./ui/controls/Input"
 import { Icon } from "./ui/controls/Button"
 import { MaterialIcon } from "./ui/icons/MaterialIcon"
 import { log } from "./app/Logger"
+import { localeManager, translate } from "./app/LocaleManager"
 
 export const globalContext = GlobalContext.init()
 
@@ -21,7 +22,7 @@ export function App() {
 
   return div()
     .observe(themeManager.$theme, 'affectsProps', 'affectsChildrenProps')
-    .observe(globalContext.localeManager.$locale, 'affectsProps', 'affectsChildrenProps')
+    .observe(localeManager.$locale, 'affectsProps', 'affectsChildrenProps')
     .react(s => {
       s.width = '100%'
     })
@@ -43,6 +44,8 @@ export function App() {
     })
 }
 
+
+const SHORTKEY_TEXT_WIDTH = '160px'
 export const ActionsHelpView = () => {
   const ctx = DerTutorContext.self
 
@@ -54,8 +57,8 @@ export const ActionsHelpView = () => {
       s.visible = vm && vm.$showActions.value
       s.position = 'fixed'
       s.right = '0px'
-      s.width = '500px'
-      s.paddingTop = layout.navBarHeight + 'px'
+      s.width = '600px'
+      s.paddingTop = '20px'
       s.paddingBottom = layout.statusBarHeight + 'px'
       s.height = window.innerHeight + 'px'
       s.paddingHorizontal = '20px'
@@ -63,6 +66,21 @@ export const ActionsHelpView = () => {
       s.bgColor = theme().actionsBg
       s.layer = '100'
     }).children(() => {
+
+      p().react(s => {
+        s.textColor = theme().text
+        s.fontWeight = 'bold'
+        s.paddingLeft = SHORTKEY_TEXT_WIDTH
+        s.text = translate('Shortkeys')
+      })
+
+      p().react(s => {
+        s.textColor = theme().text
+        s.paddingLeft = SHORTKEY_TEXT_WIDTH
+        s.text = translate('(Press ESC to hide)')
+        s.paddingBottom = '20px'
+      })
+
 
       vlist<Action>()
         .observe(ctx.$activeVM, 'recreateChildren')
@@ -72,6 +90,28 @@ export const ActionsHelpView = () => {
         .react(s => {
           s.width = '100%'
           s.gap = '0'
+        })
+
+      vstack()
+        .react(s => {
+          s.width = 'unset'
+          s.textColor = theme().strong
+          s.fontSize = theme().fontSizeXS
+          s.fontFamily = FontFamily.MONO
+          s.paddingLeft = SHORTKEY_TEXT_WIDTH
+          s.paddingTop = '20px'
+          s.paddingRight = '20px'
+          s.gap = '2px'
+        })
+        .children(() => {
+          spacer().react(s => {
+            s.width = '75%'
+            s.height = '2px'
+            s.bgColor = theme().text
+            s.marginBottom = '20px'
+          })
+          p().react(s => { s.text = '<CR> — Enter' })
+          p().react(s => s.text = '<C-k> — Ctrl+k / Cmd+k')
         })
     })
 }
@@ -89,18 +129,18 @@ const ActionInfoView = (a: Action) => {
         s.text = a.cmd
         s.textColor = theme().strong
         s.paddingHorizontal = '20px'
-        s.paddingVertical = '5px'
-        s.width = '160px'
+        s.paddingVertical = '2px'
+        s.width = SHORTKEY_TEXT_WIDTH
         s.whiteSpace = 'nowrap'
         s.textAlign = 'right'
       })
 
       span()
         .react(s => {
-          s.text = a.desc
+          s.text = translate(a.desc)
           s.textColor = theme().text
           s.width = '100%'
-          s.whiteSpace = 'nowrap'
+          //s.whiteSpace = 'nowrap'
           s.paddingVertical = '5px'
         })
     })
@@ -141,11 +181,10 @@ export const ThemeSwitcher = () => {
       s.valign = 'center'
       s.gap = '0px'
       s.border = '1px solid ' + theme().border
-      s.textColor = theme().text + '88'
+      s.textColor = theme().text + '50'
     })
     .whenHovered(s => {
-      s.textColor = theme().text
-      s.bgColor = theme().appBg + '88'
+      s.bgColor = theme().text + '20'
       s.border = '1px solid ' + theme().border
       s.cursor = 'pointer'
     })
@@ -224,7 +263,7 @@ export const MessangerView = () => {
       s.visible = !layout.isMobile
       s.fontFamily = FontFamily.MONO
       s.fontSize = theme().fontSizeXS
-      s.paddingHorizontal = layout.isCompact ? '40px' : '20px'
+      s.paddingHorizontal = '40px'
       s.text = msg?.text ?? ''
       s.width = '100%'
       s.wrap = false
@@ -288,8 +327,6 @@ const ModalView = () => {
       s.width = '100vw'
       s.height = '100vh'
       s.bgColor = theme().appBg + '50'
-    }).children(() => {
-
     })
     .onClick(() => globalContext.app.$dropdownState.value = '')
 }

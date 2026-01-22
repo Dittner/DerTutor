@@ -3,7 +3,6 @@ import { btn, ButtonProps, link, span, StackHAlign, TextProps } from "flinker-do
 import { MaterialIcon } from "../icons/MaterialIcon"
 import { theme } from "../theme/ThemeManager"
 import { FontFamily } from "./Font"
-import { globalContext } from "../../App"
 
 /*
 *
@@ -36,8 +35,6 @@ export const Icon = <P extends IconProps>() => {
 export interface IconBtnProps extends ButtonProps {
   icon?: MaterialIcon
   iconSize?: string
-  localizedText?: string
-  localizedPopUp?: string
   revert?: boolean
   halign?: StackHAlign
 }
@@ -59,8 +56,6 @@ export const IconBtn = () => {
     .map(s => {
       s.flexDirection = s.revert ? 'row-reverse' : 'row'
       s.justifyContent = s.halign === 'left' ? 'flex-start' : s.halign === 'right' ? 'flex-end' : 'center'
-      if (s.localizedPopUp)
-        s.popUp = globalContext.localeManager.translate(s.localizedPopUp)
     })
     .children(() => {
 
@@ -79,7 +74,7 @@ export const IconBtn = () => {
         .observe($sharedState)
         .react(s => {
           const ss = $sharedState.value
-          s.text = ss.localizedText ? globalContext.localeManager.translate(ss.localizedText) : ss.text
+          s.text = ss.text
           s.textColor = 'inherit'
           s.fontSize = ss.fontSize ?? 'inherit'
           s.fontFamily = 'inherit'
