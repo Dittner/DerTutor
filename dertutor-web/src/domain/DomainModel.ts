@@ -17,7 +17,7 @@ export interface IVoc {
   readonly id: number
   readonly lang_id: number
   readonly name: string
-  readonly order: number
+  readonly sort_notes: string
   readonly description: string
 }
 

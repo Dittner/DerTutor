@@ -11,6 +11,7 @@ export interface UrlKeys {
   readonly level?: number
   readonly tagId?: number
   readonly searchKey?: string
+  readonly sort?: string
   readonly page?: number
   readonly edit?: boolean
 }
@@ -44,6 +45,7 @@ export class URLNavigator {
       page: params.has('page') ? Number(params.get('page')) : undefined,
       edit: params.has('edit') ? true : undefined,
       searchKey: params.has('key') ? params.get('key') ?? '' : undefined,
+      sort: params.has('sort') ? params.get('sort') ?? '' : undefined,
     }
   }
 
@@ -59,6 +61,7 @@ export class URLNavigator {
     if (keys.level !== undefined) res += `&level=${keys.level}`
     if (keys.tagId !== undefined) res += `&tag=${keys.tagId}`
     if (keys.searchKey !== undefined) res += `&key=${keys.searchKey}`
+    if (keys.sort !== undefined) res += `&sort=${keys.sort}`
     if (keys.edit) res += `&edit`
     return res
   }

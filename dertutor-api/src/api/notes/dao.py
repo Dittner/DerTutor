@@ -19,6 +19,7 @@ class SearchParams(BaseModel):
     voc_id: int | None = Field(None, ge=1)
     level: int | None = Field(None, ge=1)
     tag_id: int | None = Field(None, ge=1)
+    sort: str | None = Field(None, min_length=2, description='Sort notes, e.g. name:asc')
 
 
 class SearchByNameParams(BaseModel):
@@ -89,6 +90,7 @@ class NotesDAO(BaseDAO[Note]):
             {"AND (name ILIKE '%' || :key || '%' OR text ILIKE '%' || :key || '%')" if params.key else ''}
             """
 
+        sort_notes = params.sort.replace(':', ' ') if params.sort else 'id desc'
         sort_and_paginate = f"""
             ORDER BY
                 {
@@ -102,7 +104,7 @@ class NotesDAO(BaseDAO[Note]):
             if params.key
             else ''
         }
-            id DESC
+            {sort_notes}
             LIMIT :limit
             OFFSET :offset;
             """

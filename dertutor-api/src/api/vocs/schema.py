@@ -4,7 +4,7 @@ from pydantic import BaseModel
 class VocCreate(BaseModel):
     lang_id: int
     name: str
-    order: int
+    sort_notes: str
     description: str
 
 
@@ -13,15 +13,10 @@ class VocRename(BaseModel):
     name: str
 
 
-class VocReorder(BaseModel):
-    id: int
-    order: int
-
-
 class VocUpdate(BaseModel):
     id: int
-    order: int
     name: str
+    sort_notes: str
     description: str
 
 
@@ -29,7 +24,7 @@ class VocRead(BaseModel):
     id: int
     lang_id: int
     name: str
-    order: int
+    sort_notes: str
     description: str
 
 

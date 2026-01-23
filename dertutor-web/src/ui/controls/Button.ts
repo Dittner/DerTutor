@@ -1,5 +1,5 @@
 import { RXObservableValue } from "flinker"
-import { btn, ButtonProps, link, span, StackHAlign, TextProps } from "flinker-dom"
+import { btn, ButtonProps, link, span, StackHAlign, StackVAlign, TextProps } from "flinker-dom"
 import { MaterialIcon } from "../icons/MaterialIcon"
 import { theme } from "../theme/ThemeManager"
 import { FontFamily } from "./Font"
@@ -37,6 +37,7 @@ export interface IconBtnProps extends ButtonProps {
   iconSize?: string
   revert?: boolean
   halign?: StackHAlign
+  valign?: StackVAlign
 }
 
 export const IconBtn = () => {
@@ -56,6 +57,7 @@ export const IconBtn = () => {
     .map(s => {
       s.flexDirection = s.revert ? 'row-reverse' : 'row'
       s.justifyContent = s.halign === 'left' ? 'flex-start' : s.halign === 'right' ? 'flex-end' : 'center'
+      s.alignItems = s.valign === 'top' ? 'flex-start' : s.valign === 'bottom' ? 'flex-end' : 'center'
     })
     .children(() => {
 
@@ -164,6 +166,7 @@ export const Link = () => {
       s.bgColor = theme().transparent
     })
     .whenHovered(s => {
+      s.textColor = theme().link
       s.textDecoration = 'underline'
     })
     .whenSelected(s => {

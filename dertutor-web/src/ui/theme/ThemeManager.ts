@@ -643,7 +643,7 @@ export class ThemeManager {
       content: '"⚠ "',
       textColor: t.warn,
     }
-    buildRule(warnProps, parentSelector, 'div.warn')
+    buildRule(warnProps, parentSelector, 'p.md-warn')
     buildRule(warnFirstChildProps, parentSelector, 'div.warn div p:first-child::before')
   }
 }

@@ -17,6 +17,7 @@ export interface NoteListState {
   page?: IPage
   selectedNote?: INote
   searchKey?: string
+  sort?: string
   searchMode?: boolean
   level?: number
   tagId?: number
@@ -207,7 +208,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
             log('NoteListVM:applyInput, creating note, result: ', n)
             if (n) {
               this.interactor.clearCache()
-              this.navigator.updateWith({ page: 1, noteId: n.id })
+              this.navigator.updateWith({ page: 1, noteId: n.id, sort: 'id:desc' })
             }
           })
           .onError(e => {
@@ -456,6 +457,7 @@ class NoteListInteractor extends Interactor<NoteListState> {
     state.searchKey = keys.searchKey
     state.level = keys.level
     state.tagId = keys.tagId
+    state.sort = keys.sort
   }
 
   private async loadPage(state: NoteListState, keys: UrlKeys) {
@@ -477,6 +479,7 @@ class NoteListInteractor extends Interactor<NoteListState> {
       this.prevState.voc?.id !== state.voc?.id ||
       this.prevState.level !== state.level ||
       this.prevState.tagId !== state.tagId ||
+      this.prevState.sort !== state.sort ||
       this.prevState.searchKey !== state.searchKey) {
 
       const isGlobalSearhcing = keys.searchKey && keys.searchKey.length > 1
@@ -489,6 +492,7 @@ class NoteListInteractor extends Interactor<NoteListState> {
       scheme.key = isGlobalSearhcing ? keys.searchKey : undefined
       scheme.level = keys.level
       scheme.tag_id = keys.tagId
+      scheme.sort = keys.sort
 
       log('Interactor.reloadPage, page:', keys.page)
       state.page = await globalContext.server.loadNotes(scheme).asAwaitable
@@ -509,6 +513,7 @@ class NoteListInteractor extends Interactor<NoteListState> {
           this.prevState.voc?.id !== state.voc?.id ||
           this.prevState.level !== state.level ||
           this.prevState.tagId !== state.tagId ||
+          this.prevState.sort !== state.sort ||
           this.prevState.searchKey !== state.searchKey) {
           note = state.page.items[0]
         } else {

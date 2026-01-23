@@ -1,4 +1,4 @@
-import { btn, div, hstack, image, spacer, vlist, vstack } from "flinker-dom"
+import { btn, div, hstack, image, spacer, span, vlist, vstack } from "flinker-dom"
 import { ILang, IVoc } from "../../../domain/DomainModel"
 import { FontFamily } from "../../controls/Font"
 import { DerTutorContext } from "../../../DerTutorContext"
@@ -172,7 +172,7 @@ const LangRenderer = (lang: ILang) => {
     })
 }
 
-const VocRenderer = (voc: IVoc, index: number) => {
+const VocRenderer = (voc: IVoc) => {
   const ctx = DerTutorContext.self
   const vm = ctx.vocListVM
   return btn()
@@ -183,9 +183,7 @@ const VocRenderer = (voc: IVoc, index: number) => {
       s.textAlign = 'left'
       s.width = '100%'
       s.paddingVertical = '5px'
-      s.text = index + 1 + '. ' + voc.name
       s.textColor = isSelected ? theme().accent : theme().text50
-      //s.borderColor = theme().appBg
     })
     .whenHovered(s => {
       s.textColor = theme().text
@@ -197,5 +195,16 @@ const VocRenderer = (voc: IVoc, index: number) => {
     .onClick(() => {
       vm.$highlightedVoc.value = voc
       vm.applySelection()
+    }).children(() => {
+      span().react(s => {
+        s.fontFamily = FontFamily.MONO
+        s.textColor = theme().text + '60'
+        s.fontSize = theme().fontSizeS
+        s.text = voc.name.length > 4 ? voc.name.substring(0, 3) : ''
+      })
+
+      span().react(s => {
+        s.text = voc.name.length > 4 ? voc.name.substring(3) : ''
+      })
     })
 }

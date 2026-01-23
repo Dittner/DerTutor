@@ -1,6 +1,6 @@
 import { RXOperation } from 'flinker'
 import { RestApi, RestApiError } from './RestApi'
-import { AuthenticateSchema, CreateNoteSchema, CreateVocSchema, DeleteMedialFileSchema, DeleteNoteSchema, DeleteVocSchema, GetPageSchema, RenameNoteSchema, RenameVocSchema, SearchByNameSchema, UpdateNoteSchema } from './Schema'
+import { AuthenticateSchema, CreateNoteSchema, CreateVocSchema, DeleteMedialFileSchema, DeleteNoteSchema, DeleteVocSchema, GetPageSchema, RenameNoteSchema, RenameVocSchema, SearchByNameSchema, UpdateNoteSchema, UpdateVocSchema } from './Schema'
 import { Path } from '../app/Utils'
 import { ILang, IMediaFile, INote, IPage, IUser } from '../domain/DomainModel'
 import { UploadFileCmd } from './cmd/UploadFileCmd'
@@ -60,6 +60,10 @@ export class DertutorServer extends RestApi {
 
   renameVoc(schema: RenameVocSchema): RXOperation<any, RestApiError> {
     return this.patch('/vocs/rename', schema)
+  }
+
+  updateVoc(schema: UpdateVocSchema): RXOperation<any, RestApiError> {
+    return this.put('/vocs', schema)
   }
 
   deleteVoc(schema: DeleteVocSchema): RXOperation<any, RestApiError> {

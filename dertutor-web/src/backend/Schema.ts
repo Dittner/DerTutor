@@ -5,12 +5,20 @@ export interface AuthenticateSchema {
 
 export interface CreateVocSchema {
   lang_id: number
+  sort_notes: string
   name: string
 }
 
 export interface RenameVocSchema {
   id: number
   name: string
+}
+
+export interface UpdateVocSchema {
+  id: number
+  name: string
+  sort_notes: string
+  description: string
 }
 
 export interface DeleteVocSchema {
@@ -51,6 +59,7 @@ export interface GetPageSchema {
   page: number
   size: number
   key?: string
+  sort?: string
   voc_id?: number
   level?: number
   tag_id?: number

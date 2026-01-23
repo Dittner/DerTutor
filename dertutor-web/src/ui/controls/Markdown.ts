@@ -50,6 +50,18 @@ noteMultiline.childrenLineRules = g.div.childrenLineRules
 noteMultiline.childrenMultilineRules = g.div.childrenMultilineRules
 g.globalRule.childrenMultilineRules.unshift(noteMultiline)
 
+// warnParagraph
+const warnParagraph = new MDLineGrammarRule()
+warnParagraph.matcher = [/^! (.*)$/, '<p class="md-warn">$1</p>']
+warnParagraph.childrenInlineRules = g.globalRule.childrenInlineRules
+warnParagraph.preProccessing = g.defLinePreproccessing
+
+g.globalRule.childrenLineRules.unshift(warnParagraph)
+g.quoteMultiline.childrenLineRules.unshift(warnParagraph)
+g.ol.childrenLineRules.unshift(warnParagraph)
+g.ul.childrenLineRules.unshift(warnParagraph)
+g.div.childrenLineRules.unshift(warnParagraph)
+
 //g.audio.matcher[1] = g.audio.matcher[1].replace('controls', '')
 const parser = new MDParser(g)
 

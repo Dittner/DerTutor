@@ -279,8 +279,9 @@ const MediaFileView = (mf: IMediaFile) => {
               s.revert = true
               s.icon = MaterialIcon.content_copy
               s.fontSize = theme().fontSizeXS
-              s.iconSize = theme().fontSizeS
+              s.iconSize = theme().fontSizeXS
               s.textColor = theme().link
+              s.valign = 'bottom'
             })
             .whenHovered(s => {
               s.textColor = theme().link100
@@ -538,14 +539,14 @@ const VocSelector = () => {
     })
 }
 
-const VocRenderer = (voc: IVoc, index:number) => {
+const VocRenderer = (voc: IVoc) => {
   const vm = DerTutorContext.self.editorVM
   return btn()
     .react(s => {
       s.wrap = false
       s.fontSize = theme().fontSizeXS
       s.isSelected = vm.$selectedVocId.value === voc.id
-      s.text = `${index+ 1}. ${voc.name}`
+      s.text = voc.name
       s.width = '100%'
       s.textAlign = 'left'
       s.textColor = theme().text50

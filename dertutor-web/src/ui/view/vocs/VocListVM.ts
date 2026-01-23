@@ -3,12 +3,13 @@ import { RXObservableValue } from "flinker"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { ViewModel } from "../ViewModel"
 import { DomainService, ILang, IVoc } from "../../../domain/DomainModel"
-import { CreateVocSchema, DeleteVocSchema, RenameVocSchema } from "../../../backend/Schema"
+import { CreateVocSchema, DeleteVocSchema, RenameVocSchema, UpdateVocSchema } from "../../../backend/Schema"
 import { UrlKeys } from "../../../app/URLNavigator"
 import { globalContext } from "../../../App"
 import { Interactor } from "../Interactor"
 import { log } from "../../../app/Logger"
 import { sortByKey } from "../../../app/Utils"
+import { translate } from "../../../app/LocaleManager"
 
 
 export interface VocListState {
@@ -51,6 +52,7 @@ export class VocListVM extends ViewModel<VocListState> {
 
     this.actionsList.add('n', 'New vocabulary (SUPERUSER)', () => this.createVoc())
     this.actionsList.add('r', 'Rename vocabulary (SUPERUSER)', () => this.renameVoc())
+    this.actionsList.add(':chsort<CR>', 'Change sorting of notes (SUPERUSER)', () => this.changeSortNotes())
     this.actionsList.add(':d<CR>', 'Delete vocabulary (SUPERUSER)', () => this.deleteVoc())
     this.actionsList.add('q', 'Quit', () => this.quit())
 
@@ -102,7 +104,8 @@ export class VocListVM extends ViewModel<VocListState> {
     if (this.$highlightedLang.value && !this.$highlightedVoc.value) {
       this.navigator.navigateTo({ langCode: this.$highlightedLang.value.code })
     } else if (this.$selectedLang.value && this.$highlightedVoc.value) {
-      this.navigator.navigateTo({ langCode: this.$selectedLang.value.code, vocCode: this.encodeName(this.$highlightedVoc.value) })
+      const voc = this.$highlightedVoc.value
+      this.navigator.navigateTo({ langCode: this.$selectedLang.value.code, vocCode: this.encodeName(voc), sort: voc.sort_notes })
     }
   }
 
@@ -135,6 +138,7 @@ export class VocListVM extends ViewModel<VocListState> {
         const schema = {} as CreateVocSchema
         schema.lang_id = lang.id
         schema.name = name
+        schema.sort_notes = 'id:desc'
 
         this.server.createVoc(schema).pipe()
           .onReceive((data: IVoc) => {
@@ -202,6 +206,53 @@ export class VocListVM extends ViewModel<VocListState> {
     }
   }
 
+
+  private async changeSortNotes() {
+    if (this.inputMode.$isActive.value) return
+    if (!this.$highlightedVoc.value) return
+
+    const res = await this.inputMode.activate('Sort:', this.$highlightedVoc.value.sort_notes).asAwaitable
+
+    if (!res.isCanceled) {
+      const lang = this.$selectedLang.value
+      const voc = this.$highlightedVoc.value
+
+      if (lang && voc) {
+        const newSortNotes = res.value.trim()
+        if (!newSortNotes) {
+          this.ctx.$msg.value = { level: 'warning', text: translate('Empty value') }
+          return
+        } else if (newSortNotes === voc.sort_notes) {
+          this.ctx.$msg.value = { level: 'info', text: translate('No changes') }
+          return
+        }
+
+        const schema = { id: voc.id, name: voc.name, description: voc.description, sort_notes: newSortNotes } as UpdateVocSchema
+        this.server.updateVoc(schema).pipe()
+          .onReceive((data: IVoc) => {
+            log('VocListVM:applyInput, updating voc, result: ', data)
+            if (data) {
+              this.ctx.$msg.value = { text: 'complete' }
+              const ind = lang.vocs.findIndex(v => v.id === voc.id)
+              if (ind !== -1) {
+                lang.vocs[ind] = { id: voc.id, lang_id: lang.id, name: data.name } as IVoc
+                this.$selectedLang.value = undefined
+                this.$selectedLang.value = lang
+                this.$highlightedVoc.value = lang.vocs[ind]
+              }
+            } else {
+              this.ctx.$msg.value = { text: 'Updating vocabulary is demaged', level: 'warning' }
+            }
+          })
+          .onError(e => {
+            const msg = e.message.indexOf('duplicate key') !== -1 ? 'Voc already exists' : e.message
+            this.ctx.$msg.value = { level: 'error', text: msg }
+          })
+          .subscribe()
+      }
+    }
+  }
+
   private async deleteVoc() {
     if (this.inputMode.$isActive.value) return
     if (!this.$highlightedVoc.value) return
@@ -261,7 +312,7 @@ class VocListInteractor extends Interactor<VocListState> {
   private async loadLangs(state: VocListState, keys: UrlKeys) {
     if (this.ctx.$allLangs.value.length === 0) {
       const allLangs = await globalContext.server.loadAllLangs().asAwaitable
-      allLangs.forEach(l => l.vocs.sort(sortByKey('order')))
+      allLangs.forEach(l => l.vocs.sort(sortByKey('name')))
       this.ctx.$allLangs.value = allLangs
     }
     state.allLangs = this.ctx.$allLangs.value

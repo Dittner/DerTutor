@@ -247,7 +247,7 @@ const VocDropdown = () => {
     })
 
 }
-const VocRenderer = (voc: IVoc, index: number) => {
+const VocRenderer = (voc: IVoc) => {
   const vm = DerTutorContext.self.noteListVM
   return p()
     .react(s => {
@@ -256,7 +256,7 @@ const VocRenderer = (voc: IVoc, index: number) => {
       s.width = '100%'
       s.paddingVertical = '3px'
       s.fontSize = theme().fontSizeXS
-      s.text = `${index + 1}. ${voc.name}`
+      s.text = voc.name
       s.textColor = theme().text
       //s.borderColor = theme().appBg
       s.textSelectable = false
@@ -266,7 +266,7 @@ const VocRenderer = (voc: IVoc, index: number) => {
       s.cursor = 'pointer'
     })
     .onClick(() => {
-      vm.$lang.value && voc && vm.navigator.navigateTo({ langCode: vm.$lang.value?.code, vocCode: voc && vm.encodeName(voc.name) })
+      vm.$lang.value && voc && vm.navigator.navigateTo({ langCode: vm.$lang.value?.code, vocCode: voc && vm.encodeName(voc.name), sort: voc.sort_notes })
     })
 }
 
@@ -544,6 +544,7 @@ const NotesPaginator = () => {
           s.isDisabled = !p || p.page <= 1
           s.text = '«'
           s.wrap = false
+          s.paddingBottom = '4px'
           s.paddingHorizontal = '10px'
           s.borderColor = theme().border
           s.popUp = translate('Previous page')
@@ -618,6 +619,7 @@ const NotesPaginator = () => {
           const p = vm.$state.value.page
           s.isDisabled = !p || p.page >= p.pages
           s.text = '»'
+          s.paddingBottom = '4px'
           s.wrap = false
           s.paddingHorizontal = '10px'
           s.borderColor = theme().border
