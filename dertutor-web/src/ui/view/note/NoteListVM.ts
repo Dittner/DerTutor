@@ -3,12 +3,13 @@ import { RXObservableValue } from "flinker"
 import { AVAILABLE_LEVELS, DomainService, ILang, INote, IPage, IVoc } from "../../../domain/DomainModel"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { ViewModel } from "../ViewModel"
-import { CreateNoteSchema, DeleteNoteSchema, GetPageSchema, RenameNoteSchema, SearchByNameSchema } from "../../../backend/Schema"
+import { CreateNoteSchema, DeleteNoteSchema, GetPageSchema, RenameNoteSchema } from "../../../backend/Schema"
 import { UrlKeys } from "../../../app/URLNavigator"
 import { globalContext } from "../../../App"
 import { Interactor } from "../Interactor"
 import { log } from "../../../app/Logger"
 import { translate } from "../../../app/LocaleManager"
+import { QuickSearchController } from "../../controls/QuickSearch"
 
 export interface NoteListState {
   allLangs?: ILang[]
@@ -27,7 +28,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
   readonly $state = new RXObservableValue<Readonly<NoteListState>>({})
   readonly $selectedNoteIndex = new RXObservableValue(-1)
   readonly $lang = new RXObservableValue<ILang | undefined>(undefined)
-  readonly $vocabulariesShown = new RXObservableValue(false)
 
   readonly $noteListShown = new RXObservableValue(true)
   readonly $filtersShown = new RXObservableValue(true)
@@ -36,17 +36,16 @@ export class NoteListVM extends ViewModel<NoteListState> {
   readonly $searchBuffer = new RXObservableValue('')
   readonly $searchBufferFocused = new RXObservableValue(false)
 
-  readonly $quickSearchBuffer = new RXObservableValue('')
-  readonly $quickSearchFocused = new RXObservableValue(false)
-  readonly $quickSearchResult = new RXObservableValue<INote | undefined>(undefined)
   readonly $noteNummberOfTotal = new RXObservableValue('')
 
+  readonly quiclSearchController: QuickSearchController
 
   constructor(ctx: DerTutorContext) {
     const interactor = new NoteListInteractor(ctx)
     super('notes', ctx, interactor)
     this.addKeybindings()
 
+    this.quiclSearchController = new QuickSearchController(ctx)
     //this.$noteListShown = new RXObservableValue(!globalContext.app.$layout.value.isCompact)
     //this.$filtersShown = new RXObservableValue(!globalContext.app.$layout.value.isCompact)
 
@@ -63,8 +62,9 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
     this.$state.value = state
     this.$lang.value = state.lang
+    this.quiclSearchController.$langId.value = state.lang?.id ?? 1
     this.$searchBuffer.value = state.searchKey ?? ''
-    this.$vocabulariesShown.value = false
+    globalContext.app.$dropdownState.value = ''
     this.$taskAnswerShown.value = false
 
     const page = state.page
@@ -105,11 +105,11 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add('r', 'Rename note (SUPERUSER)', () => this.renameNote())
     this.actionsList.add('e', 'Edit note (SUPERUSER)', () => this.edit())
     this.actionsList.add(':d<CR>', 'Delete note (SUPERUSER)', () => this.deleteNote())
-    this.actionsList.add('/', 'Quick Search', () => this.focusQuickSearchInput())
+    this.actionsList.add('/', 'Quick Search', () => this.quiclSearchController.focus())
     this.actionsList.add('f', 'Global Search', () => this.focusGlobalSearchInput())
     this.actionsList.add('<C-k>', 'Global Search', () => this.focusGlobalSearchInput())
 
-    this.actionsList.add('<Space>', 'Play audio', () => this.playAudio(this.$state.value?.selectedNote?.audio_url || this.$quickSearchResult.value?.audio_url || ''))
+    this.actionsList.add('<Space>', 'Play audio', () => this.playAudio())
     this.actionsList.add('<CR>', 'Show answer to the task', () => this.$taskAnswerShown.value = !this.$taskAnswerShown.value)
     this.actionsList.add(':id<CR>', 'Print ID of note', () => this.printID())
     this.actionsList.add('q', 'Quit', () => this.quit())
@@ -310,9 +310,10 @@ export class NoteListVM extends ViewModel<NoteListState> {
     }
   }
 
-  playAudio(url: string) {
-    if (url)
-      new Audio(this.server.baseUrl + url).play()
+  playAudio() {
+    if (this.$state.value?.selectedNote?.audio_url)
+      new Audio(this.server.baseUrl + this.$state.value?.selectedNote?.audio_url).play()
+    else this.quiclSearchController.playAudio()
   }
 
   focusGlobalSearchInput() {
@@ -321,44 +322,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.$searchBufferFocused.value = true
   }
 
-  focusQuickSearchInput() {
-    const selectedText = window.getSelection()?.toString() ?? ''
-    if (selectedText) this.$quickSearchBuffer.value = selectedText
-    this.$quickSearchFocused.value = true
-  }
-
-  quickSearch(name: string) {
-    if (name.length < 2) {
-      this.ctx.$msg.value = { text: 'Search text is too short', level: 'warning' }
-      return
-    } else if (!this.$state.value.lang) {
-      this.ctx.$msg.value = { text: 'Language not selected', level: 'warning' }
-      return
-    }
-
-    this.$quickSearchBuffer.value = name
-
-    log('NoteListVM.quickSearch by name:', name)
-    const scheme = {} as SearchByNameSchema
-    scheme.lang_id = this.$state.value.lang.id
-    scheme.voc_id = this.$state.value.lang.id //the first vocabularies have the same ids as languages
-    scheme.name = name
-
-    globalContext.server.searchNoteByName(scheme).pipe()
-      .onReceive(notes => {
-        log('NoteListVM.quickSearch result:', notes)
-        if (notes.length > 0) {
-          this.$quickSearchResult.value = notes[0]
-        } else {
-          this.ctx.$msg.value = { text: `"${name}" not found` }
-          this.$quickSearchResult.value = undefined
-        }
-      })
-      .onError(e => {
-        this.ctx.$msg.value = { level: 'error', text: e.message }
-        this.$quickSearchResult.value = undefined
-      })
-  }
 
   reprLevel(level: number | undefined) {
     return level && level < AVAILABLE_LEVELS.length ? AVAILABLE_LEVELS[level] : ''
@@ -379,18 +342,12 @@ export class NoteListVM extends ViewModel<NoteListState> {
   navigateToLexicon() {
     if (this.$state.value.lang && this.$state.value.lang.vocs.length > 0) {
       const voc = this.$state.value.lang.vocs[0]
-      this.navigator.navigateTo({ langCode: this.$state.value.lang.code, vocCode: DomainService.encodeName(voc.name) })
+      this.navigator.navigateTo({ langCode: this.$state.value.lang.code, vocCode: DomainService.encodeName(voc.name), sort: voc.sort_notes })
     }
   }
 
   encodeName(value: string) {
     return DomainService.encodeName(value)
-  }
-
-  clearQuickSearchResults() {
-    this.$quickSearchBuffer.value = ''
-    this.$quickSearchFocused.value = false
-    this.$quickSearchResult.value = undefined
   }
 
   reloadWithNote(n: INote) {
@@ -406,7 +363,8 @@ export class NoteListVM extends ViewModel<NoteListState> {
         level: this.$state.value.level,
         tagId: this.$state.value.tagId,
         searchKey: this.$state.value.searchKey,
-      }
+        sort: this.$state.value.searchKey ? 'id:desc' : voc.sort_notes,
+      } as UrlKeys
 
       this.navigator.navigateTo(keys)
     }

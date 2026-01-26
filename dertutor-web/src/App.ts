@@ -2,7 +2,7 @@ import { div, hstack, observer, p, spacer, span, vlist, vstack } from "flinker-d
 import { GlobalContext } from "./app/GlobalContext"
 import { Action } from "./ui/actions/Action"
 import { FontFamily } from "./ui/controls/Font"
-import { theme, themeManager } from "./ui/theme/ThemeManager"
+import { darkTheme, theme, themeManager } from "./ui/theme/ThemeManager"
 import { ServerConnectionView } from "./ui/view/connect/ServerConnctionView"
 import { EditorView } from "./ui/view/editor/EditorView"
 import { NoteListView } from "./ui/view/note/NoteListView"
@@ -13,6 +13,8 @@ import { Icon } from "./ui/controls/Button"
 import { MaterialIcon } from "./ui/icons/MaterialIcon"
 import { log } from "./app/Logger"
 import { localeManager, translate } from "./app/LocaleManager"
+import { ViewLayer } from "./app/ViewLayer"
+import { LabView } from "./ui/view/lab/LabView"
 
 export const globalContext = GlobalContext.init()
 
@@ -33,15 +35,16 @@ export function App() {
           else if (vm === ctx.vocListVM) return VocListView()
           else if (vm === ctx.noteListVM) return NoteListView()
           else if (vm === ctx.editorVM) return EditorView()
+          else if (vm === ctx.labVM) return LabView()
           else return undefined
         })
 
-      UserAuthStatus()
       Footer()
+      //ModalView()
       ActionsHelpView()
       AppErrorInfo()
-      ModalView()
     })
+    .onClick(() => globalContext.app.$dropdownState.value = '')
 }
 
 
@@ -56,6 +59,7 @@ export const ActionsHelpView = () => {
       const layout = globalContext.app.$layout.value
       s.visible = vm && vm.$showActions.value
       s.position = 'fixed'
+      s.top = '0px'
       s.right = '0px'
       s.width = '600px'
       s.paddingTop = '20px'
@@ -64,7 +68,7 @@ export const ActionsHelpView = () => {
       s.paddingHorizontal = '20px'
       s.gap = '0px'
       s.bgColor = theme().actionsBg
-      s.layer = '100'
+      s.layer = ViewLayer.MODAL_VIEW
     }).children(() => {
 
       p().react(s => {
@@ -78,9 +82,8 @@ export const ActionsHelpView = () => {
         s.textColor = theme().text
         s.paddingLeft = SHORTKEY_TEXT_WIDTH
         s.text = translate('(Press ESC to hide)')
-        s.paddingBottom = '20px'
+        s.paddingBottom = '50px'
       })
-
 
       vlist<Action>()
         .observe(ctx.$activeVM, 'recreateChildren')
@@ -99,17 +102,11 @@ export const ActionsHelpView = () => {
           s.fontSize = theme().fontSizeXS
           s.fontFamily = FontFamily.MONO
           s.paddingLeft = SHORTKEY_TEXT_WIDTH
-          s.paddingTop = '20px'
+          s.paddingTop = '50px'
           s.paddingRight = '20px'
           s.gap = '2px'
         })
         .children(() => {
-          spacer().react(s => {
-            s.width = '75%'
-            s.height = '2px'
-            s.bgColor = theme().text
-            s.marginBottom = '20px'
-          })
           p().react(s => { s.text = '<CR> — Enter' })
           p().react(s => s.text = '<C-k> — Ctrl+k / Cmd+k')
         })
@@ -146,46 +143,21 @@ const ActionInfoView = (a: Action) => {
     })
 }
 
-const UserAuthStatus = () => {
-  const ctx = DerTutorContext.self
-
-  return p()
-    .observe(globalContext.app.$layout)
-    .observe(ctx.$user)
-    .react(s => {
-      const layout = globalContext.app.$layout.value
-      s.position = 'fixed'
-      s.top = '0px'
-      s.right = '120px'
-      s.height = layout.navBarHeight + 'px'
-      s.lineHeight = layout.navBarHeight + 'px'
-      s.visible = !layout.isCompact
-      s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().fontSizeXS
-      s.textColor = '#604d92'
-      s.layer = '100'
-      if (!ctx.$user.value)
-        s.text = ''
-      else
-        s.text = ctx.$user.value.username + (ctx.$user.value.is_superuser ? ':superuser' : '')
-    })
-}
-
 export const ThemeSwitcher = () => {
   return hstack()
     .observe(themeManager.$theme, 'affectsChildrenProps')
     .react(s => {
-      s.height = '40px'
-      s.cornerRadius = '40px'
+      s.height = '30px'
+      s.cornerRadius = '30px'
       s.paddingHorizontal = '10px'
       s.valign = 'center'
       s.gap = '0px'
-      s.border = '1px solid ' + theme().border
-      s.textColor = theme().text + '50'
+      s.border = '1px solid ' + darkTheme().border
+      s.textColor = darkTheme().text + '50'
     })
     .whenHovered(s => {
-      s.bgColor = theme().text + '20'
-      s.border = '1px solid ' + theme().border
+      s.bgColor = darkTheme().text + '20'
+      s.border = '1px solid ' + darkTheme().border
       s.cursor = 'pointer'
     })
     .onClick(() => {
@@ -194,7 +166,7 @@ export const ThemeSwitcher = () => {
     .children(() => {
       Icon().react(s => {
         s.value = MaterialIcon.sunny
-        //s.fontSize = theme().fontSizeS
+        s.fontSize = theme().fontSizeS
         s.textAlign = 'center'
         s.textColor = theme().isLight ? theme().text : 'inherit'
       })
@@ -203,7 +175,7 @@ export const ThemeSwitcher = () => {
 
       Icon().react(s => {
         s.value = MaterialIcon.brightness_3
-        //s.fontSize = theme().fontSizeS
+        s.fontSize = theme().fontSizeS
         s.textAlign = 'center'
         s.textColor = !theme().isLight ? theme().text : 'inherit'
       })
@@ -228,7 +200,7 @@ const Footer = () => {
       s.minHeight = globalContext.app.$layout.value.statusBarHeight + 'px'
       s.valign = 'center'
       //s.blur = '10px'
-      s.layer = '100'
+      s.layer = ViewLayer.FOOTER
       s.bgColor = layout.isCompact ? theme().appBg + '88' : theme().transparent
     })
     .children(() => {
@@ -263,7 +235,7 @@ export const MessangerView = () => {
       s.visible = !layout.isMobile
       s.fontFamily = FontFamily.MONO
       s.fontSize = theme().fontSizeXS
-      s.paddingHorizontal = '40px'
+      s.paddingHorizontal = '20px'
       s.text = msg?.text ?? ''
       s.width = '100%'
       s.wrap = false
@@ -326,7 +298,8 @@ const ModalView = () => {
       s.top = '0'
       s.width = '100vw'
       s.height = '100vh'
-      s.bgColor = theme().appBg + '50'
+      s.bgColor = theme().red + '50'
+      s.layer = ViewLayer.MODAL_VIEW
     })
     .onClick(() => globalContext.app.$dropdownState.value = '')
 }

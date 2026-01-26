@@ -1,5 +1,6 @@
 import { type AnyRXObservable, RXObservableValue, RXOperation } from 'flinker'
 import { log, logErr } from '../app/Logger'
+import { translate } from '../app/LocaleManager'
 
 
 export type HttpMethod = 'HEAD' | 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -172,11 +173,11 @@ export class RestApi {
       log('Problem details:', details)
       if (response.status === 401 || response.status === 403) {
         this.$isUserAuthenticated.value = false
-        throw new RestApiError('notAuthorized', response.status, msg || 'User not authorized')
+        throw new RestApiError('notAuthorized', response.status, msg || translate('User not authorized'))
       } else if (response.status === 400) {
         throw new RestApiError('clientError', response.status, msg)
       } else if (response.status === 404) {
-        throw new RestApiError('clientError', response.status, msg || 'Not found')
+        throw new RestApiError('clientError', response.status, msg || translate('Not found'))
       } else if (response.status >= 500) {
         throw new RestApiError('serverError', response.status, 'Server error: ' + msg)
       } else {

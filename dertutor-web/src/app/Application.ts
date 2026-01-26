@@ -1,6 +1,8 @@
 import { RXObservableValue } from 'flinker'
 import { log, logErr, logWarn } from './Logger'
 
+export const ARTICLE_WIDTH = 950
+
 export interface Layout {
   isMobile: boolean
   isCompact: boolean
@@ -48,10 +50,11 @@ export class Application {
     this.updateLocation()
   }
 
+  
   private getLayout(): Layout {
     const windowWidth = window.innerWidth
     const isCompact = this.isMobileDevice || windowWidth < 1200
-    const contentWidth = isCompact ? windowWidth : this.isMobileDevice ? windowWidth : Math.min(1000, windowWidth - 600)
+    const contentWidth = isCompact ? windowWidth : this.isMobileDevice ? windowWidth : Math.min(ARTICLE_WIDTH, windowWidth - 600)
     const leftSideMenuWidth = this.isMobileDevice ? 0 : (windowWidth - contentWidth) * 0.45
     
     log('Layout is changed, wid:', window.innerWidth)

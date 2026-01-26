@@ -8,6 +8,7 @@ import { ILang, IUser } from './domain/DomainModel'
 import { globalContext } from './App'
 import { log, logErr } from './app/Logger'
 import { Locale, localeManager } from './app/LocaleManager'
+import { LabVM } from './ui/view/lab/LabVM'
 
 export interface Message {
   readonly level?: 'warning' | 'error' | 'info'
@@ -22,6 +23,7 @@ export class DerTutorContext {
   readonly vocListVM: VocListVM
   readonly noteListVM: NoteListVM
   readonly editorVM: EditorVM
+  readonly labVM: LabVM
 
   readonly $user = new RXObservableValue<IUser | undefined>(undefined)
   readonly $allLangs = new RXObservableValue<ILang[]>([])
@@ -42,6 +44,7 @@ export class DerTutorContext {
     this.vocListVM = new VocListVM(this)
     this.noteListVM = new NoteListVM(this)
     this.editorVM = new EditorVM(this)
+    this.labVM = new LabVM(this)
 
     this.router = new DerTutorRouter(this)
 
@@ -87,6 +90,8 @@ export class DerTutorRouter {
           newVM = ctx.editorVM
         else if (keys.langCode && (keys.vocCode || keys.searchKey !== undefined))
           newVM = ctx.noteListVM
+        else if (keys.langCode === 'lab')
+          newVM = ctx.labVM
         else
           newVM = ctx.vocListVM
 

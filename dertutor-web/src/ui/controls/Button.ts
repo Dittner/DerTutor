@@ -197,6 +197,6 @@ export const AccentBtn = () => {
     })
     .whenSelected(s => {
       s.textColor = theme().accent
-      s.bgColor = theme().header
+      //s.bgColor = theme().header
     })
 }

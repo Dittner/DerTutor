@@ -1,9 +1,12 @@
 import { RXObservableValue } from 'flinker'
 import { buildRule, FontWeight, UIComponentProps } from 'flinker-dom'
 import { FontFamily } from '../controls/Font'
+import { ARTICLE_WIDTH } from '../../app/Application'
+
+type THEME_ID = 'dark' | 'dark-qs' | 'light' | 'light-md' | 'light-qs'
 
 export interface GlobalTheme {
-  id: 'dark' | 'light'
+  id: THEME_ID
   isLight: boolean
   fontSizeXL: string
   fontSizeL: string
@@ -25,8 +28,9 @@ export interface GlobalTheme {
   strong: string
   link: string
   link100: string
+  black: string
   blue: string
-  info: string
+  note: string
   warn: string
   editor: string
   mark: string
@@ -38,20 +42,18 @@ export interface GlobalTheme {
   transparent: string
   h1: string
   header: string
+  quickSearchTheme: GlobalTheme
+  markdownTheme: GlobalTheme
 }
 
 export class ThemeManager {
-  private readonly _lightTheme: GlobalTheme
-  private readonly _darkTheme: GlobalTheme
-  private readonly _darkSmallTheme: GlobalTheme
-  private readonly _lightSmallTheme: GlobalTheme
+  readonly lightTheme: GlobalTheme
+  readonly darkTheme: GlobalTheme
 
   readonly $theme: RXObservableValue<GlobalTheme>
-  readonly $smallTheme: RXObservableValue<GlobalTheme>
 
   setLightTheme() {
-    this.$theme.value = this._lightTheme
-    this.$smallTheme.value = this._lightSmallTheme
+    this.$theme.value = this.lightTheme
     const html = document.querySelector('html')
     if (html) {
       html.style.colorScheme = 'dark'
@@ -61,8 +63,7 @@ export class ThemeManager {
   }
 
   setDarkTheme() {
-    this.$theme.value = this._darkTheme
-    this.$smallTheme.value = this._darkSmallTheme
+    this.$theme.value = this.darkTheme
     const html = document.querySelector('html')
     if (html) {
       html.style.colorScheme = 'dark'
@@ -72,32 +73,32 @@ export class ThemeManager {
   }
 
   toggleTheme() {
-    if (this.$theme.value.id === 'light')
+    if (this.$theme.value.isLight)
       this.setDarkTheme()
-    else if (this.$theme.value.id === 'dark')
+    else
       this.setLightTheme()
   }
 
   constructor() {
-    this._lightTheme = this.createLightTheme()
-    this._darkTheme = this.createDarkTheme(this._lightTheme)
-    this._lightSmallTheme = this.createSmallTheme(this._lightTheme)
-    this._darkSmallTheme = this.createSmallTheme(this._darkTheme)
-    this.$theme = new RXObservableValue(this._darkTheme)
-    this.$smallTheme = new RXObservableValue(this._darkSmallTheme)
+    this.lightTheme = this.createLightTheme()
+    this.darkTheme = this.createDarkTheme(this.lightTheme)
+    this.$theme = new RXObservableValue(this.darkTheme)
 
-    this.buildThemeSelectors(this._lightTheme)
-    this.buildThemeSelectors(this._darkTheme)
-    this.buildThemeSelectors(this._lightSmallTheme)
-    this.buildThemeSelectors(this._darkSmallTheme)
+    this.buildThemeSelectors(this.lightTheme)
+    this.buildThemeSelectors(this.darkTheme)
+    this.buildThemeSelectors(this.lightTheme.quickSearchTheme)
+    this.buildThemeSelectors(this.lightTheme.markdownTheme)
+    this.buildThemeSelectors(this.darkTheme.quickSearchTheme)
+    this.buildThemeSelectors(this.darkTheme.markdownTheme)
 
-    const theme = window.localStorage.getItem('theme') ?? 'light'
+    const theme = window.localStorage.getItem('theme') ?? 'dark'
     if (theme === 'light') {
       this.setLightTheme()
     } else {
       this.setDarkTheme()
     }
   }
+
 
   /*
   *
@@ -106,15 +107,14 @@ export class ThemeManager {
   * */
 
   createLightTheme(): GlobalTheme {
-    const black = '#111111'
-    const text = '#33393a'
-    const white = '#ffFFff'
-    const red = '#bd4571'
-    const header = '#4185a0'
-    const blue = '#425865'
-    const border = black + '40'
-    const appBg = '#f5f5f5'
-    return {
+    const red = '#e1646f'
+    const blue = '#639dde' //4984c8
+    const black = '#1f2226' //121416
+    const accent = '#e7eab2'  //b8c892 c693c3
+    const strong = '#c4cfea'
+    const text = '#a5acc3' //707786
+    const appBg = black
+    const res = {
       id: 'light',
       isLight: true,
 
@@ -127,32 +127,87 @@ export class ThemeManager {
       fontSizeXS: '0.7rem',
 
       defFontWeight: 'normal',
+
+      appBg,
+      text,
+      text50: text + 'bb',
+      red,
+      green: '#6db5b5',
+      h1: '#c4cfea',
+      header: '#cfb280',
+      em: accent,
+      accent,
+      quote: '#82a4b9', //a1a1a1
+      strong,
+
+      blue,
+      black,
+      mark: '#dd7d85',
+      link: '#6eacf3',
+      link100: '#9dcbff',
+      btn: '#b673b1',
+      note: '#6db5b5',
+      warn: '#a27988',
+      border: '#454e56',
+      editor: '#969dad', //839295
+      actionsBg: '#1c2023',
+      navBarBg: '#121416', //1c1f22
+      articleBg: '#25282d', //1d2125
+      inputFocusedBg: '#ccCCcc'
+    } as GlobalTheme
+
+    res.quickSearchTheme = this.createQuickSearchTheme(res)
+    res.markdownTheme = this.createLightMarkdownTheme(res)
+
+    return res
+  }
+
+  /*
+  *
+  * LIGHT MARKDOWN THEME
+  *
+  * */
+
+  createLightMarkdownTheme(t: GlobalTheme): GlobalTheme {
+    const black = '#111111'
+    const text = '#111111'
+    const red = '#bd4571'
+    const header = '#755b54'
+    const blue = '#425865'
+    const border = black + '40'
+    const appBg = '#f0f0f0'
+    const green = '#006e53'
+    return Object.assign({}, t, {
+      id: 'light-md',
+      isLight: true,
+
       appBg,
       mark: '#a11a44',
       btn: '#4a0078',
       border,
       strong: black,
+      black,
       text,
-      text50: text + '88',
+      text50: text + 'bb',
       red,
-      green: '#7198a9',
+      green,
       h1: black,
       header,
       em: black,
       accent: red,
-      quote: '#32677c',
+      quote: '#1f5a72',
       blue,
       link: '#005b90',
       link100: red,
       editor: black,
-      navBarBg: appBg,
+      navBarBg: '#304041',
       actionsBg: '#f0f0f0',
-      articleBg: '#ffFFff',
+      articleBg: '#eeEEee',
       inputFocusedBg: '#eeEEee',
       transparent: '#00000000',
-      info: '#026655',
-      warn: '#a56a26',
-    }
+      note: green,
+      warn: red
+    })
   }
 
   /*
@@ -169,13 +224,13 @@ export class ThemeManager {
     const strong = '#a3abbe'
     const text = '#787f92' //707786
     const appBg = black
-    return Object.assign({}, t, {
+    const res = Object.assign({}, t, {
       id: 'dark',
       isLight: false,
       appBg,
       contentBg: '#111111',
       text,
-      text50: text + 'aa',
+      text50: text + 'bb',
       red,
       green: '#5b9898',
       h1: '#a9b1c2',
@@ -184,13 +239,14 @@ export class ThemeManager {
       accent,
       quote: '#6a87a0', //a1a1a1
       strong,
-      
+
       blue,
+      black,
       mark: '#dd7d85',
       link: blue,
       link100: '#77b1f4',
       btn: '#c693c3',
-      info: '#5b9898',
+      note: '#5b9898',
       warn: '#a27988',
       border: '#2d3338',
       editor: '#969dad', //839295
@@ -198,37 +254,46 @@ export class ThemeManager {
       navBarBg: appBg, //1c1f22
       articleBg: '#121416', //1d2125
       inputFocusedBg: '#a5a5a5'
-    })
+    }) as GlobalTheme
+
+    res.quickSearchTheme = this.createQuickSearchTheme(res)
+    res.markdownTheme = res
+
+    return res
   }
 
   /*
   *
-  * DARK THEME SMALL
+  * QUICK_SEARCH_THEME
   *
   * */
 
-  createSmallTheme(t: GlobalTheme): GlobalTheme {
-    const text = t.isLight ? t.text : '#888888' //707f8b 
+  createQuickSearchTheme(t: GlobalTheme): GlobalTheme {
+    const text = '#888888' //707f8b 
     const accent = '#a5a5a5'  //9fa786
     return Object.assign({}, t, {
-      id: t.id + '-small',
+      id: t.id + '-qs',
       text: text,
       defTextColor: text,
-      text50: text + 'aa',
-      strong: t.isLight ? t.strong : accent,
-      h1: t.isLight ? t.h1 : accent,
-      fontSizeXL: '1rem',
-      fontSizeL: '0.9rem',
-      fontSizeM: '0.9rem',
+      text50: text + 'bb',
+      strong: accent,
+      h1: accent,
+      fontSizeXL: '0.9rem',
+      fontSizeL: '0.8rem',
+      fontSizeM: '0.8rem',
       defFontSize: '0.8rem',
       fontSizeS: '0.7rem',
       fontSizeXS: '0.7rem',
-      info: '#779685',
-      isLight: t.isLight,
+      note: '#779685',
     })
   }
 
+  readonly alreadyBuiltTheme: Record<string, boolean> = {}
+
   buildThemeSelectors(t: GlobalTheme) {
+    if (this.alreadyBuiltTheme[t.id]) return
+    this.alreadyBuiltTheme[t.id] = true
+
     const parentSelector = t.id
     const monoFont = 'var(--font-family-mono)'
     const textColor = t.text
@@ -312,7 +377,7 @@ export class ThemeManager {
       //fontFamily: '--font-family-article-bi',
       fontSize: 'inherit',
       textColor: t.strong,
-      fontWeight: t.isLight ? 'bold' : 'inherit',
+      fontWeight: t.id === 'light-md' ? 'bold' : 'inherit',
       fontStyle: 'inherit'
     }
 
@@ -390,11 +455,11 @@ export class ThemeManager {
     /******************************/
 
     const emphasizeProps: UIComponentProps = {
-      //bgColor: t.isLight ? '#bbd5bfff' : 'undefined',
+      //bgColor: t.id === 'light-md' ? '#bbd5bfff' : 'undefined',
       textColor: t.em,
       fontStyle: 'normal',
       //bgImage: t.isLight ? 'linear-gradient(#4ed0ad00, #4ed0ad50)' : 'inherit',
-      bgColor: t.isLight ? '#4ed0ad50' : 'inherit',
+      bgColor: t.id === 'light-md'? '#4ed0ad50' : 'inherit',
       //paddingVertical: '5px'
     }
     buildRule(emphasizeProps, parentSelector, 'em')
@@ -408,7 +473,7 @@ export class ThemeManager {
       fontWeight: 'inherit',
       textColor: t.mark,
       bgColor: 'unset'
-      //bgImage: t.isLight ? `linear-gradient(${t.mark + '00'}, ${t.mark + '50'})` : 'inherit',
+      //bgImage: t.id === 'light-md' ? `linear-gradient(${t.mark + '00'}, ${t.mark + '50'})` : 'inherit',
     }
 
     buildRule(markProps, parentSelector, 'mark')
@@ -478,7 +543,7 @@ export class ThemeManager {
     /******************************/
 
     const imgProps: UIComponentProps = {
-      maxWidth: window.innerWidth - 40 + 'px',
+      maxWidth: ARTICLE_WIDTH - 80 + 'px',
       //paddingTop: '50px'
     }
     buildRule(imgProps, parentSelector, 'img')
@@ -557,8 +622,8 @@ export class ThemeManager {
     const ruParagraphProps: UIComponentProps = {
       fontWeight: 'inherit',
       fontSize: t.defFontSize,
-      textColor: t.isLight ? 'inherit' : t.text50,
-      fontStyle: t.isLight ? 'italic' : 'inherit'
+      textColor: t.id === 'light-md' ? 'inherit' : t.text50,
+      fontStyle: t.id === 'light-md' ? 'italic' : 'inherit'
     }
     buildRule(ruParagraphProps, parentSelector, '.md-ru')
 
@@ -619,9 +684,9 @@ export class ThemeManager {
     const noteProps: UIComponentProps = {
       width: '100%',
       fontSize: t.fontSizeS,
-      textColor: t.info,
+      textColor: t.note,
       paddingHorizontal: '20px',
-      borderLeft: '1px solid ' + t.info + '88'
+      borderLeft: '1px solid ' + t.note + '88'
     }
     buildRule(noteProps, parentSelector, '.md-note')
 
@@ -635,7 +700,10 @@ export class ThemeManager {
       fontWeight: t.defFontWeight,
       textColor: t.warn,
       paddingHorizontal: '20px',
-      borderLeft: '1px solid ' + t.warn
+      paddingVertical: '10px',
+      bgColor: t.warn + '10',
+      borderColor: t.warn + '20',
+      //borderLeft: '1px solid ' + t.warn
     }
     const warnFirstChildProps: UIComponentProps = {
       width: '100%',
@@ -650,4 +718,5 @@ export class ThemeManager {
 
 export const themeManager = new ThemeManager()
 export const theme = () => themeManager.$theme.value
-export const smallTheme = () => themeManager.$smallTheme.value
+export const lightTheme = () => themeManager.lightTheme
+export const darkTheme = () => themeManager.darkTheme

@@ -1,5 +1,6 @@
 import { DertutorServer } from "../backend/DertutorServer"
 import { Application } from "./Application"
+import { KeyValueStore } from "./KeyValueStore"
 import { URLNavigator } from "./URLNavigator"
 import { generateUID } from "./Utils"
 
@@ -8,6 +9,7 @@ export class GlobalContext {
   readonly app: Application
   readonly server: DertutorServer
   readonly navigator: URLNavigator
+  readonly localStorage: KeyValueStore
 
   static self: GlobalContext
 
@@ -20,6 +22,7 @@ export class GlobalContext {
 
   private constructor() {
     this.app = new Application()
+    this.localStorage = new KeyValueStore('derTutorLocalStore')
     this.navigator = new URLNavigator(this.app)
     this.server = new DertutorServer()
   }

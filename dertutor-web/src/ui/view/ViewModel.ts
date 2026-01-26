@@ -12,7 +12,7 @@ import { IUser } from "../../domain/DomainModel"
 import { log } from "../../app/Logger"
 import { translate } from "../../app/LocaleManager"
 
-export type ViewModelID = 'connection' | 'vocs' | 'notes' | 'editor'
+export type ViewModelID = 'connection' | 'vocs' | 'notes' | 'editor' | 'lab'
 export interface IViewModel {
   readonly id: ViewModelID
   readonly $showActions: RXObservableValue<boolean>
@@ -49,6 +49,7 @@ export class ViewModel<ViewModelState> implements IViewModel {
     interactor.$state.pipe()
       .skipFirst()
       .onReceive(s => this.stateDidChange(s))
+      .subscribe()
   }
 
   get isActive(): boolean {
@@ -98,6 +99,14 @@ export class ViewModel<ViewModelState> implements IViewModel {
       return
     }
 
+    if (e.key === 'Escape' && globalContext.app.$dropdownState.value !== '') {
+      globalContext.app.$dropdownState.value = ''
+      return
+    }
+    if (e.key === 'Escape' && this.$showActions.value) {
+      this.$showActions.value = false
+      return
+    }
     if (e.repeat) return
     if (this.actionsList.actions.length === 0 || e.key === 'Shift') return
 

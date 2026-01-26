@@ -5,6 +5,12 @@ export interface IUser {
   readonly is_superuser: boolean
 }
 
+export type LangCode = 'de' | 'en'
+export enum LangId {
+  DE = 1,
+  EN = 2,
+}
+
 export interface ILang {
   readonly id: number
   readonly code: string

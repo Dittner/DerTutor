@@ -13,6 +13,7 @@ import { TextInput } from "../../controls/Input"
 import { MaterialIcon } from "../../icons/MaterialIcon"
 import { log } from "../../../app/Logger"
 import { translate } from "../../../app/LocaleManager"
+import { ViewLayer } from "../../../app/ViewLayer"
 
 export const EditorView = () => {
   log('new EditorView')
@@ -29,7 +30,7 @@ export const EditorView = () => {
         s.position = 'fixed'
         s.height = globalContext.app.$layout.value.navBarHeight + 'px'
         s.width = '100%'
-        s.layer = '1000'
+        s.layer = ViewLayer.EDITOR
       })
 
     TextEditor(formatter)
@@ -43,7 +44,7 @@ export const EditorView = () => {
         s.top = layout.navBarHeight + 'px'
         s.width = window.innerWidth / 2 - 20 + 'px'
         s.bgColor = theme().appBg
-        s.caretColor = theme().isLight ? '#000000' : theme().red
+        s.caretColor = theme().red
         s.textColor = theme().editor
         s.padding = '10px'
         s.fontFamily = FontFamily.MONO
@@ -496,7 +497,6 @@ const VocSelector = () => {
               const selectedVoc = vm.$state.value.lang?.vocs.find(v => v.id === vm.$selectedVocId.value)
               s.isSelected = selectedVoc !== undefined
             })
-            .onClick(() => globalContext.app.$dropdownState.value = dropdownId)
             .children(() => {
               span()
                 .observe(vm.$state)
@@ -513,9 +513,13 @@ const VocSelector = () => {
                   s.value = globalContext.app.$dropdownState.value === dropdownId ? MaterialIcon.arrow_drop_down : MaterialIcon.arrow_right
                 })
             })
+            .onClick(e => {
+              e.stopImmediatePropagation()
+              globalContext.app.$dropdownState.value = dropdownId
+            })
 
           vlist<IVoc>()
-            .observe(globalContext.app.$dropdownState, 'affectsProps')
+            .observe(globalContext.app.$dropdownState)
             .observe(vm.$selectedVocId, 'recreateChildren')
             .observe(vm.$state, 'affectsChildrenProps')
             .items(() => vm.$state.value.lang?.vocs ?? [])
@@ -523,7 +527,7 @@ const VocSelector = () => {
             .itemHash((item: IVoc) => item.id + item.name + ':' + (item.id === vm.$selectedVocId.value))
             .react(s => {
               s.visible = globalContext.app.$dropdownState.value === dropdownId
-              s.fontFamily = FontFamily.MONO
+              s.fontFamily = FontFamily.APP
               s.fontSize = theme().fontSizeXS
               s.padding = '20px'
               s.width = '250px'
@@ -533,7 +537,7 @@ const VocSelector = () => {
               s.border = '1px solid ' + theme().border
               s.position = 'absolute'
               s.cornerRadius = '4px'
-              s.layer = '100'
+              s.layer = ViewLayer.MODAL_VIEW_CONTENT
             })
         })
     })

@@ -138,7 +138,8 @@ export class TextEditorController {
       text = text.replaceAll(';', ',')
       text = text.replaceAll('[', '(')
       text = text.replaceAll(']', ')')
-      let res = text
+      text = text.replaceAll(';', ',')
+      let res = text.trim()
       const rows = text.split('\n')
       if (rows.length > 1)
         res = '```ol\n' + rows.map(v => '1. ' + v).join(';\n') + '\n```'

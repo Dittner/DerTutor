@@ -44,12 +44,14 @@ Delete vocabulary (SUPERUSER) = Wörterbuch löschen (SUPERUSER)
 Go = Los geht's
 Print ID of the selected item = Druck ID des ausgewählten Elements
 Switch theme = Thema wäscheln
+Switch theme: = Thema wäscheln:
 Shortkeys = Tastenkombinationen
 (Press ESC to hide) = (zum Ausblenden ESC drücken)
 Already authenticated = Bereits authentifiziert
 Rename: = Neuer Name:
 Delete [yes|no]? = Löschen [ja|nein]?
 no = nein
+Close = Schließen
 
 Select first note = die erste Note auswählen
 Select last note = die letzte Note auswählen
@@ -64,6 +66,9 @@ Global Search = Globale Suche
 Play audio = Audio abspielen
 Show answer to the task = Antwort auf die Aufgabe anzeigen
 Print ID of note = Druck ID der ausgewählten Note
+Not found = Nicht gefunden
+not found = nicht gefunden
+User not authorized = Benutzer nicht autorisiert
 
 Page %d% = Seite $1
 Page: %d% of %d% = Seite: $1 von $2

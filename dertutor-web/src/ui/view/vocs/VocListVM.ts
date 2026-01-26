@@ -18,16 +18,20 @@ export interface VocListState {
   voc?: IVoc
 }
 
+const SHOW_TIPS_KEY = 'showTips'
+
 export class VocListVM extends ViewModel<VocListState> {
   readonly $langs = new RXObservableValue<ILang[]>([])
   readonly $selectedLang = new RXObservableValue<ILang | undefined>(undefined)
   readonly $highlightedLang = new RXObservableValue<ILang | undefined>(undefined)
   readonly $highlightedVoc = new RXObservableValue<IVoc | undefined>(undefined)
+  readonly $showTips = new RXObservableValue(false)
 
   constructor(ctx: DerTutorContext) {
     const interactor = new VocListInteractor(ctx)
     super('vocs', ctx, interactor)
     this.addKeybindings()
+    this.$showTips.value = globalContext.localStorage.has(SHOW_TIPS_KEY) ? globalContext.localStorage.read(SHOW_TIPS_KEY) : true
   }
 
   protected override stateDidChange(state: VocListState) {
@@ -37,9 +41,17 @@ export class VocListVM extends ViewModel<VocListState> {
     this.$selectedLang.value = state.lang
     this.$highlightedLang.value = state.lang ?? (state.allLangs && state.allLangs.length > 0 ? state.allLangs[0] : undefined)
     this.$highlightedVoc.value = state.voc ?? (state.lang && state.lang.vocs.length > 0 ? state.lang.vocs[0] : undefined)
+
+    //setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200)
   }
 
   private addKeybindings() {
+    this.actionsList.add('<ESC>', 'Hide actions/Clear messages', () => {
+      this.$showActions.value = false
+      this.ctx.$msg.value = undefined
+      this.quit()
+    })
+
     this.addDefaultKeybindings()
 
     this.actionsList.add('g', 'Select first item', () => this.moveCursorToTheFirst())
@@ -291,8 +303,13 @@ export class VocListVM extends ViewModel<VocListState> {
     }
   }
 
-  private quit() {
+  quit() {
     if (this.$selectedLang.value) this.navigator.navigateTo({})
+  }
+
+  closeTips() {
+    this.$showTips.value = false
+    globalContext.localStorage.write(SHOW_TIPS_KEY, false)
   }
 }
 
