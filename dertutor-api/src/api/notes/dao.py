@@ -104,7 +104,7 @@ class NotesDAO(BaseDAO[Note]):
             if params.key
             else ''
         }
-            {sort_notes}
+            voc_id asc, {sort_notes}
             LIMIT :limit
             OFFSET :offset;
             """

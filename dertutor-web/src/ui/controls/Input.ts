@@ -2,7 +2,7 @@ import { RXObservableValue } from "flinker"
 import { hstack, input, p, span, StackProps, vstack } from "flinker-dom"
 import { theme } from "../theme/ThemeManager"
 import { FontFamily } from "./Font"
-import { globalContext } from "../../App"
+import { layout } from "../../app/Application"
 
 export interface NumberProtocol {
   value: number
@@ -178,8 +178,8 @@ export const LineInput = ($buffer: RXObservableValue<string>, $cursorPos: RXObse
       s.width = '100%'
       s.fontSize = theme().fontSizeXS
       s.valign = 'top'
-      s.height = globalContext.app.$layout.value.statusBarHeight + 'px'
-      s.lineHeight = globalContext.app.$layout.value.statusBarHeight + 'px'
+      s.height = layout().statusBarHeight + 'px'
+      s.lineHeight = layout().statusBarHeight + 'px'
       s.paddingHorizontal = '20px'
       s.margin = '0'
       s.wrap = false

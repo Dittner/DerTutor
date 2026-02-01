@@ -11,87 +11,82 @@ import { KeyboardKey, Title } from "../../controls/Text"
 import { TextInput } from "../../controls/Input"
 import { translate } from "../../../app/LocaleManager"
 import { ViewLayer } from "../../../app/ViewLayer"
+import { layout, MARKDOWN_MAX_WIDTH } from "../../../app/Application"
 import { QuickSearchPanel } from "../../controls/QuickSearch"
 
 export const NoteListView = () => {
-  const vm = DerTutorContext.self.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return div()
     .children(() => {
 
       Header()
-        .observe(globalContext.app.$layout)
         .react(s => {
-          const layout = globalContext.app.$layout.value
           s.position = 'fixed'
           s.left = '0'
           s.top = '0'
           s.width = '100%'
-          s.height = layout.navBarHeight + 'px'
+          s.height = layout().navBarHeight + 'px'
           s.layer = ViewLayer.HEADER
         })
 
       NotesMenu()
         .observe(vm.$noteListShown)
-        .observe(globalContext.app.$layout)
         .react(s => {
-          const layout = globalContext.app.$layout.value
+          const l = layout()
           s.visible = vm.$noteListShown.value
           s.position = 'fixed'
           s.left = '0'
-          s.width = (layout.isCompact ? Math.min(400, layout.contentWidth) : layout.leftSideMenuWidth) + 'px'
-          s.top = layout.navBarHeight + 'px'
-          s.height = window.innerHeight - layout.navBarHeight + 'px'
+          s.width = (l.isCompact ? Math.min(400, l.contentWidth) : l.leftSideMenuWidth) + 'px'
+          s.top = l.navBarHeight + 'px'
+          s.height = window.innerHeight - l.navBarHeight + 'px'
           s.className = 'listScrollbar'
           s.enableOwnScroller = true
           s.disableHorizontalScroll = true
-          s.paddingBottom = layout.statusBarHeight + 'px'
+          s.paddingBottom = l.statusBarHeight + 'px'
           //s.borderRight = '1px solid ' + theme().border
           s.bgColor = theme().appBg
           s.layer = ViewLayer.ONE
         })
 
       NoteContentView()
-        .observe(globalContext.app.$layout)
         .react(s => {
-          const layout = globalContext.app.$layout.value
+          const l = layout()
           s.position = 'absolute'
-          s.top = layout.navBarHeight + 'px'
+          s.top = l.navBarHeight + 'px'
           s.paddingTop = '20px'
-          s.left = layout.isCompact ? '0' : layout.leftSideMenuWidth + 'px'
+          s.left = l.isCompact ? '0' : l.leftSideMenuWidth + 'px'
           //s.width = layout.isCompact ? '100%' : (layout.contentWidth + 'px')
-          s.width = layout.isCompact ? '100%' : layout.contentWidth + 'px'
-          s.minHeight = window.innerHeight - layout.navBarHeight + 'px'
-          s.paddingHorizontal = layout.paddingHorizontal + 'px'
-          s.paddingBottom = layout.statusBarHeight + 'px'
+          s.width = l.isCompact ? '100%' : l.contentWidth + 'px'
+          s.minHeight = window.innerHeight - l.navBarHeight + 'px'
+          s.paddingHorizontal = l.paddingHorizontal + 'px'
+          s.paddingBottom = l.statusBarHeight + 'px'
           //s.cornerRadius = '10px 10px 0px 0px'
         })
 
-
-      FiltersView()
-        .observe(vm.$filtersShown)
-        .observe(globalContext.app.$layout)
+      QuickSearchPanel(vm.quiclSearchController)
+        .observe(vm.quiclSearchController.$quickSearchResult)
         .react(s => {
-          const layout = globalContext.app.$layout.value
-          s.visible = vm.$filtersShown.value
+          const l = layout()
           s.position = 'fixed'
-          s.left = layout.isCompact ? '0px' : (layout.contentWidth + layout.leftSideMenuWidth + 'px')
-          s.width = (layout.isCompact ? layout.contentWidth : window.innerWidth - layout.contentWidth - layout.leftSideMenuWidth) + 'px'
-          s.top = layout.navBarHeight + 'px'
-          s.height = window.innerHeight - layout.statusBarHeight - layout.navBarHeight + 'px'
-          s.paddingHorizontal = layout.paddingHorizontal + 'px'
-          s.className = 'listScrollbar'
+          s.left = l.isCompact ? '0px' : (l.contentWidth + l.leftSideMenuWidth + 20 + 'px')
+          s.width = (l.isCompact ? l.contentWidth : window.innerWidth - l.contentWidth - l.leftSideMenuWidth - 40) + 'px'
+          s.maxHeight = vm.quiclSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - l.statusBarHeight - 40 + 'px' : 'unset'
           s.enableOwnScroller = true
-          s.bgColor = theme().appBg
-          s.layer = ViewLayer.ONE
+          s.maxWidth = '450px'
+          s.className = 'listScrollbar'
+          s.top = l.navBarHeight + 20 + 'px'
+          s.bgColor = theme().text + '10'
+          s.borderColor = theme().text + '15'
+          s.padding = '20px'
+          s.cornerRadius = '10px'
         })
     })
 }
 
 
 const Header = () => {
-  const vm = DerTutorContext.self.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return hstack()
-    .observe(globalContext.app.$layout, 'affectsChildrenProps')
     .react(s => {
       s.gap = '10px'
       s.fontFamily = FontFamily.APP
@@ -105,12 +100,11 @@ const Header = () => {
 
       hstack()
         .react(s => {
-          const layout = globalContext.app.$layout.value
-          s.visible = !layout.isCompact
+          s.visible = !layout().isCompact
           s.valign = 'center'
           s.halign = 'left'
           s.height = '100%'
-          s.width = layout.leftSideMenuWidth - 10 + 'px'
+          s.width = layout().leftSideMenuWidth - 10 + 'px'
           s.paddingHorizontal = '20px'
         }).children(() => {
           VocDropdown()
@@ -118,19 +112,20 @@ const Header = () => {
 
       hstack()
         .react(s => {
-          const layout = globalContext.app.$layout.value
           s.valign = 'center'
           s.halign = 'left'
           s.height = '100%'
-          s.width = layout.contentWidth + 'px'
+          s.width = layout().contentWidth + 'px'
           s.gap = '10px'
-          //s.paddingHorizontal = layout.paddingHorizontal + 'px'
+          s.paddingHorizontal = layout().paddingHorizontal + 'px'
         }).children(() => {
           HeaderBtn()
             .react(s => {
+              s.paddingHorizontal = '0'
+              s.halign = 'left'
               s.icon = MaterialIcon.arrow_back
-              s.popUp = translate('Go back')
-              s.width = '50px'
+              s.popUp = translate('Back')
+              s.width = '35px'
             })
             .onClick(() => {
               vm.quit()
@@ -139,7 +134,7 @@ const Header = () => {
           HeaderBtn()
             .observe(vm.$noteListShown)
             .react(s => {
-              s.visible = globalContext.app.$layout.value.isCompact
+              s.visible = layout().isCompact
               s.isSelected = vm.$noteListShown.value
               s.icon = MaterialIcon.menu
             })
@@ -148,31 +143,39 @@ const Header = () => {
             })
 
           GlobalSearchView()
-            .observe(globalContext.app.$layout)
             .react(s => {
-              const layout = globalContext.app.$layout.value
-              s.width = layout.isCompact ? '100%' : layout.leftSideMenuWidth - 20 + 'px'
-              //s.height = layout.isCompact ? '35px' : layout.navBarHeight + 'px'
+              s.width = layout().isCompact ? '100%' : layout().leftSideMenuWidth - 20 + 'px'
+              //s.height = layout().isCompact ? '35px' : layout().navBarHeight + 'px'
             })
 
+          spacer()
+
+          FilterDropdown()
         })
+
+
+
+
+      // IconBtn()
+      //   .observe(vm.$filtersShown)
+      //   .react(s => {
+      //     s.isSelected = vm.$filtersShown.value
+      //     s.icon = MaterialIcon.settings
+      //     s.text = 'Filter'
+      //     s.textColor = theme().text50
+      //   })
+      //   .whenHovered(s => {
+      //     s.textColor = theme().text
+      //   })
+      //   .onClick(() => {
+      //     vm.$filtersShown.value = !vm.$filtersShown.value
+      //   })
 
       spacer()
 
-      HeaderBtn()
-        .observe(vm.$filtersShown)
-        .react(s => {
-          s.visible = globalContext.app.$layout.value.isCompact
-          s.isSelected = vm.$filtersShown.value
-          s.icon = MaterialIcon.settings
-        })
-        .onClick(() => {
-          vm.$filtersShown.value = !vm.$filtersShown.value
-        })
-
       ThemeSwitcher()
         .react(s => {
-          s.visible = !globalContext.app.$layout.value.isCompact
+          s.visible = !layout().isCompact
           s.position = 'absolute'
           s.right = '20px'
         })
@@ -181,8 +184,8 @@ const Header = () => {
 
 
 const VocDropdown = () => {
-  const dropdownId = 'MoteListView.VocSelector'
-  const vm = DerTutorContext.self.noteListVM
+  const dropdownId = 'NoteListView.VocSelector'
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return hstack()
     .react(s => {
       s.valign = 'center'
@@ -194,9 +197,9 @@ const VocDropdown = () => {
         .observe(vm.$lang)
         .react(s => {
           s.src = vm.$lang.value?.code === 'de' ? '/src/resources/de_flag.svg' : '/src/resources/en_flag.svg'
-          s.width = '18px'
-          s.height = '18px'
-          s.cornerRadius = '18px'
+          s.width = '15px'
+          s.height = '15px'
+          s.cornerRadius = '15px'
           s.border = '1px solid ' + theme().border
         })
 
@@ -207,36 +210,36 @@ const VocDropdown = () => {
           s.icon = MaterialIcon.keyboard_arrow_down
           s.textColor = theme().text50
           s.text = translate('Vocabularies')
+          s.fontSize = theme().fontSizeS
           s.revert = true
-          s.height = '40px'
+          s.valign = 'bottom'
+          //s.height = '40px'
           s.paddingHorizontal = '0'
           s.cornerRadius = '4px'
-          s.iconSize = '1.2rem'
+          //s.iconSize = '1.2rem'
         })
         .whenHovered(s => s.textColor = theme().text)
         .whenSelected(s => s.textColor = theme().text)
         .onClick(e => {
           e.stopImmediatePropagation()
-          globalContext.app.$dropdownState.value = dropdownId
+          globalContext.app.$dropdownState.value = globalContext.app.$dropdownState.value === dropdownId ? '' : dropdownId
         })
 
       vlist<IVoc>()
         .observe(vm.$lang, 'recreateChildren')
         .observe(globalContext.app.$dropdownState)
-        .observe(globalContext.app.$layout)
         .items(() => vm.$lang.value?.vocs ?? [])
         .itemRenderer(VocRenderer)
         .itemHash((item: IVoc) => item.id + item.name)
         .react(s => {
-          const layout = globalContext.app.$layout.value
           s.visible = globalContext.app.$dropdownState.value === dropdownId
           s.position = 'fixed'
-          s.top = layout.navBarHeight + 'px'
+          s.top = layout().navBarHeight + 'px'
           s.layer = ViewLayer.MODAL_VIEW_CONTENT
           s.fontFamily = FontFamily.APP
           s.fontSize = theme().fontSizeXS
           s.width = '250px'
-          s.maxWidth = globalContext.app.$layout.value.leftSideMenuWidth - layout.paddingHorizontal + 'px'
+          s.maxWidth = layout().leftSideMenuWidth - layout().paddingHorizontal + 'px'
           s.gap = '0'
           s.bgColor = theme().appBg
           s.border = '1px solid ' + theme().border
@@ -245,10 +248,10 @@ const VocDropdown = () => {
           s.cornerRadius = '4px'
         })
     })
-
 }
+
 const VocRenderer = (voc: IVoc) => {
-  const vm = DerTutorContext.self.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return p()
     .react(s => {
       s.fontSize = theme().fontSizeXS
@@ -289,7 +292,7 @@ const HeaderBtn = () => {
 }
 
 const GlobalSearchView = () => {
-  const vm = DerTutorContext.self.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return hstack()
     .observe(vm.$searchBufferFocused)
     .react(s => {
@@ -299,24 +302,21 @@ const GlobalSearchView = () => {
       s.width = '100%'
       s.height = '35px'
       s.border = '1px solid ' + (vm.$searchBufferFocused.value ? theme().red : theme().border)
-      s.bgColor = vm.$searchBufferFocused.value ? theme().red + '10' : theme().border + '10'
+      //s.bgColor = vm.$searchBufferFocused.value ? theme().red + '10' : theme().border + '10'
+      s.bgColor = theme().text + '10'
       s.cornerRadius = '4px'
-      s.paddingHorizontal = '5px'
+      s.paddingLeft = '10px'
+      s.paddingRight = '5px'
     })
     .children(() => {
 
-      HeaderBtn()
-        .observe(vm.$searchBufferFocused)
-        .react(s => {
-          s.icon = MaterialIcon.search
-          s.iconSize = '1.2rem'
-        })
-        .onClick(() => {
-          if (vm.$searchBuffer.value.length > 1) {
-            vm.startSearch(vm.$searchBuffer.value)
-            document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
-          }
-        })
+      // Icon()
+      //   .observe(vm.$searchBufferFocused)
+      //   .react(s => {
+      //     s.value = MaterialIcon.search
+      //     s.fontSize = '1.2rem'
+      //     s.textColor = vm.$searchBufferFocused.value ? theme().mark: theme().text50
+      //   })
 
       TextInput(vm.$searchBuffer)
         .observe(vm.$searchBufferFocused)
@@ -384,9 +384,62 @@ const GlobalSearchView = () => {
 }
 
 
+const FilterDropdown = () => {
+  const dropdownId = 'NoteListView.Filters'
+  return hstack()
+    .react(s => {
+      s.valign = 'center'
+      s.gap = '10px'
+    })
+    .children(() => {
+
+      IconBtn()
+        .observe(globalContext.app.$dropdownState)
+        .react(s => {
+          s.isSelected = globalContext.app.$dropdownState.value === dropdownId
+          s.icon = MaterialIcon.settings
+          s.textColor = theme().text50
+          s.text = translate('Filter')
+          s.fontSize = theme().fontSizeS
+          s.revert = true
+          s.valign = 'bottom'
+          //s.height = '40px'
+          s.paddingHorizontal = '0'
+          s.cornerRadius = '4px'
+          //s.iconSize = '1.2rem'
+        })
+        .whenHovered(s => s.textColor = theme().text)
+        .whenSelected(s => s.textColor = theme().text)
+        .onClick(e => {
+          e.stopImmediatePropagation()
+          globalContext.app.$dropdownState.value = globalContext.app.$dropdownState.value === dropdownId ? '' : dropdownId
+        })
+
+      FiltersView()
+        .observe(globalContext.app.$dropdownState)
+        .react(s => {
+          //s.visible = vm.$filtersShown.value
+          s.visible = globalContext.app.$dropdownState.value === dropdownId
+          s.position = 'fixed'
+          //s.left = layout.isCompact ? '0px' : (layout.contentWidth + layout.leftSideMenuWidth + 'px')
+          //s.width = (layout.isCompact ? layout.contentWidth : window.innerWidth - layout.contentWidth - layout.leftSideMenuWidth) + 'px'
+          s.top = layout().navBarHeight + 'px'
+          s.layer = ViewLayer.MODAL_VIEW_CONTENT
+          s.fontFamily = FontFamily.APP
+          s.fontSize = theme().fontSizeXS
+          s.width = '250px'
+          s.bgColor = theme().appBg
+          s.border = '1px solid ' + theme().border
+          s.padding = '12px'
+          s.shadow = '0px 6px 6px 3px #00000010'
+          s.cornerRadius = '4px'
+        })
+    })
+
+}
+
 const NotesMenu = () => {
-  const ctx = DerTutorContext.self
-  const vm = ctx.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return vstack()
     .react(s => {
       s.gap = '20px'
@@ -423,10 +476,11 @@ const NotesMenu = () => {
 }
 
 const NoteContentView = () => {
-  const ctx = DerTutorContext.self
-  const vm = ctx.noteListVM
+ const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return vstack()
+    .observe(vm.$state, 'affectsChildrenProps', 'affectsProps')
     .react(s => {
+      s.visible = vm.$state.value.selectedNote !== undefined
       s.gap = '50px'
       s.bgColor = theme().markdownTheme.articleBg
     })
@@ -434,7 +488,6 @@ const NoteContentView = () => {
       NavBar()
 
       Markdown()
-        .observe(vm.$state)
         .observe(vm.$taskAnswerShown)
         .react(s => {
           const searchKey = vm.$state.value.searchKey ?? ''
@@ -444,7 +497,7 @@ const NoteContentView = () => {
           s.fontFamily = FontFamily.ARTICLE
           s.textColor = theme().markdownTheme.text
           s.width = '100%'
-          s.maxWidth = '800px'
+          s.maxWidth = MARKDOWN_MAX_WIDTH + 'px'
           s.mark = searchKey.length > 1 ? searchKey : ''
           s.text = text.replace(/(\?\?([^?]+)\?\?)/g, vm.$taskAnswerShown.value ? '$2' : '\\_\\_\\_')
           s.fontSize = theme().markdownTheme.fontSize
@@ -452,7 +505,6 @@ const NoteContentView = () => {
         })
 
       AccentBtn()
-        .observe(vm.$state)
         .observe(vm.$taskAnswerShown)
         .react(s => {
           const note = vm.$state.value.selectedNote
@@ -469,8 +521,7 @@ const NoteContentView = () => {
 }
 
 const NoteRenderer = (n: INote) => {
-  const ctx = DerTutorContext.self
-  const vm = ctx.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return btn()
     .react(s => {
       const searchKey = vm.$state.value.searchKey ?? ''
@@ -509,7 +560,7 @@ const NoteRenderer = (n: INote) => {
 }
 
 const NotesPaginator = () => {
-  const vm = DerTutorContext.self.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return hstack()
     .observe(vm.$state, 'affectsChildrenProps')
     .react(s => {
@@ -529,7 +580,7 @@ const NotesPaginator = () => {
           s.isDisabled = !p || p.page <= 1
           s.text = '«'
           s.wrap = false
-          s.paddingBottom = '4px'
+          s.paddingBottom = '2px'
           s.paddingHorizontal = '10px'
           s.borderColor = theme().border
           s.popUp = translate('Previous page')
@@ -604,7 +655,7 @@ const NotesPaginator = () => {
           const p = vm.$state.value.page
           s.isDisabled = !p || p.page >= p.pages
           s.text = '»'
-          s.paddingBottom = '4px'
+          s.paddingBottom = '2px'
           s.wrap = false
           s.paddingHorizontal = '10px'
           s.borderColor = theme().border
@@ -615,8 +666,7 @@ const NotesPaginator = () => {
 }
 
 const NavBar = () => {
-  const ctx = DerTutorContext.self
-  const vm = ctx.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return hstack()
     .observe(vm.$state, 'affectsChildrenProps')
     .react(s => {
@@ -741,8 +791,7 @@ const NavBar = () => {
 }
 
 const NoteMeta = () => {
-  const ctx = DerTutorContext.self
-  const vm = ctx.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return p()
     .observe(vm.$state)
     .react(s => {
@@ -765,7 +814,6 @@ const NoteMeta = () => {
 }
 
 const FiltersView = () => {
-  const vm = DerTutorContext.self.noteListVM
   return vstack()
     .react(s => {
       s.gap = '0'
@@ -773,12 +821,11 @@ const FiltersView = () => {
     .children(() => {
       Title('Switch theme:')
         .react(s => {
-          s.paddingTop = '20px'
-          s.visible = globalContext.app.$layout.value.isCompact
+          s.visible = layout().isCompact
         })
       ThemeSwitcher()
         .react(s => {
-          s.visible = globalContext.app.$layout.value.isCompact
+          s.visible = layout().isCompact
         })
 
       spacer().react(s => s.height = '20px')
@@ -790,16 +837,11 @@ const FiltersView = () => {
 
       Title('Filter by tag:')
       TagSelector()
-
-      spacer().react(s => s.height = '20px')
-
-      Title('Quick search:')
-      QuickSearchPanel(vm.quiclSearchController)
     })
 }
 
 const LevelsBar = () => {
-  const vm = DerTutorContext.self.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return hlist<number>()
     .observe(vm.$state, 'affectsChildrenProps')
     .items(() => [1, 2, 3, 4, 5, 6])
@@ -815,7 +857,7 @@ const LevelsBar = () => {
 }
 
 const LevelRenderer = (level: number) => {
-  const vm = DerTutorContext.self.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return Btn()
     .react(s => {
       s.isSelected = vm.$state.value.level === level
@@ -835,7 +877,7 @@ const LevelRenderer = (level: number) => {
 }
 
 const TagSelector = () => {
-  const vm = DerTutorContext.self.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return vlist<ITag>()
     .observe(vm.$state.pipe().map(s => s.lang?.tags).removeDuplicates().fork(), 'recreateChildren')
     .observe(vm.$state.pipe().map(s => s.tagId).removeDuplicates().fork(), 'affectsChildrenProps')
@@ -852,7 +894,7 @@ const TagSelector = () => {
 }
 
 const TagRenderer = (t: ITag) => {
-  const vm = DerTutorContext.self.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return Btn()
     .react(s => {
       s.isSelected = vm.$state.value.tagId === t.id
@@ -863,7 +905,7 @@ const TagRenderer = (t: ITag) => {
 
 
 const NextPrevNoteNavigator = () => {
-  const vm = DerTutorContext.self.noteListVM
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return hstack()
     .observe(vm.$state, 'affectsChildrenProps')
     .observe(vm.$selectedNoteIndex, 'affectsChildrenProps')

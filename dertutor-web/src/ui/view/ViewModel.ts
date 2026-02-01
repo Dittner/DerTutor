@@ -12,7 +12,7 @@ import { IUser } from "../../domain/DomainModel"
 import { log } from "../../app/Logger"
 import { translate } from "../../app/LocaleManager"
 
-export type ViewModelID = 'connection' | 'vocs' | 'notes' | 'editor' | 'lab'
+export type ViewModelID = 'connection' | 'vocs' | 'notes' | 'editor' | 'lab' | 'md'
 export interface IViewModel {
   readonly id: ViewModelID
   readonly $showActions: RXObservableValue<boolean>
@@ -88,6 +88,10 @@ export class ViewModel<ViewModelState> implements IViewModel {
     this.actionsList.add('.', 'Repeat last action', () => this.lastExecutedAction?.handler())
   }
 
+  isSuperUserAuthorized() {
+    return this.ctx.$user.value && this.ctx.$user.value.is_superuser && this.ctx.$user.value.is_active
+  }
+
   private cmdBuffer = ''
   onKeyDown(e: KeyboardEvent) {
     if (!this.isActive) return
@@ -115,12 +119,18 @@ export class ViewModel<ViewModelState> implements IViewModel {
 
     const a = this.actionsList.find(this.cmdBuffer)
     if (a) {
-      if (this.cmdBuffer !== '.')
-        this.lastExecutedAction = a
-      this.cmdBuffer = ''
-      this.$cmd.value = this.lastExecutedAction?.cmd ?? ''
-      a.handler()
-      e.preventDefault()
+      if (a.onlySuperUser && !this.isSuperUserAuthorized()) {
+        this.cmdBuffer = ''
+        this.$cmd.value = this.lastExecutedAction?.cmd ?? ''
+        return
+      } else {
+        if (this.cmdBuffer !== '.')
+          this.lastExecutedAction = a
+        this.cmdBuffer = ''
+        this.$cmd.value = this.lastExecutedAction?.cmd ?? ''
+        a.handler()
+        e.preventDefault()
+      }
     } else if (this.actionsList.some(this.cmdBuffer)) {
       e.preventDefault()
       this.$cmd.value = this.cmdBuffer

@@ -166,12 +166,12 @@ export const Link = () => {
       s.bgColor = theme().transparent
     })
     .whenHovered(s => {
-      s.textColor = theme().link
+      s.textColor = theme().link100
       s.textDecoration = 'underline'
     })
     .whenSelected(s => {
       s.textColor = theme().appBg
-      s.bgColor = theme().link
+      s.bgColor = theme().link100
     })
 }
 

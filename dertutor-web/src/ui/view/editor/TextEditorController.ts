@@ -65,6 +65,7 @@ export class TextEditorController {
   }
 
   static removeSentenceUnderCursor(ta: HTMLTextAreaElement) {
+    const curCursorPos = ta.selectionStart
     let beginOfTheLineIndex = ta.value.lastIndexOf('\n', ta.selectionStart - 1)
     if (beginOfTheLineIndex === -1) beginOfTheLineIndex = 0
     let endOfTheLineIndex = ta.value.indexOf('\n', ta.selectionStart)
@@ -72,11 +73,7 @@ export class TextEditorController {
 
     ta.setSelectionRange(beginOfTheLineIndex, endOfTheLineIndex)
     document.execCommand('insertText', false, '')
-    ta.setSelectionRange(beginOfTheLineIndex, endOfTheLineIndex)
-
-    if (beginOfTheLineIndex < ta.value.length - 1) beginOfTheLineIndex++
-    ta.setSelectionRange(beginOfTheLineIndex, beginOfTheLineIndex)
-    this.moveCursorToEndLine(ta)
+    ta.setSelectionRange(curCursorPos, curCursorPos)
   }
 
   static uppercase(ta: HTMLTextAreaElement) {

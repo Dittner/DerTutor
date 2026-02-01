@@ -12,7 +12,7 @@ import { translate } from "../../app/LocaleManager"
 import { DerTutorContext } from "../../DerTutorContext"
 import { log } from "../../app/Logger"
 import { SearchByNameSchema } from "../../backend/Schema"
-import { KeyboardKey } from "./Text"
+import { KeyboardKey, Title } from "./Text"
 
 const LANG_ID_KEY = 'QUICK_SEARCH_CONTROLLER:LANG_ID_KEY'
 
@@ -21,6 +21,7 @@ export class QuickSearchController {
   readonly $quickSearchFocused = new RXObservableValue(false)
   readonly $quickSearchResult = new RXObservableValue<INote | undefined>(undefined)
   readonly $langId = new RXObservableValue(1)
+  readonly $msg = new RXObservableValue('')
   readonly showLangSwitcher: boolean
   private ctx: DerTutorContext
 
@@ -43,12 +44,17 @@ export class QuickSearchController {
     this.$quickSearchFocused.value = true
   }
 
-  search(word: string) {
-    if (word.length < 2) {
-      DerTutorContext.self.$msg.value = { text: 'Search text is too short', level: 'warning' }
+  search() {
+    const word = this.$quickSearchBuffer.value
+    if (!word) {
+      this.clear()
+      return
+    }
+    else if (word.length < 2) {
+      this.$msg.value = translate('Search text is too short')
       return
     } else if (!this.$langId.value) {
-      this.ctx.$msg.value = { text: 'Language not selected', level: 'warning' }
+      this.$msg.value = translate('Language not selected')
       return
     }
 
@@ -65,8 +71,9 @@ export class QuickSearchController {
         log('NoteListVM.quickSearch result:', notes)
         if (notes.length > 0) {
           this.$quickSearchResult.value = notes[0]
+          this.$msg.value = ''
         } else {
-          this.ctx.$msg.value = { text: `"${word}" ${translate('not found')}` }
+          this.$msg.value = `"${word}" ${translate('not found')}`
           this.$quickSearchResult.value = undefined
         }
       })
@@ -80,6 +87,7 @@ export class QuickSearchController {
     this.$quickSearchBuffer.value = ''
     this.$quickSearchFocused.value = false
     this.$quickSearchResult.value = undefined
+    document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
   }
 
   playAudio() {
@@ -91,17 +99,36 @@ export class QuickSearchController {
 export const QuickSearchPanel = (controller: QuickSearchController) => {
   return vstack()
     .react(s => {
-      s.gap = '0px'
-      s.width = '100%'
-      s.height = '100%'
       s.fontFamily = FontFamily.APP
     })
     .children(() => {
 
-      LangSwitcher(controller)
-        .react(s => s.visible = controller.showLangSwitcher)
+      hstack()
+        .react(s => {
+          s.width = '100%'
+        })
+        .children(() => {
+          Title('Quick search:')
+          spacer()
+          LangSwitcher(controller)
+            .react(s => s.visible = controller.showLangSwitcher)
+        })
 
       QuickSearchInput(controller)
+
+      p()
+        .observe(controller.$quickSearchResult)
+        .observe(controller.$msg)
+        .react(s => {
+          s.visible = controller.$quickSearchResult.value === undefined && controller.$msg.value.length > 0
+          s.text = controller.$msg.value
+          s.textColor = theme().text50
+          s.fontFamily = FontFamily.APP
+          s.fontSize = theme().fontSizeXS
+          s.paddingVertical = '50px'
+          s.width = '100%'
+          s.textAlign = 'center'
+        })
 
       Btn()
         .observe(controller.$quickSearchResult)
@@ -111,15 +138,13 @@ export const QuickSearchPanel = (controller: QuickSearchController) => {
           s.marginTop = '5px'
           s.icon = MaterialIcon.volume_up
           s.text = 'Audio'
-          s.opacity = audioUrl !== '' ? '1' : '0'
+          s.visible = audioUrl !== ''
         })
         .onClick(() => controller.playAudio())
 
       Markdown()
-        .observe(controller.$quickSearchBuffer)
         .observe(controller.$quickSearchResult)
         .react(s => {
-          s.visible = controller.$quickSearchBuffer.value.length > 0
           s.className = theme().quickSearchTheme.id
           s.lineHeight = '1.4'
           s.mode = 'md'
@@ -142,7 +167,6 @@ const QuickSearchInput = (controller: QuickSearchController) => {
       s.halign = 'stretch'
       s.width = '100%'
       s.gap = '5px'
-      s.maxWidth = '300px'
       s.height = '35px'
       s.border = '1px solid ' + (controller.$quickSearchFocused.value ? theme().accent : theme().border)
       s.cornerRadius = '4px'
@@ -182,12 +206,11 @@ const QuickSearchInput = (controller: QuickSearchController) => {
         .onKeyDown(e => {
           if (e.key === 'Enter') {
             e.stopImmediatePropagation()
-            controller.search(controller.$quickSearchBuffer.value)
-            document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
+            controller.search()
           }
           else if (e.key === 'Escape') {
             document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
-            controller.clear()
+            //controller.clear()
           }
         })
 
@@ -219,23 +242,12 @@ const QuickSearchInput = (controller: QuickSearchController) => {
 const LangSwitcher = (controller: QuickSearchController) => {
   return hstack().react(s => {
     s.valign = 'center'
-    s.width = '100%'
-    s.maxWidth = '300px'
     s.gap = '10px'
     s.fontSize = theme().fontSizeXS
     s.paddingVertical = '2px'
     s.valign = 'center'
   })
     .children(() => {
-      p().react(s => {
-        s.text = translate('Quick search:')
-        s.textColor = theme().text
-        s.fontWeight = 'bold'
-        s.fontSize = 'inherit'
-      })
-
-      spacer()
-
       btn()
         .observe(controller.$langId)
         .react(s => {

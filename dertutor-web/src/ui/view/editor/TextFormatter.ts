@@ -56,8 +56,9 @@ export class TextFormatter {
 
   removeExtraSpacesInTheMiddle(s: string): string {
     return s
-      .replace(/ +/g, ' ')
-      .replace(/ +,/g, ',')
+      .replace(/^ +/gm, '')
+      .replace(/ +/gm, ' ')
+      .replace(/ +,/gm, ',')
       .replace(/ +$/gm, '')
   }
 

@@ -30,7 +30,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
   readonly $lang = new RXObservableValue<ILang | undefined>(undefined)
 
   readonly $noteListShown = new RXObservableValue(true)
-  readonly $filtersShown = new RXObservableValue(true)
   readonly $taskAnswerShown = new RXObservableValue(false)
 
   readonly $searchBuffer = new RXObservableValue('')
@@ -52,7 +51,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
     globalContext.app.$layout.pipe()
       .onReceive(l => {
         this.$noteListShown.value = !l.isCompact
-        this.$filtersShown.value = !l.isCompact
       })
       .subscribe()
   }
@@ -89,7 +87,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.ctx.$msg.value = undefined
     window.scrollTo(0, 0)
     this.$noteListShown.value = !globalContext.app.$layout.value.isCompact
-    this.$filtersShown.value = !globalContext.app.$layout.value.isCompact
   }
 
   private addKeybindings() {
@@ -101,10 +98,10 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add('<Right>', 'Select next note', () => this.moveNext())
     this.actionsList.add('<Left>', 'Select prev note', () => this.movePrev())
 
-    this.actionsList.add('n', 'New note (SUPERUSER)', () => this.createNote())
-    this.actionsList.add('r', 'Rename note (SUPERUSER)', () => this.renameNote())
-    this.actionsList.add('e', 'Edit note (SUPERUSER)', () => this.edit())
-    this.actionsList.add(':d<CR>', 'Delete note (SUPERUSER)', () => this.deleteNote())
+    this.actionsList.add('n', 'New note (SUPERUSER)', () => this.createNote(), true)
+    this.actionsList.add('r', 'Rename note (SUPERUSER)', () => this.renameNote(), true)
+    this.actionsList.add('e', 'Edit note (SUPERUSER)', () => this.edit(), true)
+    this.actionsList.add(':d<CR>', 'Delete note (SUPERUSER)', () => this.deleteNote(), true)
     this.actionsList.add('/', 'Quick Search', () => this.quiclSearchController.focus())
     this.actionsList.add('f', 'Global Search', () => this.focusGlobalSearchInput())
     this.actionsList.add('<C-k>', 'Global Search', () => this.focusGlobalSearchInput())
@@ -180,7 +177,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
   private async createNote() {
     if (this.inputMode.$isActive.value) return
     if (!this.$state.value.voc) {
-      this.ctx.$msg.value = { text: 'Vocabulary not selected' }
+      this.ctx.$msg.value = { text: translate('Vocabulary not selected') }
       return
     }
 

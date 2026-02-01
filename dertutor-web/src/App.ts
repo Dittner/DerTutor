@@ -15,6 +15,8 @@ import { log } from "./app/Logger"
 import { localeManager, translate } from "./app/LocaleManager"
 import { ViewLayer } from "./app/ViewLayer"
 import { LabView } from "./ui/view/lab/LabView"
+import { MarkdownView } from "./ui/view/md/MarkdownView"
+import { layout } from "./app/Application"
 
 export const globalContext = GlobalContext.init()
 
@@ -25,17 +27,20 @@ export function App() {
   return div()
     .observe(themeManager.$theme, 'affectsProps', 'affectsChildrenProps')
     .observe(localeManager.$locale, 'affectsProps', 'affectsChildrenProps')
+    .observe(globalContext.app.$layout, 'affectsProps', 'affectsChildrenProps')
     .react(s => {
       s.width = '100%'
     })
     .children(() => {
       observer(ctx.$activeVM)
         .onReceive(vm => {
-          if (vm === ctx.connectionVM) return ServerConnectionView()
-          else if (vm === ctx.vocListVM) return VocListView()
-          else if (vm === ctx.noteListVM) return NoteListView()
-          else if (vm === ctx.editorVM) return EditorView()
-          else if (vm === ctx.labVM) return LabView()
+          if (!vm) return undefined
+          if (vm.id === 'connection') return ServerConnectionView()
+          else if (vm.id === 'vocs') return VocListView()
+          else if (vm.id === 'notes') return NoteListView()
+          else if (vm.id === 'editor') return EditorView()
+          else if (vm.id === 'lab') return LabView()
+          else if (vm.id === 'md') return MarkdownView()
           else return undefined
         })
 
@@ -56,18 +61,18 @@ export const ActionsHelpView = () => {
     .observe(ctx.$activeVM.pipe().skipNullable().flatMap(vm => vm.$showActions).fork())
     .react(s => {
       const vm = ctx.$activeVM.value
-      const layout = globalContext.app.$layout.value
       s.visible = vm && vm.$showActions.value
       s.position = 'fixed'
       s.top = '0px'
       s.right = '0px'
       s.width = '600px'
       s.paddingTop = '20px'
-      s.paddingBottom = layout.statusBarHeight + 'px'
+      s.paddingBottom = layout().statusBarHeight + 'px'
       s.height = window.innerHeight + 'px'
       s.paddingHorizontal = '20px'
       s.gap = '0px'
-      s.bgColor = theme().actionsBg
+      s.bgColor = theme().actionsBg + 'cc'
+      s.blur = '10px'
       s.layer = ViewLayer.MODAL_VIEW
     }).children(() => {
 
@@ -87,7 +92,8 @@ export const ActionsHelpView = () => {
 
       vlist<Action>()
         .observe(ctx.$activeVM, 'recreateChildren')
-        .items(() => ctx.$activeVM.value?.actionsList.actions ?? [])
+        .observe(ctx.$user, 'recreateChildren')
+        .items(() => ctx.$activeVM.value?.actionsList.actions.filter(a => !a.onlySuperUser || (ctx.$user.value?.is_superuser && ctx.$user.value?.is_active)) ?? [])
         .itemHash(a => a.cmd)
         .itemRenderer(ActionInfoView)
         .react(s => {
@@ -124,7 +130,7 @@ const ActionInfoView = (a: Action) => {
       span().react(s => {
         s.display = 'inline-block'
         s.text = a.cmd
-        s.textColor = theme().strong
+        s.textColor = a.onlySuperUser ? theme().red : theme().strong
         s.paddingHorizontal = '20px'
         s.paddingVertical = '2px'
         s.width = SHORTKEY_TEXT_WIDTH
@@ -135,7 +141,7 @@ const ActionInfoView = (a: Action) => {
       span()
         .react(s => {
           s.text = translate(a.desc)
-          s.textColor = theme().text
+          s.textColor = a.onlySuperUser ? theme().red + 'aa' : theme().text
           s.width = '100%'
           //s.whiteSpace = 'nowrap'
           s.paddingVertical = '5px'
@@ -187,9 +193,7 @@ const Footer = () => {
   const ctx = DerTutorContext.self
 
   return hstack()
-    .observe(globalContext.app.$layout)
     .react(s => {
-      const layout = globalContext.app.$layout.value
       s.position = 'fixed'
       s.bottom = '0'
       s.left = '0'
@@ -197,11 +201,10 @@ const Footer = () => {
       s.fontSize = theme().fontSizeXS
       s.gap = '10px'
       s.width = '100%'
-      s.minHeight = globalContext.app.$layout.value.statusBarHeight + 'px'
+      s.minHeight = layout().statusBarHeight + 'px'
       s.valign = 'center'
       //s.blur = '10px'
       s.layer = ViewLayer.FOOTER
-      s.bgColor = layout.isCompact ? theme().appBg + '88' : theme().transparent
     })
     .children(() => {
 
@@ -215,7 +218,7 @@ const Footer = () => {
             s.visible = vm.inputMode.$isActive.value
             s.position = 'fixed'
             s.width = '100%'
-            s.height = globalContext.app.$layout.value.statusBarHeight + 'px'
+            s.height = layout().statusBarHeight + 'px'
             s.bottom = '0'
             s.title = vm.inputMode.name
             s.isSecure = vm.inputMode.isSecure
@@ -227,12 +230,10 @@ const Footer = () => {
 export const MessangerView = () => {
   const ctx = DerTutorContext.self
   return p()
-    .observe(globalContext.app.$layout)
     .observe(ctx.$msg)
     .react(s => {
-      const layout = globalContext.app.$layout.value
       const msg = ctx.$msg.value
-      s.visible = !layout.isMobile
+      s.visible = !layout().isMobile
       s.fontFamily = FontFamily.MONO
       s.fontSize = theme().fontSizeXS
       s.paddingHorizontal = '20px'
@@ -240,6 +241,7 @@ export const MessangerView = () => {
       s.width = '100%'
       s.wrap = false
       s.whiteSpace = 'nowrap'
+      s.bgColor = layout().isCompact ? theme().appBg + '88' : theme().transparent
 
       if (msg?.level === 'error')
         s.textColor = theme().red
@@ -263,6 +265,7 @@ export const CmdView = () => {
       s.paddingHorizontal = '10px'
       s.width = '100%'
       s.textAlign = 'right'
+      s.bgColor = layout().isCompact ? theme().appBg + '88' : theme().transparent
     })
 }
 

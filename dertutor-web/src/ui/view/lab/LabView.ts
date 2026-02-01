@@ -12,24 +12,23 @@ import { TextEditor } from "../editor/TextEditor"
 import { RXObservableValue } from "flinker"
 import { Markdown } from "../../controls/Markdown"
 import { QuickSearchPanel } from "../../controls/QuickSearch"
+import { layout } from "../../../app/Application"
 
 export const LabView = () => {
   log('new LabView')
 
-  const ctx = DerTutorContext.self
-  const vm = ctx.labVM
+  const vm = DerTutorContext.self.vmFactory.getLabVM()
 
   const formatter = new TextFormatter()
 
   return hstack()
-    .observe(globalContext.app.$layout, 'affectsChildrenProps')
     .observe(vm.$editMode, 'affectsChildrenProps')
     .children(() => {
 
       Header()
         .react(s => {
           s.position = 'fixed'
-          s.height = globalContext.app.$layout.value.navBarHeight + 'px'
+          s.height = layout().navBarHeight + 'px'
           s.width = '100%'
           s.layer = ViewLayer.EDITOR
         })
@@ -37,43 +36,39 @@ export const LabView = () => {
       LabEditor('Editor1', vm.$editor1, formatter)
         .react(s => {
           s.visible = vm.$editMode.value
-          const layout = globalContext.app.$layout.value
           s.position = 'fixed'
           s.left = '20px'
-          s.top = layout.navBarHeight + 'px'
+          s.top = layout().navBarHeight + 'px'
 
           s.width = window.innerWidth / 2 - 20 + 'px'
-          s.height = (window.innerHeight - layout.navBarHeight - layout.statusBarHeight) / 2 - 20 + 'px'
+          s.height = (window.innerHeight - layout().navBarHeight - layout().statusBarHeight) / 2 - 20 + 'px'
         })
 
       LabEditor('Editor2', vm.$editor2, formatter)
         .react(s => {
           s.visible = vm.$editMode.value
-          const layout = globalContext.app.$layout.value
           s.position = 'fixed'
           s.left = '20px'
           s.width = window.innerWidth / 2 - 20 + 'px'
-          s.height = (window.innerHeight - layout.navBarHeight - layout.statusBarHeight) / 2 - 20 + 'px'
-          s.top = (window.innerHeight - layout.navBarHeight - layout.statusBarHeight) / 2 + layout.navBarHeight + 'px'
+          s.height = (window.innerHeight - layout().navBarHeight - layout().statusBarHeight) / 2 - 20 + 'px'
+          s.top = (window.innerHeight - layout().navBarHeight - layout().statusBarHeight) / 2 + layout().navBarHeight + 'px'
         })
 
       vstack()
         .react(s => {
-          const layout = globalContext.app.$layout.value
-          s.paddingLeft = vm.$editMode.value ? (window.innerWidth / 2 + 20 + 'px') : (layout.leftSideMenuWidth + 'px')
+          s.paddingLeft = vm.$editMode.value ? (window.innerWidth / 2 + 20 + 'px') : (layout().leftSideMenuWidth + layout().paddingHorizontal + 'px')
           s.width = '100%'
           s.paddingRight = '10px'
-          s.paddingTop = globalContext.app.$layout.value.navBarHeight + 'px'
+          s.paddingTop = layout().navBarHeight + 'px'
           s.gap = '20px'
         })
         .children(() => {
 
           LabEditor('Result', vm.$result, formatter)
             .react(s => {
-              const layout = globalContext.app.$layout.value
               s.visible = vm.$editMode.value
               s.width = '100%'
-              s.height = (window.innerHeight - layout.navBarHeight - layout.statusBarHeight) - 20 + 'px'
+              s.height = (window.innerHeight - layout().navBarHeight - layout().statusBarHeight) - 20 + 'px'
             })
 
           Markdown()
@@ -82,7 +77,7 @@ export const LabView = () => {
               s.visible = !vm.$editMode.value
               s.className = theme().id
               s.width = '100%'
-              s.maxWidth = '900px'
+              s.maxWidth = '800px'
               s.fontFamily = FontFamily.ARTICLE
               s.textColor = theme().text
               s.cornerRadius = '5px'
@@ -90,7 +85,7 @@ export const LabView = () => {
               s.mode = 'md'
               s.fontSize = theme().fontSize
               s.absolutePathPrefix = globalContext.server.baseUrl
-              s.paddingBottom = globalContext.app.$layout.value.statusBarHeight + 15 + 'px'
+              s.paddingBottom = layout().statusBarHeight + 15 + 'px'
             })
         })
 
@@ -99,14 +94,14 @@ export const LabView = () => {
           s.visible = !vm.$editMode.value
           s.position = 'fixed'
           s.width = '400px'
-          s.top = globalContext.app.$layout.value.navBarHeight + 'px'
+          s.top = layout().navBarHeight + 'px'
           s.right = '20px'
         })
     })
 }
 
 const Header = () => {
-  const vm = DerTutorContext.self.labVM
+  const vm = DerTutorContext.self.vmFactory.getLabVM()
   return hstack()
     .react(s => {
       s.gap = '20px'
@@ -117,7 +112,10 @@ const Header = () => {
     .children(() => {
       p().react(s => {
         s.text = 'Merge two texts sentence by sentence'
-        s.textColor = theme().text
+        s.textColor = theme().h1
+        s.fontWeight = 'bold'
+        s.fontFamily = FontFamily.APP
+        s.fontSize = theme().fontSizeXS
       })
 
       spacer()

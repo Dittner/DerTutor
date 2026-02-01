@@ -1,7 +1,9 @@
 import { RXObservableValue } from 'flinker'
 import { log, logErr, logWarn } from './Logger'
+import { globalContext } from '../App'
 
-export const ARTICLE_WIDTH = 950
+export const ARTICLE_WIDTH = 1000
+export const MARKDOWN_MAX_WIDTH = 800
 
 export interface Layout {
   isMobile: boolean
@@ -113,3 +115,5 @@ export class Application {
     }
   }
 }
+
+export const layout = () => globalContext.app.$layout.value

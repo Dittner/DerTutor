@@ -5,6 +5,8 @@ export default defineConfig({
   plugins: [],
   server: {
     allowedHosts: true,
-    hmr: false
+    hmr: {
+      port: 4444
+    }
   }
 })

@@ -39,10 +39,8 @@ export class VocListVM extends ViewModel<VocListState> {
 
     this.$langs.value = state.allLangs ?? []
     this.$selectedLang.value = state.lang
-    this.$highlightedLang.value = state.lang ?? (state.allLangs && state.allLangs.length > 0 ? state.allLangs[0] : undefined)
-    this.$highlightedVoc.value = state.voc ?? (state.lang && state.lang.vocs.length > 0 ? state.lang.vocs[0] : undefined)
-
-    //setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200)
+    this.$highlightedLang.value = state.lang
+    this.$highlightedVoc.value = state.voc
   }
 
   private addKeybindings() {
@@ -62,10 +60,11 @@ export class VocListVM extends ViewModel<VocListState> {
     this.actionsList.add('<Left>', 'Select prev item', () => this.moveCursor(-1))
     this.actionsList.add('<Up>', 'Select prev item', () => this.moveCursor(-1))
 
-    this.actionsList.add('n', 'New vocabulary (SUPERUSER)', () => this.createVoc())
-    this.actionsList.add('r', 'Rename vocabulary (SUPERUSER)', () => this.renameVoc())
-    this.actionsList.add(':chsort<CR>', 'Change sorting of notes (SUPERUSER)', () => this.changeSortNotes())
-    this.actionsList.add(':d<CR>', 'Delete vocabulary (SUPERUSER)', () => this.deleteVoc())
+    this.actionsList.add('n', 'New vocabulary (SUPERUSER)', () => this.createVoc(), true)
+    this.actionsList.add('r', 'Rename vocabulary (SUPERUSER)', () => this.renameVoc(), true)
+    this.actionsList.add(':chsort<CR>', 'Change sorting of notes (SUPERUSER)', () => this.changeSortNotes(), true)
+    this.actionsList.add(':d<CR>', 'Delete vocabulary (SUPERUSER)', () => this.deleteVoc(), true)
+
     this.actionsList.add('q', 'Quit', () => this.quit())
 
     this.actionsList.add('<CR>', 'Go', () => this.applySelection())
@@ -75,11 +74,15 @@ export class VocListVM extends ViewModel<VocListState> {
   private moveCursor(step: number) {
     const selectedLang = this.$selectedLang.value
     if (selectedLang) {
+      if (!this.$highlightedVoc.value) {
+        this.$highlightedVoc.value = selectedLang.vocs.length > 0 ? selectedLang.vocs[0] : undefined
+        return
+      }
       for (let i = 0; i < selectedLang.vocs.length; i++) {
         if (this.$highlightedVoc.value === selectedLang.vocs[i]) {
           if ((i + step) >= 0 && (i + step) < selectedLang.vocs.length)
             this.$highlightedVoc.value = selectedLang.vocs[i + step]
-          break
+          return
         }
       }
     } else {
@@ -88,10 +91,11 @@ export class VocListVM extends ViewModel<VocListState> {
         if (this.$highlightedLang.value === allLangs[i]) {
           if ((i + step) >= 0 && (i + step) < allLangs.length)
             this.$highlightedLang.value = allLangs[i + step]
-          break
+          return
         }
       }
     }
+    this.$highlightedLang.value = this.$langs.value.length > 0 ? this.$langs.value[0] : undefined
   }
 
   private moveCursorToTheLast() {
@@ -310,6 +314,10 @@ export class VocListVM extends ViewModel<VocListState> {
   closeTips() {
     this.$showTips.value = false
     globalContext.localStorage.write(SHOW_TIPS_KEY, false)
+  }
+
+  navigateToMarkdown() {
+    this.navigator.navigateTo({ module: 'md' })
   }
 }
 

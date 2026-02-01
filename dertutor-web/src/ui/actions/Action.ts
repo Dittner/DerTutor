@@ -2,10 +2,12 @@ export class Action {
   readonly desc: string
   readonly cmd: string
   readonly handler: () => void
-  constructor(cmd: string, desc: string, handler: () => void) {
+  readonly onlySuperUser: boolean
+  constructor(cmd: string, desc: string, handler: () => void, onlySuperUser: boolean) {
     this.cmd = cmd
     this.desc = desc
     this.handler = handler
+    this.onlySuperUser = onlySuperUser
   }
 }
 
@@ -13,8 +15,8 @@ export class ActionsList {
   readonly actions: Array<Action> = [] // description, keyCode, handler
   constructor() { }
 
-  add(code: string, desc: string, handler: () => void) {
-    this.actions.push(new Action(code, desc, handler))
+  add(code: string, desc: string, handler: () => void, onlySuperUser: boolean = false) {
+    this.actions.push(new Action(code, desc, handler, onlySuperUser))
   }
 
   find(cmd: string): Action | undefined {

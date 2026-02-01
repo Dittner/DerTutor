@@ -14,12 +14,12 @@ import { MaterialIcon } from "../../icons/MaterialIcon"
 import { log } from "../../../app/Logger"
 import { translate } from "../../../app/LocaleManager"
 import { ViewLayer } from "../../../app/ViewLayer"
+import { layout } from "../../../app/Application"
 
 export const EditorView = () => {
   log('new EditorView')
 
-  const ctx = DerTutorContext.self
-  const vm = ctx.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
 
   const formatter = new TextFormatter()
 
@@ -28,7 +28,7 @@ export const EditorView = () => {
     Header()
       .react(s => {
         s.position = 'fixed'
-        s.height = globalContext.app.$layout.value.navBarHeight + 'px'
+        s.height = layout().navBarHeight + 'px'
         s.width = '100%'
         s.layer = ViewLayer.EDITOR
       })
@@ -37,11 +37,10 @@ export const EditorView = () => {
       .observe(vm.$state)
       .bind(vm.$buffer)
       .react(s => {
-        const layout = globalContext.app.$layout.value
         s.visible = vm.$state.value.note !== undefined
         s.position = 'fixed'
         s.left = '20px'
-        s.top = layout.navBarHeight + 'px'
+        s.top = layout().navBarHeight + 'px'
         s.width = window.innerWidth / 2 - 20 + 'px'
         s.bgColor = theme().appBg
         s.caretColor = theme().red
@@ -49,7 +48,7 @@ export const EditorView = () => {
         s.padding = '10px'
         s.fontFamily = FontFamily.MONO
         s.fontSize = '18px'
-        s.height = window.innerHeight - layout.statusBarHeight - layout.navBarHeight + 'px'
+        s.height = window.innerHeight - layout().statusBarHeight - layout().navBarHeight + 'px'
         s.border = '1px solid ' + theme().border
       })
       .whenFocused(s => {
@@ -61,7 +60,7 @@ export const EditorView = () => {
         s.paddingLeft = window.innerWidth / 2 + 20 + 'px'
         s.width = '100%'
         s.paddingRight = '10px'
-        s.paddingTop = globalContext.app.$layout.value.navBarHeight + 'px'
+        s.paddingTop = layout().navBarHeight + 'px'
         s.gap = '20px'
       })
       .children(() => {
@@ -76,7 +75,7 @@ export const EditorView = () => {
         spacer().react(s => {
           s.width = '100%'
           s.height = '2px'
-          s.marginVertical = globalContext.app.$layout.value.navBarHeight + 'px'
+          s.marginVertical = layout().navBarHeight + 'px'
           s.bgColor = theme().text50
         })
 
@@ -93,7 +92,7 @@ export const EditorView = () => {
             s.fontSize = theme().fontSize
             s.absolutePathPrefix = globalContext.server.baseUrl
             s.paddingHorizontal = '5px'
-            s.paddingBottom = globalContext.app.$layout.value.statusBarHeight + 15 + 'px'
+            s.paddingBottom = layout().statusBarHeight + 15 + 'px'
           })
       })
   })
@@ -126,7 +125,7 @@ const Panel = (title: string) => {
 }
 
 const LevelsPanel = () => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return Panel('Level:')
     .children(() => {
       hlist<number>()
@@ -141,7 +140,7 @@ const LevelsPanel = () => {
     })
 }
 const LevelRenderer = (level: number) => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return Btn()
     .react(s => {
       s.isSelected = vm.$level.value === level
@@ -153,7 +152,7 @@ const LevelRenderer = (level: number) => {
 }
 
 const TagSelector = () => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return Panel('Tag:')
     .observe(vm.$state, 'recreateChildren')
     .observe(vm.$tagId, 'affectsChildrenProps')
@@ -171,7 +170,7 @@ const TagSelector = () => {
 }
 
 const TagRenderer = (t: ITag) => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return Btn()
     .react(s => {
       s.isSelected = vm.$tagId.value === t.id
@@ -194,7 +193,7 @@ const TagRenderer = (t: ITag) => {
 }
 
 const PronunciationPanel = () => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return Panel('Pronunciation:')
     .children(() => {
       vstack()
@@ -240,7 +239,7 @@ const PronunciationPanel = () => {
 }
 
 const MediaFileList = () => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return vstack()
     .observe(vm.$mediaFiles, 'affectsProps', 'recreateChildren')
     .react(s => {
@@ -256,7 +255,7 @@ const MediaFileList = () => {
 }
 
 const MediaFileView = (mf: IMediaFile) => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return Panel('Media:')
     .children(() => {
       vstack()
@@ -300,7 +299,7 @@ const MediaFileView = (mf: IMediaFile) => {
 
 
 const PendingUploadResources = () => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return vstack()
     .react(s => {
       s.gap = '5px'
@@ -351,7 +350,7 @@ const PendingUploadResources = () => {
 }
 
 const PendingUploadFileList = () => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return vstack()
     .observe(vm.$filesPendingUpload, 'affectsProps', 'recreateChildren')
     .react(s => {
@@ -367,7 +366,7 @@ const PendingUploadFileList = () => {
 }
 
 const FileView = (w: FileWrapper) => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return Panel('File:')
     .react(s => {
       s.bgColor = theme().red + '10'
@@ -403,7 +402,7 @@ const FileView = (w: FileWrapper) => {
 
 
 const Header = () => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return hstack()
     .react(s => {
       s.gap = '20px'
@@ -447,11 +446,8 @@ const Header = () => {
     })
 }
 
-
-
-
 const ReplacePanel = () => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return Panel('Replace:')
     .children(() => {
       TextInput(vm.textReplacer.$replaceFrom).react(s => {
@@ -479,7 +475,7 @@ const ReplacePanel = () => {
 }
 
 const VocSelector = () => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   const dropdownId = 'EditorView.VocSelector'
   return Panel('Vocabulary:')
     .children(() => {
@@ -544,7 +540,7 @@ const VocSelector = () => {
 }
 
 const VocRenderer = (voc: IVoc) => {
-  const vm = DerTutorContext.self.editorVM
+  const vm = DerTutorContext.self.vmFactory.getEditorVM()
   return btn()
     .react(s => {
       s.wrap = false

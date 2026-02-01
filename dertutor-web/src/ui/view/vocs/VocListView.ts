@@ -4,11 +4,12 @@ import { FontFamily } from "../../controls/Font"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { darkTheme, theme } from "../../theme/ThemeManager"
 import { Markdown } from "../../controls/Markdown"
-import { globalContext, ThemeSwitcher } from "../../../App"
+import { ThemeSwitcher } from "../../../App"
 import { localeManager, translate } from "../../../app/LocaleManager"
-import { Icon, IconBtn } from "../../controls/Button"
+import { Btn, Icon, IconBtn } from "../../controls/Button"
 import { MaterialIcon } from "../../icons/MaterialIcon"
 import { ViewLayer } from "../../../app/ViewLayer"
+import { layout } from "../../../app/Application"
 
 
 const EN_ACTION_TIPS = `
@@ -16,7 +17,6 @@ const EN_ACTION_TIPS = `
 \`\`\`ul
 + You can navigate through menu items using arrows: →, ↓, →, ↑
 + To see more shortcuts, press: ?
-+ To create/edit/delete notes, you must log in as superuser...
 \`\`\`
 `
 
@@ -25,79 +25,71 @@ const DE_ACTION_TIPS = `
 \`\`\`ul
 + Sie können mithilfe der Pfeilzeichen durch die Menüpunkte navigieren: →, ↓, →, ↑
 + Um weitere Tastenkombinationen anzuzeigen, drücken Sie: ?
-+ Zum Erstellen/Bearbeiten/Löschen von Notizen müssen Sie sich als Superuser anmelden.
 \`\`\`
 `
 
 export const VocListView = () => {
-  const ctx = DerTutorContext.self
-  const vm = ctx.vocListVM
+  const vm = DerTutorContext.self.vmFactory.getVocListVM()
   return vstack()
-    .observe(globalContext.app.$layout, 'affectsChildrenProps')
     .react(s => {
-      const layout = globalContext.app.$layout.value
       s.width = '100%'
       s.halign = 'left'
       s.valign = 'top'
-      s.paddingTop = layout.navBarHeight + 'px'
-      s.paddingBottom = layout.statusBarHeight + 'px'
-      s.paddingHorizontal = '20px'
+      s.paddingTop = layout().navBarHeight + 'px'
+      s.paddingBottom = layout().statusBarHeight + 'px'
+      //s.paddingHorizontal = '20px'
     })
     .children(() => {
       Header()
         .react(s => {
-          const layout = globalContext.app.$layout.value
           s.position = 'fixed'
           s.top = '0'
           s.left = '0'
           s.width = '100%'
-          s.height = layout.navBarHeight + 'px'
+          s.height = layout().navBarHeight + 'px'
           s.layer = ViewLayer.HEADER
           s.paddingHorizontal = '20px'
         })
 
       hstack()
         .react(s => {
-          const layout = globalContext.app.$layout.value
-          s.visible = !layout.isCompact
+          s.visible = !layout().isMobile
           s.width = '100%'
           s.position = 'fixed'
+          s.top = '0'
           s.left = '0'
-          s.top = layout.navBarHeight + 'px'
-          s.halign = 'center'
-          s.valign = 'top'
-          s.height = (window.innerHeight - layout.navBarHeight - layout.statusBarHeight) + 'px'
+          //s.top = layout().navBarHeight + 'px'
+          s.halign = 'right'
+          s.valign = 'center'
+          //s.height = (window.innerHeight - layout().navBarHeight - layout().statusBarHeight) + 'px'
+          s.height = '100vh'
           s.bgColor = darkTheme().appBg
         })
         .children(() => {
-          //de
+
           image()
-            .observe(vm.$highlightedLang)
             .react(s => {
-              s.maskImage = 'linear-gradient(to right, #00000000, #000000ff, #00000000)'
-              s.src = 'src/resources/de.jpg'
-              s.height = '100%'
+              //s.maskImage = 'linear-gradient(to right, #00000030, #00000070, #00000030)'
+              s.src = 'src/resources/bg.jpg'
+              s.width = window.innerHeight < window.innerWidth ? '100%' : 'unset'
+              s.height = window.innerHeight < window.innerWidth ? 'unset' : '100%'
               s.position = 'absolute'
-              s.opacity = vm.$highlightedLang.value?.code === 'de' ? '1' : '0'
-              s.maxHeight = '674px'
-              s.animate = 'opacity 500ms'
+              //s.animate = 'opacity 500ms'
             })
 
-          //en
-          image()
-            .observe(vm.$highlightedLang)
-            .react(s => {
-              s.maskImage = 'linear-gradient(to right, #00000000, #000000ff, #00000000)'
-              s.src = 'src/resources/en.jpg'
-              s.height = '100%'
-              s.position = 'absolute'
-              s.opacity = vm.$highlightedLang.value?.code === 'en' ? '1' : '0'
-              s.maxHeight = '674px'
-              s.animate = 'opacity 500ms'
-            })
-        }).onClick(() => vm.quit())
-
-
+          p().react(s => {
+            s.text = "»Der Mensch ist ein Seil, geknüpft zwischen Tier und Übermensch — ein Seil über einem Abgrunde.«"
+            s.fontSize = '1.8rem' 
+            s.fontFamily = FontFamily.PIRULEN
+            s.textColor = theme().red
+            s.width = '100%'
+            s.maxWidth = '700px'
+            s.textAlign = 'center'
+            s.paddingHorizontal = '20px'
+            s.position = 'absolute'
+          })
+        })
+        .onClick(() => vm.quit())
 
       vlist<IVoc>()
         .observe(vm.$selectedLang)
@@ -107,18 +99,17 @@ export const VocListView = () => {
         .itemRenderer(VocRenderer)
         .itemHash((item: IVoc) => item.id + item.name + ':' + (item === vm.$highlightedVoc.value))
         .react(s => {
-          const layout = globalContext.app.$layout.value
           s.visible = vm.$selectedLang.value !== undefined
-          //s.width = layout.isCompact ? '100%' : 0.75 * layout.contentWidth + 'px'
-          s.width = 'unset'
+          s.width = layout().isCompact ? layout().contentWidth + 'px' : '500px'
           s.gap = '0px'
-          s.bgColor = theme().appBg
+          s.bgColor = theme().appBg + 'cc'
+          s.blur = '10px'
           s.layer = ViewLayer.MODAL_VIEW_CONTENT
           s.fontFamily = FontFamily.APP
           s.fontSize = theme().fontSizeXS
-          s.paddingHorizontal = '20px'
+          s.paddingHorizontal = '30px'
           s.paddingVertical = '20px'
-          s.borderColor = layout.isCompact ? theme().transparent : theme().border
+          //s.borderColor = layout.isCompact ? theme().transparent : theme().border
         })
 
 
@@ -126,11 +117,10 @@ export const VocListView = () => {
         .observe(vm.$showTips)
         .react(s => {
           s.visible = vm.$showTips.value
-          const layout = globalContext.app.$layout.value
           s.position = 'fixed'
           s.right = '20px'
           s.width = 'unset'
-          s.bottom = layout.statusBarHeight + 'px'
+          s.bottom = layout().statusBarHeight + 'px'
           s.halign = 'right'
           s.gap = '2px'
         }).children(() => {
@@ -169,7 +159,7 @@ export const VocListView = () => {
 }
 
 const Header = () => {
-  const vm = DerTutorContext.self.vocListVM
+  const vm = DerTutorContext.self.vmFactory.getVocListVM()
   return hstack()
     .observe(vm.$langs, 'recreateChildren')
     .observe(vm.$selectedLang, 'affectsChildrenProps')
@@ -178,8 +168,9 @@ const Header = () => {
       s.fontFamily = FontFamily.APP
       s.halign = 'left'
       s.valign = 'center'
-      s.gap = '20px'
-      s.borderBottom = '1px solid ' + darkTheme().border
+      s.gap = '15px'
+      s.bgColor = theme().navBarBg + 'cc'
+      //.borderBottom = '1px solid ' + darkTheme().border
     })
     .children(() => {
       vm.$langs.value.forEach((l, i) => {
@@ -194,9 +185,18 @@ const Header = () => {
 
       spacer()
 
-      UserAuthStatus()
+      Btn()
+        .react(s => {
+          s.visible = !layout().isMobile
+          s.text = translate('Markdown')
+          s.fontSize = theme().fontSizeS
+          s.icon = MaterialIcon.edit
+        })
+        .onClick(() => vm.navigateToMarkdown())
 
       ThemeSwitcher()
+
+      UserAuthStatus()
     })
 }
 
@@ -205,48 +205,40 @@ const UserAuthStatus = () => {
   const ctx = DerTutorContext.self
 
   return p()
-    .observe(globalContext.app.$layout)
     .observe(ctx.$user)
     .react(s => {
-      const layout = globalContext.app.$layout.value
-      s.position = 'fixed'
-      s.top = '0px'
-      s.right = '120px'
-      s.height = layout.navBarHeight + 'px'
-      s.lineHeight = layout.navBarHeight + 'px'
-      s.visible = !layout.isCompact
       s.fontFamily = FontFamily.MONO
       s.fontSize = theme().fontSizeXS
-      s.textColor = '#604d92'
+      s.textColor = theme().red
       s.layer = ViewLayer.HEADER
-      if (!ctx.$user.value)
-        s.text = ''
-      else
-        s.text = ctx.$user.value.username + (ctx.$user.value.is_superuser ? ':superuser' : '')
+      s.width = '10px'
+      s.height = '10px'
+      s.cornerRadius = '10px'
+      s.bgColor = '#920d58'
+      s.popUp = ctx.$user.value ? ctx.$user.value.username + (ctx.$user.value.is_superuser ? ':superuser' : '') : ''
     })
 }
 
 const LangRenderer = (lang: ILang) => {
-  const ctx = DerTutorContext.self
-  const vm = ctx.vocListVM
+  const vm = DerTutorContext.self.vmFactory.getVocListVM()
   return hstack()
     .react(s => {
       const isSelected = vm.$selectedLang.value === lang
       const isHighlighted = vm.$highlightedLang.value === lang
       s.fontFamily = FontFamily.APP
-      s.fontSize = darkTheme().fontSize
-      s.textColor = isSelected || isHighlighted ? darkTheme().mark : darkTheme().text50
+      s.fontSize = darkTheme().fontSizeS
+      s.textColor = isSelected || isHighlighted ? darkTheme().strong : darkTheme().text50
       //s.bgColor = isSelected ? darkTheme().header : darkTheme().transparent
       s.textSelectable = false
-      s.paddingHorizontal = '20px'
+      s.paddingHorizontal = '10px'
       s.paddingVertical = '5px'
       s.valign = 'center'
       s.halign = 'center'
-      s.cornerRadius = '10px'
-      s.gap = '10px'
+      s.cornerRadius = '5px'
+      s.gap = '8px'
     })
     .whenHovered(s => {
-      s.bgColor = darkTheme().text + '20'
+      s.textColor = darkTheme().strong
       s.cursor = 'pointer'
     })
     .onClick(() => {
@@ -254,17 +246,19 @@ const LangRenderer = (lang: ILang) => {
       vm.$highlightedLang.value = lang
       vm.$highlightedVoc.value = undefined
       vm.applySelection()
-    }).children(() => {
+    })
+    .children(() => {
       image()
         .react(s => {
           s.src = lang.code === 'de' ? '/src/resources/de_flag.svg' : '/src/resources/en_flag.svg'
-          s.width = '18px'
-          s.height = '18px'
-          s.cornerRadius = '18px'
+          s.width = '15px'
+          s.height = '15px'
+          s.cornerRadius = '15px'
         })
 
       span().react(s => {
         s.text = lang.name
+        s.textColor = 'inherit'
       })
 
       Icon().react(s => {
@@ -272,15 +266,14 @@ const LangRenderer = (lang: ILang) => {
         const isHighlighted = vm.$highlightedLang.value === lang
 
         s.value = isSelected ? MaterialIcon.keyboard_arrow_down : MaterialIcon.keyboard_arrow_right
-        s.fontSize = darkTheme().fontSizeL
-        s.textColor = isSelected || isHighlighted ? darkTheme().mark : darkTheme().text50
+        s.fontSize = darkTheme().fontSize
+        s.textColor = isSelected || isHighlighted ? darkTheme().strong : darkTheme().text50
       })
     })
 }
 
 const VocRenderer = (voc: IVoc) => {
-  const ctx = DerTutorContext.self
-  const vm = ctx.vocListVM
+  const vm = DerTutorContext.self.vmFactory.getVocListVM()
   return btn()
     .react(s => {
       const isSelected = vm.$highlightedVoc.value === voc
@@ -289,6 +282,7 @@ const VocRenderer = (voc: IVoc) => {
       s.textAlign = 'left'
       s.width = '100%'
       s.paddingVertical = '5px'
+      s.fontSize = theme().fontSizeS
       s.textColor = isSelected ? theme().accent : theme().text50
     })
     .whenHovered(s => {
@@ -301,11 +295,11 @@ const VocRenderer = (voc: IVoc) => {
     .onClick(() => {
       vm.$highlightedVoc.value = voc
       vm.applySelection()
-    }).children(() => {
+    })
+    .children(() => {
       span().react(s => {
         s.fontFamily = FontFamily.MONO
         s.textColor = theme().text + '60'
-        s.fontSize = theme().fontSizeS
         s.text = voc.name.length > 4 ? voc.name.substring(0, 3) : ''
       })
 

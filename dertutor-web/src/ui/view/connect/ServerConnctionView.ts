@@ -1,19 +1,20 @@
 import { p, vstack } from "flinker-dom"
-import { globalContext, MessangerView } from "../../../App"
+import { MessangerView } from "../../../App"
 import { FontFamily } from "../../controls/Font"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
+import { layout } from "../../../app/Application"
 
 export const ServerConnectionView = () => {
   const ctx = DerTutorContext.self
-  const vm = ctx.connectionVM
+  const vm = ctx.vmFactory.getConnectionVM()
 
   return vstack()
     .react(s => {
       s.position = 'fixed'
       s.width = '100vw'
       s.height = '100vh'
-      s.paddingTop = globalContext.app.$layout.value.navBarHeight  + 'px'
+      s.paddingTop = layout().navBarHeight  + 'px'
       s.mouseEnabled = false
     }).children(() => {
       p()

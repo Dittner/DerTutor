@@ -110,9 +110,9 @@ export class ThemeManager {
     const red = '#e1646f'
     const blue = '#639dde' //4984c8
     const black = '#1f2226' //121416
-    const accent = '#e7eab2'  //b8c892 c693c3
+    const accent = '#dedbc0'  //b8c892 c693c3
     const strong = '#c4cfea'
-    const text = '#a5acc3' //707786
+    const text = '#999fb0' //707786
     const appBg = black
     const res = {
       id: 'light',
@@ -145,7 +145,7 @@ export class ThemeManager {
       mark: '#dd7d85',
       link: '#6eacf3',
       link100: '#9dcbff',
-      btn: '#b673b1',
+      btn: '#723186',
       note: '#6db5b5',
       warn: '#a27988',
       border: '#454e56',
@@ -176,7 +176,7 @@ export class ThemeManager {
     const blue = '#425865'
     const border = black + '40'
     const appBg = '#f0f0f0'
-    const green = '#006e53'
+    const green = '#1f7f67'
     return Object.assign({}, t, {
       id: 'light-md',
       isLight: true,
@@ -237,23 +237,23 @@ export class ThemeManager {
       header: '#b3996d',
       em: accent,
       accent,
-      quote: '#6a87a0', //a1a1a1
+      quote: '#b1b1b1', //6a87a0 
       strong,
 
       blue,
       black,
       mark: '#dd7d85',
-      link: blue,
-      link100: '#77b1f4',
+      link: '#4573bf',
+      link100: '#679aea',
       btn: '#c693c3',
       note: '#5b9898',
       warn: '#a27988',
       border: '#2d3338',
       editor: '#969dad', //839295
-      actionsBg: '#1c2023',
+      actionsBg: '#17181c',
       navBarBg: appBg, //1c1f22
-      articleBg: '#121416', //1d2125
-      inputFocusedBg: '#a5a5a5'
+      articleBg: appBg, // '#0f1013', //121416 0c0d0f
+      inputFocusedBg: '#ccCCcc'
     }) as GlobalTheme
 
     res.quickSearchTheme = this.createQuickSearchTheme(res)
@@ -459,7 +459,7 @@ export class ThemeManager {
       textColor: t.em,
       fontStyle: 'normal',
       //bgImage: t.isLight ? 'linear-gradient(#4ed0ad00, #4ed0ad50)' : 'inherit',
-      bgColor: t.id === 'light-md'? '#4ed0ad50' : 'inherit',
+      bgColor: t.id === 'light-md' ? '#b24ed050' : 'inherit',
       //paddingVertical: '5px'
     }
     buildRule(emphasizeProps, parentSelector, 'em')
@@ -549,10 +549,32 @@ export class ThemeManager {
     buildRule(imgProps, parentSelector, 'img')
     buildRule(imgProps, parentSelector, 'figure')
 
+    /******************************/
+    // audio
+    /******************************/
+
+    const audioProps: UIComponentProps = {
+      width: '50%',
+      height: '35px',
+      display: 'block',
+    }
+    buildRule(audioProps, parentSelector, 'audio')
+
+    const audioControlsProps: UIComponentProps = {
+      textColor: t.red,
+      bgColor: t.border
+    }
+    buildRule(audioControlsProps, parentSelector, 'audio::-webkit-media-controls-panel')
+
+    /******************************/
+    // figcaption
+    /******************************/
+
     const imgCaptionProps: UIComponentProps = {
       fontWeight: 'inherit',
       fontSize: t.fontSizeXS,
       textColor: t.text50,
+      paddingBottom: '5px'
     }
     buildRule(imgCaptionProps, parentSelector, 'figcaption')
 
@@ -598,22 +620,7 @@ export class ThemeManager {
     }
     buildRule(footerProps, parentSelector, 'footer')
 
-    /******************************/
-    // audio
-    /******************************/
 
-    const audioProps: UIComponentProps = {
-      width: '50%',
-      height: '35px',
-      display: 'block',
-    }
-    buildRule(audioProps, parentSelector, 'audio')
-
-    const audioControlsProps: UIComponentProps = {
-      textColor: t.red,
-      bgColor: t.border
-    }
-    buildRule(audioControlsProps, parentSelector, 'audio::-webkit-media-controls-panel')
 
     /******************************/
     // ru translation
@@ -684,7 +691,8 @@ export class ThemeManager {
     const noteProps: UIComponentProps = {
       width: '100%',
       fontSize: t.fontSizeS,
-      textColor: t.note,
+      textColor: t.isLight ? 'inherit' : t.note,
+      bgColor: t.isLight ? t.note + '50' : 'inherit',
       paddingHorizontal: '20px',
       borderLeft: '1px solid ' + t.note + '88'
     }
