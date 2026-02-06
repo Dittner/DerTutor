@@ -185,7 +185,7 @@ export const LineInput = ($buffer: RXObservableValue<string>, $cursorPos: RXObse
       s.wrap = false
       s.whiteSpace = 'pre'
       s.textColor = textColor
-      s.bgColor = theme().inputFocusedBg
+      s.bgColor = theme().lineInputFocusedBg
       s.borderTop = '1px solid ' + theme().border
     })
     .propsDidChange(props => $sharedState.value = props)
@@ -214,7 +214,7 @@ export const LineInput = ($buffer: RXObservableValue<string>, $cursorPos: RXObse
           const t = $buffer.value
           const i = $cursorPos.value
           s.fontSize = 'inherit'
-          s.textColor = i === -1 ? textColor : theme().inputFocusedBg
+          s.textColor = i === -1 ? textColor : theme().lineInputFocusedBg
           s.bgColor = textColor
           s.height = '100%'
           s.text = i === -1 ? ' ' : t.at(i)

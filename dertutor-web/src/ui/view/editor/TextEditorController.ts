@@ -133,16 +133,16 @@ export class TextEditorController {
       if (ta.selectionStart === ta.selectionEnd) return
       let text = ta.value.slice(ta.selectionStart, ta.selectionEnd)
       text = text.replaceAll(';', ',')
-      text = text.replaceAll('[', '(')
-      text = text.replaceAll(']', ')')
+      text = text.replace(/[\[\]()]/gm, '')
+      text = text.replace(/\n+/g, '\n')
       text = text.replaceAll(';', ',')
       let res = text.trim()
-      const rows = text.split('\n')
+      const rows = res.split('\n')
       if (rows.length > 1)
         res = '```ol\n' + rows.map(v => '1. ' + v).join(';\n') + '\n```'
       document.execCommand('insertText', false, res)
     } catch (e) {
-      logErr('TextEditorController:lowercase: ', e)
+      logErr('TextEditorController:toOrderedList: ', e)
     }
   }
 

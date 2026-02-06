@@ -1,7 +1,7 @@
 import { btn, div, hlist, hstack, input, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { globalContext } from "../../../App"
 import { IMediaFile, ITag, IVoc } from "../../../domain/DomainModel"
-import { AccentBtn, Btn, Icon, IconBtn, LinkBtn, RedBtn } from "../../controls/Button"
+import { PinkBtn, Btn, Icon, IconBtn, LinkBtn, RedBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { Markdown } from "../../controls/Markdown"
 import { DerTutorContext } from "../../../DerTutorContext"
@@ -220,7 +220,7 @@ const PronunciationPanel = () => {
             .onClick(() => vm.playAudio())
         })
 
-      AccentBtn()
+      PinkBtn()
         .observe(vm.$audioUrl)
         .react(s => {
           s.visible = vm.$audioUrl.value === ''
@@ -324,7 +324,7 @@ const PendingUploadResources = () => {
           s.valign = 'center'
         })
         .children(() => {
-          AccentBtn()
+          PinkBtn()
             .react(s => {
               s.text = translate('Choose a media-file')
             })
@@ -338,7 +338,7 @@ const PendingUploadResources = () => {
               s.text = '|'
             })
 
-          AccentBtn()
+          PinkBtn()
             .observe(vm.$filesPendingUpload)
             .react(s => {
               s.visible = vm.$filesPendingUpload.value.length > 0
@@ -412,7 +412,7 @@ const Header = () => {
       s.bgColor = theme().appBg
     })
     .children(() => {
-      AccentBtn()
+      PinkBtn()
         .observe(vm.$hasChanges)
         .react(s => {
           s.isDisabled = !vm.$hasChanges.value
@@ -421,7 +421,7 @@ const Header = () => {
         })
         .onClick(() => vm.save())
 
-      AccentBtn()
+      PinkBtn()
         .observe(vm.$hasChanges)
         .react(s => {
           s.isDisabled = !vm.$hasChanges.value
@@ -429,7 +429,7 @@ const Header = () => {
         })
         .onClick(() => vm.discardChanges())
 
-      AccentBtn()
+      PinkBtn()
         .observe(vm.$hasChanges)
         .react(s => {
           s.visible = vm.$state.value.lang?.code === 'en'
@@ -437,7 +437,7 @@ const Header = () => {
         })
         .onClick(() => vm.loadTranslation())
 
-      AccentBtn()
+      PinkBtn()
         .react(s => {
           s.text = translate('Quit')
           s.popUp = 'ESC'
@@ -464,7 +464,7 @@ const ReplacePanel = () => {
 
       spacer()
 
-      AccentBtn()
+      PinkBtn()
         .observe(vm.textReplacer.$replaceFrom.pipe().map(value => value.length > 0).removeDuplicates().fork())
         .react(s => {
           s.isDisabled = vm.textReplacer.$replaceFrom.value.length === 0

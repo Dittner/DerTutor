@@ -182,18 +182,18 @@ export const Link = () => {
 **/
 
 
-export const AccentBtn = () => {
+export const PinkBtn = () => {
   return IconBtn()
     .react(s => {
       s.fontFamily = FontFamily.APP
       s.fontSize = theme().fontSizeXS
       s.minHeight = '25px'
       s.gap = '2px'
-      s.textColor = theme().btn + 'cc'
+      s.textColor = theme().pynk + 'cc'
       s.cornerRadius = '4px'
     })
     .whenHovered(s => {
-      s.textColor = theme().btn
+      s.textColor = theme().pynk
     })
     .whenSelected(s => {
       s.textColor = theme().accent

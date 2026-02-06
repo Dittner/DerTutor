@@ -114,6 +114,10 @@ export class Application {
       logErr('Failed to copy text: ', err);
     }
   }
+
+  clearInputFocus() {
+    document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
+  }
 }
 
 export const layout = () => globalContext.app.$layout.value

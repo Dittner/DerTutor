@@ -37,6 +37,7 @@ export class VocListVM extends ViewModel<VocListState> {
   protected override stateDidChange(state: VocListState) {
     if (!this.activate) return
 
+    state.allLangs?.forEach(l => l.vocs.sort(sortByKey('name')))
     this.$langs.value = state.allLangs ?? []
     this.$selectedLang.value = state.lang
     this.$highlightedLang.value = state.lang
@@ -337,7 +338,6 @@ class VocListInteractor extends Interactor<VocListState> {
   private async loadLangs(state: VocListState, keys: UrlKeys) {
     if (this.ctx.$allLangs.value.length === 0) {
       const allLangs = await globalContext.server.loadAllLangs().asAwaitable
-      allLangs.forEach(l => l.vocs.sort(sortByKey('name')))
       this.ctx.$allLangs.value = allLangs
     }
     state.allLangs = this.ctx.$allLangs.value

@@ -34,10 +34,10 @@ export interface GlobalTheme {
   warn: string
   editor: string
   mark: string
-  btn: string
+  pynk: string
   border: string
   navBarBg: string
-  inputFocusedBg: string
+  lineInputFocusedBg: string
   articleBg: string
   transparent: string
   h1: string
@@ -111,9 +111,8 @@ export class ThemeManager {
     const blue = '#639dde' //4984c8
     const black = '#1f2226' //121416
     const accent = '#dedbc0'  //b8c892 c693c3
-    const strong = '#c4cfea'
-    const text = '#999fb0' //707786
-    const appBg = black
+    const strong = '#cfd7ea'
+    const text = '#a8afc2' //707786
     const res = {
       id: 'light',
       isLight: true,
@@ -128,12 +127,12 @@ export class ThemeManager {
 
       defFontWeight: 'normal',
 
-      appBg,
+      appBg: black,
       text,
       text50: text + 'bb',
       red,
       green: '#6db5b5',
-      h1: '#c4cfea',
+      h1: strong,
       header: '#cfb280',
       em: accent,
       accent,
@@ -145,15 +144,15 @@ export class ThemeManager {
       mark: '#dd7d85',
       link: '#6eacf3',
       link100: '#9dcbff',
-      btn: '#723186',
+      pynk: '#d69bea',
       note: '#6db5b5',
       warn: '#a27988',
       border: '#454e56',
-      editor: '#969dad', //839295
+      editor: '#a8afc2', //839295
       actionsBg: '#1c2023',
-      navBarBg: '#121416', //1c1f22
+      navBarBg: '#262a2e', //1c1f22
       articleBg: '#25282d', //1d2125
-      inputFocusedBg: '#ccCCcc'
+      lineInputFocusedBg: '#ccCCcc'
     } as GlobalTheme
 
     res.quickSearchTheme = this.createQuickSearchTheme(res)
@@ -176,19 +175,19 @@ export class ThemeManager {
     const blue = '#425865'
     const border = black + '40'
     const appBg = '#f0f0f0'
-    const green = '#1f7f67'
+    const green = '#0d6750'
     return Object.assign({}, t, {
       id: 'light-md',
       isLight: true,
 
       appBg,
       mark: '#a11a44',
-      btn: '#4a0078',
+      pynk: '#521464',
       border,
       strong: black,
       black,
       text,
-      text50: text + 'bb',
+      text50: text + 'aa',
       red,
       green,
       h1: black,
@@ -199,11 +198,9 @@ export class ThemeManager {
       blue,
       link: '#005b90',
       link100: red,
-      editor: black,
       navBarBg: '#304041',
       actionsBg: '#f0f0f0',
       articleBg: '#eeEEee',
-      inputFocusedBg: '#eeEEee',
       transparent: '#00000000',
       note: green,
       warn: red
@@ -245,15 +242,14 @@ export class ThemeManager {
       mark: '#dd7d85',
       link: '#4573bf',
       link100: '#679aea',
-      btn: '#c693c3',
+      pynk: '#c693c3',
       note: '#5b9898',
       warn: '#a27988',
       border: '#2d3338',
       editor: '#969dad', //839295
       actionsBg: '#17181c',
-      navBarBg: appBg, //1c1f22
+      navBarBg: '#141518', //1c1f22
       articleBg: appBg, // '#0f1013', //121416 0c0d0f
-      inputFocusedBg: '#ccCCcc'
     }) as GlobalTheme
 
     res.quickSearchTheme = this.createQuickSearchTheme(res)
@@ -269,8 +265,8 @@ export class ThemeManager {
   * */
 
   createQuickSearchTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#888888' //707f8b 
-    const accent = '#a5a5a5'  //9fa786
+    const text = t.isLight ? '#bbBBbb' : '#888888' //707f8b 
+    const accent = t.isLight ? '#e0e0e0' : '#a5a5a5'  //9fa786
     return Object.assign({}, t, {
       id: t.id + '-qs',
       text: text,
@@ -629,8 +625,8 @@ export class ThemeManager {
     const ruParagraphProps: UIComponentProps = {
       fontWeight: 'inherit',
       fontSize: t.defFontSize,
-      textColor: t.id === 'light-md' ? 'inherit' : t.text50,
-      fontStyle: t.id === 'light-md' ? 'italic' : 'inherit'
+      textColor: t.text50,
+      //fontStyle: t.id === 'light-md' ? 'italic' : 'inherit'
     }
     buildRule(ruParagraphProps, parentSelector, '.md-ru')
 
@@ -691,8 +687,7 @@ export class ThemeManager {
     const noteProps: UIComponentProps = {
       width: '100%',
       fontSize: t.fontSizeS,
-      textColor: t.isLight ? 'inherit' : t.note,
-      bgColor: t.isLight ? t.note + '50' : 'inherit',
+      textColor: t.note,
       paddingHorizontal: '20px',
       borderLeft: '1px solid ' + t.note + '88'
     }

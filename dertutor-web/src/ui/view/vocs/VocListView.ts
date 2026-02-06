@@ -81,7 +81,7 @@ export const VocListView = () => {
             s.text = "»Der Mensch ist ein Seil, geknüpft zwischen Tier und Übermensch — ein Seil über einem Abgrunde.«"
             s.fontSize = '1.8rem' 
             s.fontFamily = FontFamily.PIRULEN
-            s.textColor = theme().red
+            s.textColor = '#b9777d'
             s.width = '100%'
             s.maxWidth = '700px'
             s.textAlign = 'center'
@@ -169,7 +169,7 @@ const Header = () => {
       s.halign = 'left'
       s.valign = 'center'
       s.gap = '15px'
-      s.bgColor = theme().navBarBg + 'cc'
+      s.bgColor = theme().navBarBg
       //.borderBottom = '1px solid ' + darkTheme().border
     })
     .children(() => {
@@ -226,8 +226,8 @@ const LangRenderer = (lang: ILang) => {
       const isSelected = vm.$selectedLang.value === lang
       const isHighlighted = vm.$highlightedLang.value === lang
       s.fontFamily = FontFamily.APP
-      s.fontSize = darkTheme().fontSizeS
-      s.textColor = isSelected || isHighlighted ? darkTheme().strong : darkTheme().text50
+      s.fontSize = theme().fontSizeS
+      s.textColor = isSelected || isHighlighted ? theme().text : theme().text50
       //s.bgColor = isSelected ? darkTheme().header : darkTheme().transparent
       s.textSelectable = false
       s.paddingHorizontal = '10px'
@@ -238,7 +238,7 @@ const LangRenderer = (lang: ILang) => {
       s.gap = '8px'
     })
     .whenHovered(s => {
-      s.textColor = darkTheme().strong
+      s.textColor = theme().text
       s.cursor = 'pointer'
     })
     .onClick(() => {
@@ -266,8 +266,8 @@ const LangRenderer = (lang: ILang) => {
         const isHighlighted = vm.$highlightedLang.value === lang
 
         s.value = isSelected ? MaterialIcon.keyboard_arrow_down : MaterialIcon.keyboard_arrow_right
-        s.fontSize = darkTheme().fontSize
-        s.textColor = isSelected || isHighlighted ? darkTheme().strong : darkTheme().text50
+        s.fontSize = theme().fontSize
+        s.textColor = isSelected || isHighlighted ? theme().text : theme().text50
       })
     })
 }

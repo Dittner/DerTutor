@@ -1,6 +1,6 @@
 import { btn, div, hlist, hstack, image, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { INote, ITag, IVoc } from "../../../domain/DomainModel"
-import { AccentBtn, Btn, IconBtn, LinkBtn } from "../../controls/Button"
+import { PinkBtn, Btn, IconBtn, LinkBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { globalContext, ThemeSwitcher } from "../../../App"
 import { Markdown } from "../../controls/Markdown"
@@ -72,13 +72,8 @@ export const NoteListView = () => {
           s.width = (l.isCompact ? l.contentWidth : window.innerWidth - l.contentWidth - l.leftSideMenuWidth - 40) + 'px'
           s.maxHeight = vm.quiclSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - l.statusBarHeight - 40 + 'px' : 'unset'
           s.enableOwnScroller = true
-          s.maxWidth = '450px'
           s.className = 'listScrollbar'
           s.top = l.navBarHeight + 20 + 'px'
-          s.bgColor = theme().text + '10'
-          s.borderColor = theme().text + '15'
-          s.padding = '20px'
-          s.cornerRadius = '10px'
         })
     })
 }
@@ -91,10 +86,10 @@ const Header = () => {
       s.gap = '10px'
       s.fontFamily = FontFamily.APP
       s.valign = 'center'
-      s.bgColor = theme().navBarBg + 'cc'
-      s.borderBottom = '1px solid ' + theme().border
+      s.bgColor = theme().navBarBg
+      //s.borderBottom = '1px solid ' + theme().border
       s.halign = 'left'
-      s.blur = '10px'
+      //s.blur = '10px'
     })
     .children(() => {
 
@@ -151,6 +146,11 @@ const Header = () => {
           spacer()
 
           FilterDropdown()
+            .observe(vm.$state)
+            .react(s => {
+              const state = vm.$state.value
+              s.visible = state.lang !== undefined && state.voc !== undefined && state.lang.id === state.voc.id
+            })
         })
 
 
@@ -303,7 +303,7 @@ const GlobalSearchView = () => {
       s.height = '35px'
       s.border = '1px solid ' + (vm.$searchBufferFocused.value ? theme().red : theme().border)
       //s.bgColor = vm.$searchBufferFocused.value ? theme().red + '10' : theme().border + '10'
-      s.bgColor = theme().text + '10'
+      s.bgColor = vm.$searchBufferFocused.value ? theme().appBg : theme().transparent
       s.cornerRadius = '4px'
       s.paddingLeft = '10px'
       s.paddingRight = '5px'
@@ -335,10 +335,10 @@ const GlobalSearchView = () => {
           if (e.key === 'Enter') {
             e.stopImmediatePropagation()
             vm.startSearch(vm.$searchBuffer.value)
-            document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
+            globalContext.app.clearInputFocus()
           }
           else if (e.key === 'Escape') {
-            document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
+            globalContext.app.clearInputFocus()
           }
         })
         .onFocus(() => {
@@ -476,7 +476,7 @@ const NotesMenu = () => {
 }
 
 const NoteContentView = () => {
- const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return vstack()
     .observe(vm.$state, 'affectsChildrenProps', 'affectsProps')
     .react(s => {
@@ -490,28 +490,31 @@ const NoteContentView = () => {
       Markdown()
         .observe(vm.$taskAnswerShown)
         .react(s => {
+          const t = theme().markdownTheme
           const searchKey = vm.$state.value.searchKey ?? ''
           const text = vm.$state.value.selectedNote?.text ?? ''
-          s.className = theme().markdownTheme.id
+          s.className = t.id
           s.mode = 'md'
           s.fontFamily = FontFamily.ARTICLE
-          s.textColor = theme().markdownTheme.text
+          s.textColor = t.text
           s.width = '100%'
           s.maxWidth = MARKDOWN_MAX_WIDTH + 'px'
           s.mark = searchKey.length > 1 ? searchKey : ''
           s.text = text.replace(/(\?\?([^?]+)\?\?)/g, vm.$taskAnswerShown.value ? '$2' : '\\_\\_\\_')
-          s.fontSize = theme().markdownTheme.fontSize
+          s.fontSize = t.fontSize
           s.absolutePathPrefix = globalContext.server.baseUrl
         })
 
-      AccentBtn()
+      PinkBtn()
         .observe(vm.$taskAnswerShown)
         .react(s => {
           const note = vm.$state.value.selectedNote
           s.visible = note && vm.$taskAnswerShown.value === false && note.text.includes('??')
           s.text = translate('Show answer')
           s.popUp = 'Enter'
+          s.textColor = theme().markdownTheme.pynk + 'cc'
         })
+        .whenHovered(s => s.textColor = theme().markdownTheme.pynk)
         .onClick(() => vm.$taskAnswerShown.value = true)
 
       spacer()
@@ -793,23 +796,38 @@ const NavBar = () => {
 const NoteMeta = () => {
   const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return p()
-    .observe(vm.$state)
     .react(s => {
-      const note = vm.$state.value.selectedNote
-      const level = note ? vm.reprLevel(note.level) : ''
-      const tag = vm.reprTag(note?.tag_id)
-      s.text = ''
-      if (level && tag) s.text += level + ', ' + tag
-      else if (level) s.text += level
-      else if (tag) s.text += tag
-      s.visible = s.text !== ''
       s.fontFamily = FontFamily.APP
       s.fontSize = theme().markdownTheme.fontSizeXS
       s.textColor = theme().markdownTheme.text
-      s.bgColor = theme().markdownTheme.text + '10'
-      s.borderColor = theme().markdownTheme.text + '20'
-      s.cornerRadius = '4px'
-      s.paddingHorizontal = '4px'
+    })
+    .children(() => {
+      span()
+        .observe(vm.$state)
+        .react(s => {
+          const note = vm.$state.value.selectedNote
+          const level = note ? vm.reprLevel(note.level) : ''
+          s.visible = level !== ''
+          s.text = level
+          s.bgColor = theme().markdownTheme.text + '10'
+          s.borderColor = theme().markdownTheme.text + '20'
+          s.cornerRadius = '4px'
+          s.paddingHorizontal = '4px'
+        })
+
+      span()
+        .observe(vm.$state)
+        .react(s => {
+          const note = vm.$state.value.selectedNote
+          const tag = vm.reprTag(note?.tag_id)
+          s.visible = tag !== ''
+          s.text = tag
+          s.marginLeft = '5px'
+          s.bgColor = theme().markdownTheme.text + '10'
+          s.borderColor = theme().markdownTheme.text + '20'
+          s.cornerRadius = '4px'
+          s.paddingHorizontal = '4px'
+        })
     })
 }
 

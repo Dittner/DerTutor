@@ -13,7 +13,7 @@ import { Markdown } from "../../controls/Markdown"
 import { QuickSearchPanel } from "../../controls/QuickSearch"
 import { translate } from "../../../app/LocaleManager"
 import { MaterialIcon } from "../../icons/MaterialIcon"
-import { layout } from "../../../app/Application"
+import { ARTICLE_WIDTH, layout, MARKDOWN_MAX_WIDTH } from "../../../app/Application"
 
 export const MarkdownView = () => {
   log('new MarkdownView')
@@ -31,6 +31,7 @@ export const MarkdownView = () => {
       s.halign = 'left'
       s.paddingLeft = layout().leftSideMenuWidth + 'px'
       s.gap = '0px'
+      s.bg = theme().appBg
     })
     .children(() => {
       Header()
@@ -41,8 +42,7 @@ export const MarkdownView = () => {
           s.left = '0'
           s.top = '0'
           s.layer = ViewLayer.HEADER
-          s.bgColor = theme().navBarBg
-          s.borderBottom = '1px solid ' + theme().border
+          //s.borderBottom = '1px solid ' + theme().border
         })
 
       Editor('Editor', vm.$text, formatter)
@@ -70,7 +70,8 @@ export const MarkdownView = () => {
           s.text = vm.$text.value
           s.absolutePathPrefix = globalContext.server.baseUrl
           s.paddingTop = '20px'
-          s.paddingHorizontal = layout().paddingHorizontal + 'px'
+          s.paddingLeft = layout().paddingHorizontal + 'px'
+          s.paddingRight = ARTICLE_WIDTH - MARKDOWN_MAX_WIDTH - layout().paddingHorizontal + 'px'
           s.paddingBottom = layout().statusBarHeight + 15 + 'px'
         })
 
@@ -88,14 +89,9 @@ export const MarkdownView = () => {
           s.width = (l.isCompact ? l.contentWidth : window.innerWidth - l.contentWidth - l.leftSideMenuWidth - 40) + 'px'
           s.maxHeight = vm.quiclSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - l.statusBarHeight - 40 + 'px' : 'unset'
           s.enableOwnScroller = true
-          s.maxWidth = l.isCompact ? 'unset' : '450px'
+          s.maxWidth = l.isCompact ? 'unset' : '400px'
           s.className = 'listScrollbar'
           s.top = l.navBarHeight + 20 + 'px'
-          s.bgColor = l.isCompact ? theme().appBg : theme().text + '10'
-          s.borderColor = theme().text + '15'
-          s.padding = '20px'
-          //s.paddingBottom = layout.statusBarHeight + 40 + 'px'
-          s.cornerRadius = '10px'
         })
     })
 }
@@ -107,7 +103,7 @@ const Header = () => {
       s.gap = '0px'
       s.halign = 'left'
       s.valign = 'center'
-      s.bgColor = theme().appBg
+      s.bgColor = theme().navBarBg
       s.paddingLeft = layout().leftSideMenuWidth + 'px'
     })
     .children(() => {
@@ -126,13 +122,13 @@ const Header = () => {
               s.icon = MaterialIcon.arrow_back
               s.text = translate('Back')
               s.fontSize = theme().fontSizeXS
-              s.textColor = theme().markdownTheme.link
+              s.textColor = theme().link
               s.height = layout().navBarHeight + 'px'
               s.halign = 'left'
               s.width = '100px'
             })
             .whenHovered(s => {
-              s.textColor = theme().markdownTheme.link100
+              s.textColor = theme().link100
             })
             .onClick(() => vm.quit())
 

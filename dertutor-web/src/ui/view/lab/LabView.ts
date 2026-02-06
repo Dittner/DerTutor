@@ -1,6 +1,6 @@
 import { hstack, p, spacer, vstack } from "flinker-dom"
 import { globalContext } from "../../../App"
-import { AccentBtn } from "../../controls/Button"
+import { PinkBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
@@ -120,7 +120,7 @@ const Header = () => {
 
       spacer()
 
-      AccentBtn()
+      PinkBtn()
         .observe(vm.$editMode)
         .react(s => {
           s.isSelected = vm.$editMode.value
@@ -128,13 +128,13 @@ const Header = () => {
         })
         .onClick(() => vm.$editMode.value = !vm.$editMode.value)
 
-      AccentBtn()
+      PinkBtn()
         .react(s => {
           s.text = 'Merge'
         })
         .onClick(() => vm.merge())
 
-      AccentBtn()
+      PinkBtn()
         .react(s => {
           s.text = translate('Quit')
           s.popUp = 'ESC'

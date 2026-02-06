@@ -72,6 +72,7 @@ export class QuickSearchController {
         if (notes.length > 0) {
           this.$quickSearchResult.value = notes[0]
           this.$msg.value = ''
+          globalContext.app.clearInputFocus()
         } else {
           this.$msg.value = `"${word}" ${translate('not found')}`
           this.$quickSearchResult.value = undefined
@@ -87,7 +88,8 @@ export class QuickSearchController {
     this.$quickSearchBuffer.value = ''
     this.$quickSearchFocused.value = false
     this.$quickSearchResult.value = undefined
-    document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
+    this.$msg.value = ''
+    globalContext.app.clearInputFocus()
   }
 
   playAudio() {
@@ -100,6 +102,11 @@ export const QuickSearchPanel = (controller: QuickSearchController) => {
   return vstack()
     .react(s => {
       s.fontFamily = FontFamily.APP
+      s.bgColor = theme().text + '08'
+      s.borderColor = theme().border
+      s.maxWidth = '440px'
+      s.padding = '20px'
+      s.cornerRadius = '4px'
     })
     .children(() => {
 
@@ -209,7 +216,7 @@ const QuickSearchInput = (controller: QuickSearchController) => {
             controller.search()
           }
           else if (e.key === 'Escape') {
-            document.activeElement instanceof HTMLInputElement && document.activeElement.blur()
+            globalContext.app.clearInputFocus()
             //controller.clear()
           }
         })
