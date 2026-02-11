@@ -64,6 +64,7 @@ export const TextInput = (inputBinding: RXObservableValue<string>) => {
       s.textColor = theme().text
       s.autoCorrect = 'off'
       s.autoComplete = 'off'
+      s.minHeight = '30px'
       s.border = '1px solid ' + theme().border
     })
     .whenFocused(s => {

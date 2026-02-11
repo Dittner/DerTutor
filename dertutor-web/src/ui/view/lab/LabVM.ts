@@ -85,9 +85,9 @@ export class LabVM extends ViewModel<LabState> {
     let res = '```ol\n'
     text1Rows.forEach((r, i) => {
       if (!r.match(/^\s*$/)) {
-        res += '1. ' + r + '\n'
+        res += '1. ' + r.trim() + '\n'
         if (i < text2Rows.length)
-          res += '~ ' + text2Rows.at(i) + '\n\n'
+          res += '~ ' + text2Rows.at(i)?.trim() + '\n\n'
       }
 
     })

@@ -66,6 +66,7 @@ Rename note (SUPERUSER) = Note umbenennen (SUPERUSER)
 Edit note (SUPERUSER) = Note bearbeiten (SUPERUSER)
 Delete note (SUPERUSER) = Note löschen (SUPERUSER)
 Quick Search = Schnellsuche
+Quick search = Schnellsuche
 Global Search = Globale Suche
 Play audio = Audio abspielen
 Show answer to the task = Antwort auf die Aufgabe anzeigen

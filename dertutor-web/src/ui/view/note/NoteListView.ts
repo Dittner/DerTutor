@@ -1,13 +1,13 @@
 import { btn, div, hlist, hstack, image, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { INote, ITag, IVoc } from "../../../domain/DomainModel"
-import { PinkBtn, Btn, IconBtn, LinkBtn } from "../../controls/Button"
+import { PinkBtn, Btn, IconBtn, LinkBtn, Icon } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { globalContext, ThemeSwitcher } from "../../../App"
 import { Markdown } from "../../controls/Markdown"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { MaterialIcon } from "../../icons/MaterialIcon"
 import { theme } from "../../theme/ThemeManager"
-import { KeyboardKey, Title } from "../../controls/Text"
+import { KeyboardKey, Title, VSeparator } from "../../controls/Text"
 import { TextInput } from "../../controls/Input"
 import { translate } from "../../../app/LocaleManager"
 import { ViewLayer } from "../../../app/ViewLayer"
@@ -19,16 +19,6 @@ export const NoteListView = () => {
   return div()
     .children(() => {
 
-      Header()
-        .react(s => {
-          s.position = 'fixed'
-          s.left = '0'
-          s.top = '0'
-          s.width = '100%'
-          s.height = layout().navBarHeight + 'px'
-          s.layer = ViewLayer.HEADER
-        })
-
       NotesMenu()
         .observe(vm.$noteListShown)
         .react(s => {
@@ -37,14 +27,14 @@ export const NoteListView = () => {
           s.position = 'fixed'
           s.left = '0'
           s.width = (l.isCompact ? Math.min(400, l.contentWidth) : l.leftSideMenuWidth) + 'px'
-          s.top = l.navBarHeight + 'px'
-          s.height = window.innerHeight - l.navBarHeight + 'px'
+          s.top = '0'
+          s.height = window.innerHeight + 'px'
           s.className = 'listScrollbar'
           s.enableOwnScroller = true
           s.disableHorizontalScroll = true
           s.paddingBottom = l.statusBarHeight + 'px'
           //s.borderRight = '1px solid ' + theme().border
-          s.bgColor = theme().appBg
+          s.bgColor = theme().menuBg
           s.layer = ViewLayer.ONE
         })
 
@@ -52,136 +42,101 @@ export const NoteListView = () => {
         .react(s => {
           const l = layout()
           s.position = 'absolute'
-          s.top = l.navBarHeight + 'px'
-          s.paddingTop = '20px'
+          s.top = '0'
+          //s.paddingTop = l.navBarHeight + 'px'
           s.left = l.isCompact ? '0' : l.leftSideMenuWidth + 'px'
           //s.width = layout.isCompact ? '100%' : (layout.contentWidth + 'px')
           s.width = l.isCompact ? '100%' : l.contentWidth + 'px'
-          s.minHeight = window.innerHeight - l.navBarHeight + 'px'
+          s.minHeight = window.innerHeight + 'px'
           s.paddingHorizontal = l.paddingHorizontal + 'px'
           s.paddingBottom = l.statusBarHeight + 'px'
           //s.cornerRadius = '10px 10px 0px 0px'
         })
 
-      QuickSearchPanel(vm.quiclSearchController)
-        .observe(vm.quiclSearchController.$quickSearchResult)
+      RightSidePanel()
         .react(s => {
           const l = layout()
           s.position = 'fixed'
-          s.left = l.isCompact ? '0px' : (l.contentWidth + l.leftSideMenuWidth + 20 + 'px')
-          s.width = (l.isCompact ? l.contentWidth : window.innerWidth - l.contentWidth - l.leftSideMenuWidth - 40) + 'px'
+          s.left = l.isCompact ? '0px' : (l.contentWidth + l.leftSideMenuWidth + 'px')
+          s.width = (l.isCompact ? l.contentWidth : window.innerWidth - l.contentWidth - l.leftSideMenuWidth) + 'px'
           s.maxHeight = vm.quiclSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - l.statusBarHeight - 40 + 'px' : 'unset'
-          s.enableOwnScroller = true
-          s.className = 'listScrollbar'
-          s.top = l.navBarHeight + 20 + 'px'
+          s.top = '0px'
         })
     })
 }
 
 
-const Header = () => {
+const RightSidePanel = () => {
   const vm = DerTutorContext.self.vmFactory.getNoteListVM()
-  return hstack()
+  return vstack()
     .react(s => {
-      s.gap = '10px'
-      s.fontFamily = FontFamily.APP
-      s.valign = 'center'
-      s.bgColor = theme().navBarBg
-      //s.borderBottom = '1px solid ' + theme().border
-      s.halign = 'left'
-      //s.blur = '10px'
-    })
-    .children(() => {
-
+      s.paddingHorizontal = '40px'
+      s.visible = !layout().isCompact
+      s.halign = 'right'
+    }).children(() => {
       hstack()
         .react(s => {
-          s.visible = !layout().isCompact
+          s.gap = '20px'
+          s.fontFamily = FontFamily.APP
           s.valign = 'center'
-          s.halign = 'left'
-          s.height = '100%'
-          s.width = layout().leftSideMenuWidth - 10 + 'px'
-          s.paddingHorizontal = '20px'
-        }).children(() => {
-          VocDropdown()
+          s.height = layout().navBarHeight + 'px'
+          s.halign = 'right'
+          s.width = '100%'
         })
-
-      hstack()
-        .react(s => {
-          s.valign = 'center'
-          s.halign = 'left'
-          s.height = '100%'
-          s.width = layout().contentWidth + 'px'
-          s.gap = '10px'
-          s.paddingHorizontal = layout().paddingHorizontal + 'px'
-        }).children(() => {
-          HeaderBtn()
+        .children(() => {
+          IconBtn()
+            .observe(globalContext.app.$dropdownState)
             .react(s => {
+              s.icon = MaterialIcon.search
+              s.textColor = theme().text50
+              s.text = translate('Quick search')
+              s.fontSize = theme().fontSizeS
+              s.valign = 'bottom'
               s.paddingHorizontal = '0'
-              s.halign = 'left'
-              s.icon = MaterialIcon.arrow_back
-              s.popUp = translate('Back')
-              s.width = '35px'
+              s.iconSize = '1rem'
             })
-            .onClick(() => {
-              vm.quit()
-            })
-
-          HeaderBtn()
-            .observe(vm.$noteListShown)
-            .react(s => {
-              s.visible = layout().isCompact
-              s.isSelected = vm.$noteListShown.value
-              s.icon = MaterialIcon.menu
-            })
-            .onClick(() => {
-              vm.$noteListShown.value = !vm.$noteListShown.value
+            .whenHovered(s => s.textColor = theme().text)
+            .whenSelected(s => s.textColor = theme().text)
+            .onClick(e => {
+              e.stopImmediatePropagation()
+              vm.quiclSearchController.$quickSearchFocused.value = true
             })
 
-          GlobalSearchView()
-            .react(s => {
-              s.width = layout().isCompact ? '100%' : layout().leftSideMenuWidth - 20 + 'px'
-              //s.height = layout().isCompact ? '35px' : layout().navBarHeight + 'px'
-            })
+          // IconBtn()
+          //   .observe(vm.$filtersShown)
+          //   .react(s => {
+          //     s.isSelected = vm.$filtersShown.value
+          //     s.icon = MaterialIcon.settings
+          //     s.text = 'Filter'
+          //     s.textColor = theme().text50
+          //   })
+          //   .whenHovered(s => {
+          //     s.textColor = theme().text
+          //   })
+          //   .onClick(() => {
+          //     vm.$filtersShown.value = !vm.$filtersShown.value
+          //   })
 
-          spacer()
+          VSeparator()
 
-          FilterDropdown()
-            .observe(vm.$state)
-            .react(s => {
-              const state = vm.$state.value
-              s.visible = state.lang !== undefined && state.voc !== undefined && state.lang.id === state.voc.id
-            })
+          ThemeSwitcher()
         })
 
-
-
-
-      // IconBtn()
-      //   .observe(vm.$filtersShown)
-      //   .react(s => {
-      //     s.isSelected = vm.$filtersShown.value
-      //     s.icon = MaterialIcon.settings
-      //     s.text = 'Filter'
-      //     s.textColor = theme().text50
-      //   })
-      //   .whenHovered(s => {
-      //     s.textColor = theme().text
-      //   })
-      //   .onClick(() => {
-      //     vm.$filtersShown.value = !vm.$filtersShown.value
-      //   })
-
-      spacer()
-
-      ThemeSwitcher()
+      QuickSearchPanel(vm.quiclSearchController)
+        .observe(vm.quiclSearchController.$quickSearchResult)
+        .observe(vm.quiclSearchController.$quickSearchFocused)
         .react(s => {
-          s.visible = !layout().isCompact
-          s.position = 'absolute'
-          s.right = '20px'
+          const l = layout()
+          s.visible = vm.quiclSearchController.$quickSearchResult.value !== undefined || vm.quiclSearchController.$quickSearchFocused.value
+          //s.position = 'fixed'
+          //s.left = l.isCompact ? '0px' : (l.contentWidth + l.leftSideMenuWidth + 40 + 'px')
+          s.width = '100%'
+          s.maxWidth = '400px'
+          s.maxHeight = vm.quiclSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - l.statusBarHeight + 'px' : 'unset'
+          //s.top = l.navBarHeight + 20 + 'px'
         })
     })
 }
-
 
 const VocDropdown = () => {
   const dropdownId = 'NoteListView.VocSelector'
@@ -200,7 +155,7 @@ const VocDropdown = () => {
           s.width = '15px'
           s.height = '15px'
           s.cornerRadius = '15px'
-          s.border = '1px solid ' + theme().border
+          //s.border = '1px solid ' + theme().border
         })
 
       IconBtn()
@@ -293,92 +248,111 @@ const HeaderBtn = () => {
 
 const GlobalSearchView = () => {
   const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const INPUT_HEI = '30px'
   return hstack()
     .observe(vm.$searchBufferFocused)
     .react(s => {
-      s.gap = '0px'
+      s.gap = '5px'
       s.fontFamily = FontFamily.APP
       s.valign = 'center'
       s.width = '100%'
-      s.height = '35px'
-      s.border = '1px solid ' + (vm.$searchBufferFocused.value ? theme().red : theme().border)
+      s.height = INPUT_HEI
+      //s.border = '1px solid ' + (vm.$searchBufferFocused.value ? theme().red : theme().border)
       //s.bgColor = vm.$searchBufferFocused.value ? theme().red + '10' : theme().border + '10'
-      s.bgColor = vm.$searchBufferFocused.value ? theme().appBg : theme().transparent
-      s.cornerRadius = '4px'
-      s.paddingLeft = '10px'
-      s.paddingRight = '5px'
+
+      //s.paddingHorizontal = '20px'
+      //s.paddingRight = '5px'
     })
     .children(() => {
 
-      // Icon()
-      //   .observe(vm.$searchBufferFocused)
-      //   .react(s => {
-      //     s.value = MaterialIcon.search
-      //     s.fontSize = '1.2rem'
-      //     s.textColor = vm.$searchBufferFocused.value ? theme().mark: theme().text50
-      //   })
-
-      TextInput(vm.$searchBuffer)
+      hstack()
         .observe(vm.$searchBufferFocused)
         .react(s => {
           s.width = '100%'
-          s.fontSize = theme().fontSizeS
-          s.placeholder = translate('Search...')
-          s.border = 'unset'
-          s.textColor = theme().mark
-          s.autoFocus = vm.$searchBufferFocused.value
+          s.height = '100%'
+          s.valign = 'center'
+          s.textColor = theme().searchInputText
+          s.bgColor = vm.$searchBufferFocused.value ? theme().searchInputBg : theme().searchInputBg + 'aa'
+          s.cornerRadius = INPUT_HEI
+          s.paddingHorizontal = '10px'
         })
-        .whenFocused(s => {
-          s.border = 'unset'
-        })
-        .onKeyDown(e => {
-          if (e.key === 'Enter') {
-            e.stopImmediatePropagation()
-            vm.startSearch(vm.$searchBuffer.value)
-            globalContext.app.clearInputFocus()
-          }
-          else if (e.key === 'Escape') {
-            globalContext.app.clearInputFocus()
-          }
-        })
-        .onFocus(() => {
-          vm.$searchBufferFocused.value = true
-          document.activeElement instanceof HTMLInputElement && document.activeElement.select()
-        })
-        .onBlur(() => {
-          vm.$searchBufferFocused.value = false
+        .children(() => {
+          Icon()
+
+            .react(s => {
+              s.value = MaterialIcon.search
+              s.fontSize = theme().fontSize
+              s.textColor = theme().searchInputText + '88'
+            })
+
+          TextInput(vm.$searchBuffer)
+            .observe(vm.$searchBufferFocused)
+            .react(s => {
+              s.width = '100%'
+              //s.height = '100%'
+              s.fontSize = theme().fontSizeS
+              s.placeholder = translate('Search...')
+              s.border = 'unset'
+              s.textColor = theme().searchInputText
+              s.autoFocus = vm.$searchBufferFocused.value
+            })
+            .whenFocused(s => {
+              s.border = 'unset'
+            })
+            .whenPlaceholderShown(s => {
+              s.textColor = theme().searchInputText + '88'
+            })
+            .onKeyDown(e => {
+              if (e.key === 'Enter') {
+                e.stopImmediatePropagation()
+                vm.startSearch(vm.$searchBuffer.value)
+                globalContext.app.clearInputFocus()
+              }
+              else if (e.key === 'Escape') {
+                globalContext.app.clearInputFocus()
+              }
+            })
+            .onFocus(() => {
+              vm.$searchBufferFocused.value = true
+              document.activeElement instanceof HTMLInputElement && document.activeElement.select()
+            })
+            .onBlur(() => {
+              vm.$searchBufferFocused.value = false
+            })
+
+          IconBtn()
+            .observe(vm.$searchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
+            .react(s => {
+              s.visible = vm.$searchBuffer.value.length > 0
+              s.icon = MaterialIcon.close
+              s.iconSize = theme().fontSizeXS
+              s.textColor = theme().appBg
+              s.bgColor = theme().text + 'cc'
+              s.width = '15px'
+              s.height = '15px'
+              s.right = '105px'
+              s.cornerRadius = '15px'
+            })
+            .whenHovered(s => s.bgColor = theme().text)
+            .onClick(() => {
+              vm.$searchBuffer.value = ''
+              vm.$searchBufferFocused.value = false
+              vm.startSearch('')
+            })
         })
 
-      IconBtn()
-        .observe(vm.$searchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
-        .react(s => {
-          s.visible = vm.$searchBuffer.value.length > 0
-          s.icon = MaterialIcon.close
-          s.iconSize = theme().fontSizeXS
-          s.textColor = theme().appBg
-          s.bgColor = theme().text + 'cc'
-          s.width = '15px'
-          s.height = '15px'
-          s.cornerRadius = '15px'
-        })
-        .whenHovered(s => s.bgColor = theme().text)
-        .onClick(() => {
-          vm.$searchBuffer.value = ''
-          vm.$searchBufferFocused.value = false
-          vm.startSearch('')
-        })
 
       KeyboardKey('⌘k')
         .observe(vm.$searchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
         .react(s => {
-          s.visible = vm.$searchBuffer.value.length === 0
+          //s.visible = vm.$searchBuffer.value.length === 0
         })
 
       KeyboardKey('f')
         .observe(vm.$searchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
         .react(s => {
-          s.visible = vm.$searchBuffer.value.length === 0
-          s.marginLeft = '5px'
+          //s.visible = vm.$searchBuffer.value.length === 0
+          //s.marginLeft = '5px'
         })
     })
 }
@@ -443,10 +417,87 @@ const NotesMenu = () => {
   return vstack()
     .react(s => {
       s.gap = '20px'
-      s.paddingTop = '20px'
+      //s.paddingTop = '20px'
       s.width = '100%'
     })
     .children(() => {
+
+      vstack()
+        .react(s => {
+          s.visible = !layout().isCompact
+          s.valign = 'center'
+          s.halign = 'left'
+          //s.height = '150px'
+          s.bgColor = theme().menuHeaderBg
+          s.width = '100%'
+          s.paddingHorizontal = '20px'
+          s.paddingBottom = '20px'
+        }).children(() => {
+          hstack()
+            .react(s => {
+              s.width = '100%'
+              s.valign = 'center'
+              s.gap = '10px'
+              s.height = layout().navBarHeight + 'px'
+            })
+            .children(() => {
+
+
+              // HeaderBtn()
+              //   .react(s => {
+              //     s.paddingHorizontal = '0'
+              //     s.halign = 'left'
+              //     s.icon = MaterialIcon.arrow_back
+              //     s.popUp = translate('Back')
+              //     s.width = '35px'
+              //   })
+              //   .onClick(() => {
+              //     vm.quit()
+              //   })
+
+              VocDropdown()
+
+              spacer()
+
+              FilterDropdown()
+                .observe(vm.$state)
+                .react(s => {
+                  const state = vm.$state.value
+                  s.visible = state.lang !== undefined && state.voc !== undefined && state.lang.id === state.voc.id
+                })
+            })
+
+
+          hstack()
+            .react(s => {
+              s.valign = 'center'
+              s.halign = 'left'
+              //s.height = '100%'
+              s.width = '100%'
+              s.gap = '10px'
+            }).children(() => {
+
+
+              HeaderBtn()
+                .observe(vm.$noteListShown)
+                .react(s => {
+                  s.visible = layout().isCompact
+                  s.isSelected = vm.$noteListShown.value
+                  s.icon = MaterialIcon.menu
+                })
+                .onClick(() => {
+                  vm.$noteListShown.value = !vm.$noteListShown.value
+                })
+
+              GlobalSearchView()
+                .react(s => {
+                  s.width = '100%'
+                  //s.maxWidth = '300px'
+                  //s.height = layout().isCompact ? '35px' : layout().navBarHeight + 'px'
+                })
+            })
+
+        })
 
       Title('')
         .observe(vm.$state)
@@ -482,26 +533,27 @@ const NoteContentView = () => {
     .react(s => {
       s.visible = vm.$state.value.selectedNote !== undefined
       s.gap = '50px'
-      s.bgColor = theme().markdownTheme.articleBg
+      s.bgColor = theme().articleBg
+      s.halign = 'center'
     })
     .children(() => {
+
       NavBar()
 
       Markdown()
         .observe(vm.$taskAnswerShown)
         .react(s => {
-          const t = theme().markdownTheme
           const searchKey = vm.$state.value.searchKey ?? ''
           const text = vm.$state.value.selectedNote?.text ?? ''
-          s.className = t.id
+          s.className = theme().id
           s.mode = 'md'
           s.fontFamily = FontFamily.ARTICLE
-          s.textColor = t.text
+          s.textColor = theme().text
           s.width = '100%'
           s.maxWidth = MARKDOWN_MAX_WIDTH + 'px'
           s.mark = searchKey.length > 1 ? searchKey : ''
           s.text = text.replace(/(\?\?([^?]+)\?\?)/g, vm.$taskAnswerShown.value ? '$2' : '\\_\\_\\_')
-          s.fontSize = t.fontSize
+          s.fontSize = theme().fontSize
           s.absolutePathPrefix = globalContext.server.baseUrl
         })
 
@@ -512,9 +564,9 @@ const NoteContentView = () => {
           s.visible = note && vm.$taskAnswerShown.value === false && note.text.includes('??')
           s.text = translate('Show answer')
           s.popUp = 'Enter'
-          s.textColor = theme().markdownTheme.pynk + 'cc'
+          s.textColor = theme().pynk + 'cc'
         })
-        .whenHovered(s => s.textColor = theme().markdownTheme.pynk)
+        .whenHovered(s => s.textColor = theme().pynk)
         .onClick(() => vm.$taskAnswerShown.value = true)
 
       spacer()
@@ -623,7 +675,7 @@ const NotesPaginator = () => {
           s.fontSize = theme().fontSizeXS
           s.cornerRadius = '2px'
           s.textSelectable = false
-          s.textColor = theme().accent + 'cc'
+          s.textColor = theme().accent
         })
 
       Btn()
@@ -676,10 +728,11 @@ const NavBar = () => {
       s.width = '100%'
       s.gap = '10px'
       s.whiteSpace = 'nowrap'
-      s.valign = 'top'
+      s.valign = 'center'
       s.halign = 'left'
-      s.fontSize = theme().markdownTheme.fontSizeXS
+      s.fontSize = theme().fontSizeXS
       s.fontFamily = FontFamily.MONO
+      s.height = layout().navBarHeight + 'px'
     })
     .children(() => {
       hstack()
@@ -691,15 +744,15 @@ const NavBar = () => {
         .children(() => {
           IconBtn()
             .react(s => {
-              s.icon = MaterialIcon.home
-              s.iconSize = theme().markdownTheme.fontSizeS
-              s.textColor = theme().markdownTheme.link
+              s.icon = MaterialIcon.language
+              s.iconSize = theme().fontSizeS
+              s.textColor = theme().link
               s.wrap = false
               s.fontFamily = FontFamily.APP
-              s.fontSize = theme().markdownTheme.fontSizeXS
+              s.fontSize = theme().fontSizeXS
               s.paddingVertical = '5px'
             })
-            .whenHovered(s => s.textColor = theme().markdownTheme.link100)
+            .whenHovered(s => s.textColor = theme().link100)
             .onClick(() => {
               vm.$state.value.lang && vm.navigator.navigateTo({})
             })
@@ -708,17 +761,17 @@ const NavBar = () => {
             .react(s => {
               s.text = ' › '
               s.paddingVertical = '2px'
-              s.textColor = theme().markdownTheme.link + 'bb'
+              s.textColor = theme().link + 'bb'
               s.textSelectable = false
             })
 
           LinkBtn()
             .react(s => {
               s.text = vm.$state.value.lang?.name ?? ''
-              s.textColor = theme().markdownTheme.link
+              s.textColor = theme().link
             })
             .whenHovered(s => {
-              s.textColor = theme().markdownTheme.link100
+              s.textColor = theme().link100
             })
             .onClick(() => {
               vm.$state.value.lang && vm.navigator.navigateTo({ langCode: vm.$state.value.lang?.code })
@@ -731,7 +784,7 @@ const NavBar = () => {
               s.visible = lang !== undefined && voc !== undefined
               s.text = ' › '
               s.paddingVertical = '2px'
-              s.textColor = theme().markdownTheme.link + 'bb'
+              s.textColor = theme().link + 'bb'
               s.textSelectable = false
             })
 
@@ -741,10 +794,10 @@ const NavBar = () => {
               const voc = vm.$state.value.voc ?? lang?.vocs.find(v => v.id === vm.$state.value.selectedNote?.voc_id)
               s.visible = lang !== undefined && voc !== undefined
               s.text = voc?.name ?? ''
-              s.textColor = theme().markdownTheme.link
+              s.textColor = theme().link
             })
             .whenHovered(s => {
-              s.textColor = theme().markdownTheme.link100
+              s.textColor = theme().link100
             })
             .onClick(() => {
               const lang = vm.$state.value.lang
@@ -757,8 +810,8 @@ const NavBar = () => {
         .observe(vm.$noteNummberOfTotal)
         .react(s => {
           s.fontFamily = FontFamily.MONO
-          s.fontSize = theme().markdownTheme.fontSizeXS
-          s.textColor = theme().markdownTheme.text50
+          s.fontSize = theme().fontSizeXS
+          s.textColor = theme().text50
           s.text = vm.$noteNummberOfTotal.value
           s.textAlign = 'center'
           s.paddingVertical = '4px'
@@ -779,12 +832,12 @@ const NavBar = () => {
               const hasAudio = vm.$state.value.selectedNote !== undefined && vm.$state.value.selectedNote.audio_url !== ''
               s.visible = hasAudio
               s.icon = MaterialIcon.volume_up
-              s.textColor = theme().markdownTheme.text50
+              s.textColor = theme().text50
               //s.text = 'Audio'
               s.minHeight = 'unset'
             })
             .whenHovered(s => {
-              s.textColor = theme().markdownTheme.text
+              s.textColor = theme().text
             })
             .onClick(() => vm.playAudio())
 
@@ -798,8 +851,8 @@ const NoteMeta = () => {
   return p()
     .react(s => {
       s.fontFamily = FontFamily.APP
-      s.fontSize = theme().markdownTheme.fontSizeXS
-      s.textColor = theme().markdownTheme.text
+      s.fontSize = theme().fontSizeXS
+      s.textColor = theme().text
     })
     .children(() => {
       span()
@@ -809,10 +862,10 @@ const NoteMeta = () => {
           const level = note ? vm.reprLevel(note.level) : ''
           s.visible = level !== ''
           s.text = level
-          s.bgColor = theme().markdownTheme.text + '10'
-          s.borderColor = theme().markdownTheme.text + '20'
+          s.bgColor = theme().text + '10'
+          s.borderColor = theme().text + '20'
           s.cornerRadius = '4px'
-          s.paddingHorizontal = '4px'
+          s.paddingHorizontal = '6px'
         })
 
       span()
@@ -823,8 +876,8 @@ const NoteMeta = () => {
           s.visible = tag !== ''
           s.text = tag
           s.marginLeft = '5px'
-          s.bgColor = theme().markdownTheme.text + '10'
-          s.borderColor = theme().markdownTheme.text + '20'
+          s.bgColor = theme().text + '10'
+          s.borderColor = theme().text + '20'
           s.cornerRadius = '4px'
           s.paddingHorizontal = '4px'
         })
@@ -950,10 +1003,10 @@ const NextPrevNoteNavigator = () => {
           s.halign = 'left'
           s.width = '50%'
           s.height = '40px'
-          s.textColor = theme().markdownTheme.link
+          s.textColor = theme().link
         })
         .whenHovered(s => {
-          s.textColor = theme().markdownTheme.link100
+          s.textColor = theme().link100
         })
         .onClick(() => {
           vm.movePrev()
@@ -980,10 +1033,10 @@ const NextPrevNoteNavigator = () => {
           s.halign = 'left'
           s.width = '50%'
           s.height = '40px'
-          s.textColor = theme().markdownTheme.link
+          s.textColor = theme().link
         })
         .whenHovered(s => {
-          s.textColor = theme().markdownTheme.link100
+          s.textColor = theme().link100
         })
         .onClick(() => {
           vm.moveNext()

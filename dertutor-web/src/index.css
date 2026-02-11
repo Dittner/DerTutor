@@ -27,7 +27,7 @@
 html {
     color-scheme: dark;
     scroll-behavior: auto;
-    font-size: 21px;
+    font-size: 20px;
     text-size-adjust: 100%;
     line-height: var(--LineHeight);
     justify-content: space-between;
@@ -213,7 +213,6 @@ audio::-webkit-media-controls-panel {
 
 input {
     font-size: 1rem;
-    min-height: 35px;
     border-radius: unset;
     outline: unset;
     background: unset;

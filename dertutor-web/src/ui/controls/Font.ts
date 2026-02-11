@@ -4,4 +4,5 @@ export enum FontFamily {
   MONO = 'var(--font-family-mono)',
   MATERIAL_ICON = 'MaterialIcons',
   PIRULEN = 'pirulen',
+  GOTHIC = 'gothic',
 }

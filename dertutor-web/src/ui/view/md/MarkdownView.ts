@@ -58,15 +58,15 @@ export const MarkdownView = () => {
         .observe(vm.$text)
         .react(s => {
           s.visible = !vm.$editMode.value
-          s.className = theme().markdownTheme.id
+          s.className = theme().id
           s.mode = 'md'
           s.width = '100%'
           s.maxWidth = layout().contentWidth + 'px'
           s.minHeight = window.innerHeight - layout().navBarHeight + 'px'
           s.fontFamily = FontFamily.ARTICLE
-          s.fontSize = theme().markdownTheme.fontSize
-          s.textColor = theme().markdownTheme.text
-          s.bgColor = theme().markdownTheme.articleBg
+          s.fontSize = theme().fontSize
+          s.textColor = theme().text
+          s.bgColor = theme().articleBg
           s.text = vm.$text.value
           s.absolutePathPrefix = globalContext.server.baseUrl
           s.paddingTop = '20px'
@@ -75,7 +75,7 @@ export const MarkdownView = () => {
           s.paddingBottom = layout().statusBarHeight + 15 + 'px'
         })
 
-      QuickSearchPanel(vm.quiclSearchController)
+      QuickSearchPanel(vm.quiclSearchController, 'Quick search:')
         .observe(vm.quiclSearchController.$quickSearchFocused)
         .observe(vm.quiclSearchController.$quickSearchResult)
         .react(s => {

@@ -2,8 +2,10 @@ import { RXObservableValue } from 'flinker'
 import { log, logErr, logWarn } from './Logger'
 import { globalContext } from '../App'
 
-export const ARTICLE_WIDTH = 1000
+
+export const ARTICLE_PADDING = 80
 export const MARKDOWN_MAX_WIDTH = 800
+export const ARTICLE_WIDTH = MARKDOWN_MAX_WIDTH + 2 * ARTICLE_PADDING
 
 export interface Layout {
   isMobile: boolean
@@ -56,7 +58,7 @@ export class Application {
   private getLayout(): Layout {
     const windowWidth = window.innerWidth
     const isCompact = this.isMobileDevice || windowWidth < 1200
-    const contentWidth = isCompact ? windowWidth : this.isMobileDevice ? windowWidth : Math.min(ARTICLE_WIDTH, windowWidth - 600)
+    const contentWidth = isCompact ? windowWidth : Math.min(ARTICLE_WIDTH, windowWidth - 600)
     const leftSideMenuWidth = this.isMobileDevice ? 0 : (windowWidth - contentWidth) * 0.45
     
     log('Layout is changed, wid:', window.innerWidth)
@@ -66,7 +68,7 @@ export class Application {
       isCompact,
       navBarHeight: 70,
       statusBarHeight: 30,
-      paddingHorizontal: isCompact ? 20 : 60,
+      paddingHorizontal: isCompact ? 20 : ARTICLE_PADDING,
       contentWidth,
       leftSideMenuWidth
     }

@@ -2,7 +2,7 @@ import { div, hstack, observer, p, spacer, span, vlist, vstack } from "flinker-d
 import { GlobalContext } from "./app/GlobalContext"
 import { Action } from "./ui/actions/Action"
 import { FontFamily } from "./ui/controls/Font"
-import { darkTheme, theme, themeManager } from "./ui/theme/ThemeManager"
+import { theme, themeManager } from "./ui/theme/ThemeManager"
 import { ServerConnectionView } from "./ui/view/connect/ServerConnctionView"
 import { EditorView } from "./ui/view/editor/EditorView"
 import { NoteListView } from "./ui/view/note/NoteListView"
@@ -153,37 +153,47 @@ export const ThemeSwitcher = () => {
   return hstack()
     .observe(themeManager.$theme, 'affectsChildrenProps')
     .react(s => {
-      s.height = '30px'
-      s.cornerRadius = '30px'
+      s.height = '25px'
+      s.cornerRadius = '35px'
       s.paddingHorizontal = '10px'
       s.valign = 'center'
-      s.gap = '0px'
-      s.border = '1px solid ' + darkTheme().border
-      s.textColor = darkTheme().text + '50'
+      s.gap = '2px'
+      s.border = '1px solid ' + theme().border
+      s.textColor = theme().text + '50'
+      s.popUp = theme().id
     })
     .whenHovered(s => {
-      s.bgColor = darkTheme().text + '20'
-      s.border = '1px solid ' + darkTheme().border
+      s.bgColor = theme().text + '20'
+      s.border = '1px solid ' + theme().border
       s.cursor = 'pointer'
     })
     .onClick(() => {
       themeManager.toggleTheme()
     })
     .children(() => {
+      // Icon().react(s => {
+      //   s.value = MaterialIcon.sunny
+      //   s.fontSize = theme().fontSizeXS
+      //   s.textAlign = 'center'
+      //   s.textColor = theme().id === 'light' ? theme().text : 'inherit'
+      // })
+
+      // spacer()
+
       Icon().react(s => {
-        s.value = MaterialIcon.sunny
-        s.fontSize = theme().fontSizeS
+        s.value = MaterialIcon.contrast
+        s.fontSize = theme().fontSizeXS
         s.textAlign = 'center'
-        s.textColor = theme().isLight ? theme().text : 'inherit'
+        s.textColor = theme().id === 'dark' ? theme().text : 'inherit'
       })
 
       spacer()
 
       Icon().react(s => {
         s.value = MaterialIcon.brightness_3
-        s.fontSize = theme().fontSizeS
+        s.fontSize = theme().fontSizeXS
         s.textAlign = 'center'
-        s.textColor = !theme().isLight ? theme().text : 'inherit'
+        s.textColor = theme().id === 'night'  ? theme().text : 'inherit'
       })
     })
 

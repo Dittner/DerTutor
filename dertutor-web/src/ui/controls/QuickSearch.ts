@@ -98,16 +98,8 @@ export class QuickSearchController {
   }
 }
 
-export const QuickSearchPanel = (controller: QuickSearchController) => {
+export const QuickSearchPanel = (controller: QuickSearchController, title:string = '') => {
   return vstack()
-    .react(s => {
-      s.fontFamily = FontFamily.APP
-      s.bgColor = theme().text + '08'
-      s.borderColor = theme().border
-      s.maxWidth = '440px'
-      s.padding = '20px'
-      s.cornerRadius = '4px'
-    })
     .children(() => {
 
       hstack()
@@ -115,52 +107,65 @@ export const QuickSearchPanel = (controller: QuickSearchController) => {
           s.width = '100%'
         })
         .children(() => {
-          Title('Quick search:')
+          title && Title(title)
           spacer()
           LangSwitcher(controller)
             .react(s => s.visible = controller.showLangSwitcher)
         })
 
-      QuickSearchInput(controller)
-
-      p()
-        .observe(controller.$quickSearchResult)
-        .observe(controller.$msg)
+      vstack()
         .react(s => {
-          s.visible = controller.$quickSearchResult.value === undefined && controller.$msg.value.length > 0
-          s.text = controller.$msg.value
-          s.textColor = theme().text50
           s.fontFamily = FontFamily.APP
-          s.fontSize = theme().fontSizeXS
-          s.paddingVertical = '50px'
-          s.width = '100%'
-          s.textAlign = 'center'
+          s.bgColor = theme().text + '08'
+          s.borderColor = theme().border
+          s.padding = '20px'
+          s.cornerRadius = '4px'
+          s.enableOwnScroller = true
+          s.className = 'listScrollbar'
         })
+        .children(() => {
+          QuickSearchInput(controller)
 
-      Btn()
-        .observe(controller.$quickSearchResult)
-        .react(s => {
-          const audioUrl = controller.$quickSearchResult.value?.audio_url ?? ''
-          s.mouseEnabled = audioUrl !== ''
-          s.marginTop = '5px'
-          s.icon = MaterialIcon.volume_up
-          s.text = 'Audio'
-          s.visible = audioUrl !== ''
-        })
-        .onClick(() => controller.playAudio())
+          p()
+            .observe(controller.$quickSearchResult)
+            .observe(controller.$msg)
+            .react(s => {
+              s.visible = controller.$quickSearchResult.value === undefined && controller.$msg.value.length > 0
+              s.text = controller.$msg.value
+              s.textColor = theme().text50
+              s.fontFamily = FontFamily.APP
+              s.fontSize = theme().fontSizeXS
+              s.paddingVertical = '50px'
+              s.width = '100%'
+              s.textAlign = 'center'
+            })
 
-      Markdown()
-        .observe(controller.$quickSearchResult)
-        .react(s => {
-          s.className = theme().quickSearchTheme.id
-          s.lineHeight = '1.4'
-          s.mode = 'md'
-          s.fontFamily = FontFamily.ARTICLE
-          s.fontSize = '0.8rem'
-          s.textColor = theme().quickSearchTheme.text
-          s.width = '100%'
-          s.text = controller.$quickSearchResult.value?.text ?? ''
-          s.absolutePathPrefix = globalContext.server.baseUrl
+          Btn()
+            .observe(controller.$quickSearchResult)
+            .react(s => {
+              const audioUrl = controller.$quickSearchResult.value?.audio_url ?? ''
+              s.mouseEnabled = audioUrl !== ''
+              s.marginTop = '5px'
+              s.icon = MaterialIcon.volume_up
+              s.text = 'Audio'
+              s.visible = audioUrl !== ''
+            })
+            .onClick(() => controller.playAudio())
+
+          Markdown()
+            .observe(controller.$quickSearchResult)
+            .react(s => {
+              s.visible = controller.$quickSearchResult.value !== undefined && controller.$quickSearchResult.value.text.length > 0
+              s.className = theme().quickSearchTheme.id
+              s.lineHeight = '1.4'
+              s.mode = 'md'
+              s.fontFamily = FontFamily.ARTICLE
+              s.fontSize = '0.8rem'
+              s.textColor = theme().quickSearchTheme.text
+              s.width = '100%'
+              s.text = controller.$quickSearchResult.value?.text ?? ''
+              s.absolutePathPrefix = globalContext.server.baseUrl
+            })
         })
     })
 }
