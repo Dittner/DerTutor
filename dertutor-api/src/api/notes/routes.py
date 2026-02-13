@@ -39,7 +39,20 @@ async def search_notes(session: AsyncSession, params: Annotated[SearchParams, Qu
 @router.get('/notes/search_by_name', response_model=list[NoteRead])
 @open_session
 async def search_by_key(session: AsyncSession, params: Annotated[SearchByNameParams, Query()]):
-    return await NotesDAO.search_notes_by_name(session, params)
+    res = await NotesDAO.search_notes_by_name(session, params)
+
+    if len(res) == 0 and params.lang_id == 1:
+        word = params.name
+        n = word.replace('ß', 'ss')
+        if n != word:
+            params.name = n
+            res = await NotesDAO.search_notes_by_name(session, params)
+        if len(res) == 0:
+            n = ctx.de_tagger.analyze(word)
+            if n and n[0] and n[0] != word:
+                params.name = n[0]
+                res = await NotesDAO.search_notes_by_name(session, params)
+    return res
 
 
 @router.post('/notes', response_model=NoteRead)

@@ -76,8 +76,7 @@ export class ViewModel<ViewModelState> implements IViewModel {
   addDefaultKeybindings(): void {
     this.actionsList.add('?', 'Show list of actions', () => this.showActions())
     this.actionsList.add('<ESC>', 'Hide actions/Clear messages', () => {
-      this.$showActions.value = false
-      this.ctx.$msg.value = undefined
+      this.didPressESC()
     })
     this.actionsList.add('t', 'Switch theme', () => {
       themeManager.toggleTheme()
@@ -85,7 +84,14 @@ export class ViewModel<ViewModelState> implements IViewModel {
     })
     this.actionsList.add(':auth<CR>', 'Login', () => this.signIn())
     this.actionsList.add(':unauth<CR>', 'Logout', () => this.signOut())
+    this.actionsList.add('ll', 'Show/Hide layout lines', () => globalContext.app.$layoutLinesShown.value = !globalContext.app.$layoutLinesShown.value)
     this.actionsList.add('.', 'Repeat last action', () => this.lastExecutedAction?.handler())
+  }
+
+  didPressESC() {
+    this.$showActions.value = false
+    this.ctx.$msg.value = undefined
+    globalContext.app.$layoutLinesShown.value = false
   }
 
   isSuperUserAuthorized() {

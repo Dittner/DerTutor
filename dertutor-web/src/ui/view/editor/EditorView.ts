@@ -200,7 +200,6 @@ const PronunciationPanel = () => {
         .observe(vm.$audioUrl)
         .react(s => {
           s.visible = vm.$audioUrl.value !== ''
-          s.gap = '0px'
           s.width = '100%'
           s.fontSize = theme().fontSizeXS
           s.fontFamily = FontFamily.APP
@@ -260,7 +259,6 @@ const MediaFileView = (mf: IMediaFile) => {
     .children(() => {
       vstack()
         .react(s => {
-          s.gap = '0px'
           s.width = '100%'
           s.fontSize = theme().fontSizeXS
           s.fontFamily = FontFamily.APP

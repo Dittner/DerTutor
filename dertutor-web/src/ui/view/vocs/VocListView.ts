@@ -12,7 +12,6 @@ import { ViewLayer } from "../../../app/ViewLayer"
 import { layout } from "../../../app/Application"
 import { VSeparator } from "../../controls/Text"
 
-
 const ABOUT = `
 ## Ресурс для изучения немецкого и английского языков
 Основной функционал:
@@ -33,16 +32,13 @@ const ABOUT = `
 + _q_ — для возврата на предыдущий экран.
 \`\`\`
 1. Выделите слово и нажмите _⌘k_ или _f_ для глобального поиска по всем словарям в пределах выбранного языка.
-1. Выделите слово и нажмите / (слэш) для __быстрого поиска__. __Быстрый поиск__ возращает единственный ответ в случае полного совпадения искомого слова со словом в словаре.
-При этом искомое слово должно быть в начальной форме (напр. инфинитив для глагола). __Быстрый поиск__ позволяет искать слова, не теряя фокуса от прочтения текста.
+1. Выделите слово и нажмите / (слэш) для __быстрого поиска__. __Быстрый поиск__ возращает единственный ответ в случае полного совпадения искомого слова со словом в словаре. __Быстрый поиск__ позволяет искать слова, не теряя фокуса от прочтения текста.
 1. Чтобы просмотреть весь список доступных на том или ином экране горячих клавиш, нажмите знак вопроса: «?».
 \`\`\`
 
 ## Markdown
 В режиме _Markdown_ вы можете добавить в редактор большой объём текста. Чтение будет более эффективным, если использовать преимущества __быстрого поиска__.
 `
-
-
 
 export const VocListView = () => {
   const vm = DerTutorContext.self.vmFactory.getVocListVM()
@@ -51,8 +47,8 @@ export const VocListView = () => {
       s.width = '100%'
       s.halign = 'center'
       s.valign = 'top'
-      s.paddingTop = layout().navBarHeight + 20 + 'px'
-      s.paddingBottom = layout().statusBarHeight + 'px'
+      s.paddingTop = 2 * layout().navBarHeight + 'px'
+      //s.paddingBottom = layout().statusBarHeight + 'px'
       s.bgColor = '#111111'
       //s.paddingHorizontal = '20px'
     })
@@ -72,12 +68,13 @@ export const VocListView = () => {
         .react(s => {
           s.position = 'fixed'
           //s.opacity = '0.75'
+          //s.left = '0'
           s.top = '0'
-          s.maskImage = 'linear-gradient(to right, #00000020, #00000050, #00000020)'
+          s.maskImage = 'linear-gradient(to right, #00000010, #000000aa)'
           s.src = 'src/resources/bg.jpg'
-          s.width = '100%'
+          s.width = layout().isCompact ? 'unset' : '100%'
+          s.height = layout().isCompact ? '100%' : 'unset'
           //s.animate = 'opacity 500ms'
-
         })
         .onClick(() => vm.quit())
 
@@ -114,66 +111,95 @@ export const VocListView = () => {
       //   })
       //   .onClick(() => vm.quit())
 
-      hstack().react(s => {
-        //s.width = layout().contentWidth + 'px'
-        s.paddingHorizontal = layout().paddingHorizontal + 'px'
-        s.valign = 'base'
-        s.halign = 'left'
-        s.textColor = theme().text
-      }).children(() => {
-        // image()
-        //   .react(s => {
-        //     s.src = '/src/resources/dertutor.svg'
-        //     s.height = '400px'
-        //     s.opacity = '0.2'
-        //   })
+      hstack()
+        .react(s => {
+          //s.width = layout().contentWidth + 'px'
+          s.valign = 'base'
+          s.halign = 'left'
+          s.textColor = theme().text
+          s.paddingLeft = layout().leftSideMenuWidth + layout().paddingHorizontal + 'px'
+          s.paddingTop = layout().navBarHeight + 'px'
+          s.height = window.innerHeight - 2 * layout().navBarHeight - layout().statusBarHeight + 'px'
+        })
+        .children(() => {
+          // image()
+          //   .react(s => {
+          //     s.src = '/src/resources/dertutor.svg'
+          //     s.height = '400px'
+          //     s.opacity = '0.2'
+          //   })
 
-        p()
-          .react(s => {
-            s.fontSize = '7rem'
-            s.fontFamily = FontFamily.GOTHIC
-            s.textColor = '#ffFFff88'
-            //s.maxWidth = '700px'
-            s.textAlign = 'left'
-            s.text = 'D'
-          }).children(() => {
-            span().react(s => {
+          p()
+            .react(s => {
+              s.fontSize = layout().isCompact ? '3rem' : '6rem'
+              s.fontFamily = FontFamily.GOTHIC
+              s.textColor = '#ffFFff88'
+              //s.maxWidth = '700px'
+              s.textAlign = 'left'
               s.text = 'D'
-              s.fontSize = '15rem'
-            })
+              s.whiteSpace = 'nowrap'
+            }).children(() => {
+              span().react(s => {
+                s.text = 'D'
+                s.fontSize = '15rem'
+              })
 
-            span().react(s => {
-              s.text = 'er '
-              s.marginLeft = '-30px'
-            })
+              span().react(s => {
+                s.text = 'er '
+                s.marginLeft = '-30px'
+              })
 
-            span().react(s => {
-              s.text = 'T'
-              s.fontSize = '15rem'
-            })
+              span().react(s => {
+                s.text = 'T'
+                s.fontSize = '15rem'
+              })
 
-            span().react(s => {
-              s.text = 'utor'
-              s.marginLeft = '-30px'
+              span().react(s => {
+                s.text = 'utor'
+                s.marginLeft = '-30px'
+              })
             })
+        })
+
+      hstack()
+        .react(s => {
+          s.width = '100%'
+          s.valign = 'bottom'
+          s.layer = '1'
+          //s.bgColor = nightTheme().black + '88'
+        })
+        .children(() => {
+          spacer().react(s => {
+            s.width = layout().leftSideMenuWidth + 'px'
+            // s.height = '100vh'
+            // s.bgColor = nightTheme().black + 'cc'
           })
-      })
 
-      Markdown().react(s => {
-        //s.position = 'absolute'
-        //s.top = '400px'
-        s.className = theme().id
-        s.mode = 'md'
-        s.fontSize = theme().fontSize
-        s.fontFamily = FontFamily.APP
-        s.textColor = theme().quickSearchTheme.text
-        s.width = layout().contentWidth + 'px'
-        //s.maxWidth = '700px'
-        s.textAlign = 'left'
-        s.paddingHorizontal = layout().paddingHorizontal + 'px'
-        s.text = ABOUT
-        s.layer = '1'
-      })
+          Markdown().react(s => {
+            //s.position = 'absolute'
+            //s.top = '400px'
+            s.className = theme().id
+            s.paddingTop = '100px'
+            s.paddingHorizontal = layout().paddingHorizontal + 'px'
+            s.mode = 'md'
+            s.fontSize = theme().fontSizeS
+            s.fontFamily = FontFamily.APP
+            s.textColor = theme().quickSearchTheme.text
+            s.width = '100%'
+            s.minWidth = layout().contentWidth + 'px'
+            //s.maxWidth = '700px'
+            //s.bgColor = '#00000088'
+            s.textAlign = 'left'
+            s.text = ABOUT
+            s.paddingBottom = '100px'
+          })
+
+          spacer().react(s => {
+            s.width = window.innerWidth - layout().leftSideMenuWidth - layout().contentWidth + 'px'
+            // s.height = '50vh'
+            // s.bgColor = nightTheme().black + 'cc'
+          })
+        })
         .onClick(() => vm.quit())
 
       vlist<IVoc>()
@@ -188,14 +214,13 @@ export const VocListView = () => {
           s.left = '0'
           s.top = layout().navBarHeight + 'px'
           s.visible = vm.$selectedLang.value !== undefined
-          s.width = layout().isCompact ? layout().contentWidth + 'px' : '500px'
-          s.gap = '0px'
+          s.width = layout().isCompact ? layout().contentWidth + 'px' : layout().leftSideMenuWidth + 'px'
           s.bgColor = theme().appBg
           s.blur = '10px'
           s.layer = ViewLayer.MODAL_VIEW_CONTENT
           s.fontFamily = FontFamily.APP
           s.fontSize = theme().fontSizeXS
-          s.paddingHorizontal = '30px'
+          s.paddingHorizontal = '20px'
           s.paddingVertical = '20px'
           //s.borderColor = layout.isCompact ? theme().transparent : theme().border
         })
@@ -213,7 +238,7 @@ const Header = () => {
       s.halign = 'left'
       s.valign = 'center'
       s.gap = '20px'
-      s.bgColor = vm.$selectedLang.value !== undefined ? theme().navBarBg : 'unset'
+      s.bgColor = layout().isCompact ? theme().navBarBg : 'unset'
       //.borderBottom = '1px solid ' + darkTheme().border
     })
     .children(() => {
@@ -237,8 +262,6 @@ const Header = () => {
       VSeparator()
 
       ThemeSwitcher()
-
-
 
       UserAuthStatus()
     })
@@ -326,6 +349,7 @@ const VocRenderer = (voc: IVoc) => {
       s.textAlign = 'left'
       s.width = '100%'
       s.paddingVertical = '5px'
+      s.paddingHorizontal = '0'
       s.fontSize = theme().fontSizeS
       s.textColor = isSelected ? theme().accent : theme().text50
     })

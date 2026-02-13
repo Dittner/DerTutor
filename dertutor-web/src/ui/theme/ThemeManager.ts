@@ -42,8 +42,6 @@ export interface GlobalTheme {
   menuHeaderBg: string
   lineInputFocusedBg: string
   articleBg: string
-  searchInputBg: string
-  searchInputText: string
   transparent: string
   h1: string
   header: string
@@ -106,7 +104,7 @@ export class ThemeManager {
     this.darkTheme = this.createDarkTheme(this.lightTheme)
     this.nightTheme = this.createNightTheme(this.darkTheme)
 
-    //this.buildThemeSelectors(this.lightTheme)
+    this.buildThemeSelectors(this.lightTheme)
     this.buildThemeSelectors(this.darkTheme)
     this.buildThemeSelectors(this.nightTheme)
 
@@ -149,7 +147,7 @@ export class ThemeManager {
       fontSizeM: '1.1rem',
       fontSize: '1rem',
       defFontSize: 'inherit',
-      fontSizeS: '0.9rem',
+      fontSizeS: '0.85rem',
       fontSizeXS: '0.7rem',
 
       defFontWeight: 'normal',
@@ -158,8 +156,6 @@ export class ThemeManager {
       navBarBg: white, //304041
       actionsBg: white,
       articleBg: '#fcfcfc',
-      searchInputText: black,
-      searchInputBg: white,
       menuBg: '#d5e3ec',
       menuHeaderBg: '#2a7fb7',
 
@@ -168,7 +164,7 @@ export class ThemeManager {
       red,
       green: '#6db5b5',
       h1: strong,
-      header: '#9c8357',
+      header: '#786036',
       em: strong,
       accent,
       quote: '#1f5a72',
@@ -204,11 +200,11 @@ export class ThemeManager {
   * */
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const accent = '#c0caa8'
+    const accent = '#cddbae'
     const black = '#1f2226'
     const text = '#a8afc2'
     const white = '#cfd7ea'
-    const red = '#bd4571'
+    const red = '#d44e7f'
     const header = '#755b54'
     const blue = '#425865'
     const green = '#6db5b5'
@@ -219,17 +215,15 @@ export class ThemeManager {
       isLight: false,
 
       appBg: black,
-      actionsBg: '#1a1d20',
+      actionsBg: '#28506a',
       navBarBg: '#1a1d20', //1c1f22
       articleBg: black, //1d2125
-      searchInputText: black,
-      searchInputBg: white,
       border: '#555e66',
       menuBg: '#1a1d20',
-      menuHeaderBg: '#205375',
+      menuHeaderBg: '#28506a',
 
       mark: red,
-      pynk: '#521464',
+      pynk: '#d68ceb',
       strong: white,
       black,
       white,
@@ -242,7 +236,7 @@ export class ThemeManager {
       header: '#c09f6c',
       em: accent,
       accent: accent,
-      quote: '#82a4b9',
+      quote: '#8fb2c7',
       blue,
 
       link,
@@ -279,11 +273,9 @@ export class ThemeManager {
       id: 'night',
       isLight: false,
       appBg,
-      actionsBg: '#17181c',
+      actionsBg: menuBg,
       navBarBg: menuBg, //1c1f22
       articleBg: appBg, // '#0f1013', //121416 0c0d0f
-      searchInputText: white,
-      searchInputBg: '#2c3036',
       menuBg: menuBg,
       menuHeaderBg: menuBg,
 
@@ -334,7 +326,7 @@ export class ThemeManager {
       text50: text + 'bb',
       strong,
       h1: strong,
-      fontSizeXL: '1rem',
+      fontSizeXL: '0.9rem',
       fontSizeL: '0.8rem',
       fontSizeM: '0.8rem',
       defFontSize: '0.8rem',

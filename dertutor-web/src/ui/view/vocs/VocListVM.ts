@@ -46,8 +46,7 @@ export class VocListVM extends ViewModel<VocListState> {
 
   private addKeybindings() {
     this.actionsList.add('<ESC>', 'Hide actions/Clear messages', () => {
-      this.$showActions.value = false
-      this.ctx.$msg.value = undefined
+      this.didPressESC()
       this.quit()
     })
 

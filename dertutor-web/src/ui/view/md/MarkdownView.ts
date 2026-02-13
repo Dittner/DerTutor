@@ -30,7 +30,6 @@ export const MarkdownView = () => {
 
       s.halign = 'left'
       s.paddingLeft = layout().leftSideMenuWidth + 'px'
-      s.gap = '0px'
       s.bg = theme().appBg
     })
     .children(() => {
@@ -85,13 +84,14 @@ export const MarkdownView = () => {
           else
             s.visible = true
           s.position = 'fixed'
-          s.left = l.isCompact ? '0px' : (l.contentWidth + l.leftSideMenuWidth + 20 + 'px')
-          s.width = (l.isCompact ? l.contentWidth : window.innerWidth - l.contentWidth - l.leftSideMenuWidth - 40) + 'px'
-          s.maxHeight = vm.quiclSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - l.statusBarHeight - 40 + 'px' : 'unset'
+          s.right = l.isCompact ? '0' : '20px'
+          s.width = (l.isCompact ? l.contentWidth - 20 : window.innerWidth - l.contentWidth - l.leftSideMenuWidth) + 'px'
+          s.maxHeight = vm.quiclSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - l.statusBarHeight - 20 + 'px' : 'unset'
           s.enableOwnScroller = true
           s.maxWidth = l.isCompact ? 'unset' : '400px'
+          s.height = l.isCompact ? '100%' : 'unset'
           s.className = 'listScrollbar'
-          s.top = l.navBarHeight + 20 + 'px'
+          s.top = (l.isCompact ?  l.navBarHeight : l.navBarHeight + 20) + 'px'
         })
     })
 }
@@ -100,7 +100,6 @@ const Header = () => {
   const vm = DerTutorContext.self.vmFactory.getMarkdownVM()
   return hstack()
     .react(s => {
-      s.gap = '0px'
       s.halign = 'left'
       s.valign = 'center'
       s.bgColor = theme().navBarBg

@@ -48,6 +48,7 @@ export function App() {
       //ModalView()
       ActionsHelpView()
       AppErrorInfo()
+      LayoutLinesForDevMode()
     })
     .onClick(() => globalContext.app.$dropdownState.value = '')
 }
@@ -70,7 +71,6 @@ export const ActionsHelpView = () => {
       s.paddingBottom = layout().statusBarHeight + 'px'
       s.height = window.innerHeight + 'px'
       s.paddingHorizontal = '20px'
-      s.gap = '0px'
       s.bgColor = theme().actionsBg + 'cc'
       s.blur = '10px'
       s.layer = ViewLayer.MODAL_VIEW
@@ -164,7 +164,6 @@ export const ThemeSwitcher = () => {
     })
     .whenHovered(s => {
       s.bgColor = theme().text + '20'
-      s.border = '1px solid ' + theme().border
       s.cursor = 'pointer'
     })
     .onClick(() => {
@@ -193,7 +192,7 @@ export const ThemeSwitcher = () => {
         s.value = MaterialIcon.brightness_3
         s.fontSize = theme().fontSizeXS
         s.textAlign = 'center'
-        s.textColor = theme().id === 'night'  ? theme().text : 'inherit'
+        s.textColor = theme().id === 'night' ? theme().text : 'inherit'
       })
     })
 
@@ -272,7 +271,7 @@ export const CmdView = () => {
       s.text = ctx.$activeVM.value?.$cmd.value ?? ''
       s.whiteSpace = 'nowrap'
       s.textColor = theme().text50
-      s.paddingHorizontal = '10px'
+      s.paddingHorizontal = '20px'
       s.width = '100%'
       s.textAlign = 'right'
       s.bgColor = layout().isCompact ? theme().appBg + '88' : theme().transparent
@@ -316,3 +315,54 @@ const ModalView = () => {
     })
     .onClick(() => globalContext.app.$dropdownState.value = '')
 }
+
+const LayoutLinesForDevMode = () => {
+  const vline = () => {
+    return spacer()
+      .react(s => {
+        s.position = 'fixed'
+        s.width = '1px'
+        s.height = '100%'
+        s.bgColor = '#008800'
+      })
+  }
+
+  const hline = () => {
+    return spacer()
+      .react(s => {
+        s.position = 'fixed'
+        s.width = '100%'
+        s.height = '1px'
+        s.bgColor = '#008800'
+      })
+  }
+
+  return div()
+  .observe(globalContext.app.$layoutLinesShown)
+    .react(s => {
+      s.visible = globalContext.app.$layoutLinesShown.value
+      s.position = 'fixed'
+      s.layer = '1000'
+      s.top = '0'
+      s.left = '0'
+      s.width = '100%'
+      s.height = '100%'
+      s.bgColor = '#00880010'
+    })
+    .children(() => {
+      vline().react(s => s.left = '0px')
+      vline().react(s => s.right = '0px')
+      vline().react(s => s.left = '20px')
+      vline().react(s => s.left = layout().leftSideMenuWidth + 'px')
+      vline().react(s => s.left = layout().leftSideMenuWidth - 20 + 'px')
+      vline().react(s => s.left = layout().leftSideMenuWidth + layout().paddingHorizontal + 'px')
+      vline().react(s => s.left = layout().leftSideMenuWidth + layout().contentWidth - layout().paddingHorizontal + 'px')
+      vline().react(s => s.left = layout().leftSideMenuWidth + layout().contentWidth / 2 + 'px')
+      vline().react(s => s.left = layout().leftSideMenuWidth + layout().contentWidth + 'px')
+      vline().react(s => s.right = '20px')
+      hline().react(s => s.top = layout().navBarHeight + 'px')
+      hline().react(s => s.top = 2 * layout().navBarHeight + 'px')
+      hline().react(s => s.bottom = layout().statusBarHeight + 'px')
+    })
+}
+

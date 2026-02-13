@@ -86,7 +86,8 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
     this.ctx.$msg.value = undefined
     window.scrollTo(0, 0)
-    this.$noteListShown.value = !globalContext.app.$layout.value.isCompact
+    if (globalContext.app.$layout.value.isCompact)
+      this.$noteListShown.value = false
   }
 
   private addKeybindings() {
@@ -106,6 +107,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add('f', 'Global Search', () => this.focusGlobalSearchInput())
     this.actionsList.add('<C-k>', 'Global Search', () => this.focusGlobalSearchInput())
 
+    this.actionsList.add('m', 'Show/Hide menu', () => this.$noteListShown.value = !this.$noteListShown.value)
     this.actionsList.add('<Space>', 'Play audio', () => this.playAudio())
     this.actionsList.add('<CR>', 'Show answer to the task', () => this.$taskAnswerShown.value = !this.$taskAnswerShown.value)
     this.actionsList.add(':id<CR>', 'Print ID of note', () => this.printID())

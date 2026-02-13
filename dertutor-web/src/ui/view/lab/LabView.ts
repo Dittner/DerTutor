@@ -95,7 +95,7 @@ export const LabView = () => {
           s.position = 'fixed'
           s.width = '400px'
           s.top = layout().navBarHeight + 'px'
-          s.right = '20px'
+          s.right = '0px'
         })
     })
 }

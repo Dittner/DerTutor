@@ -20,9 +20,6 @@ export const TitledTextInput = (inputBinding: RXObservableValue<string>) => {
   const $state = new RXObservableValue({} as TextInputProps)
   return vstack<TextInputProps>()
     .propsDidChange(props => $state.value = props)
-    .react(s => {
-      s.gap = '0px'
-    })
     .children(() => {
       p()
         .observe($state)
@@ -66,6 +63,7 @@ export const TextInput = (inputBinding: RXObservableValue<string>) => {
       s.autoComplete = 'off'
       s.minHeight = '30px'
       s.border = '1px solid ' + theme().border
+      s.paddingBottom = '4px'
     })
     .whenFocused(s => {
       s.border = '1px solid ' + theme().accent

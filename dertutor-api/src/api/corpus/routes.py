@@ -65,3 +65,15 @@ async def get_translation(key: str):
         return item
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Translation of <{decoded_key}> not found')
+
+
+@router.get('/corpus/de_lemma')
+async def get_de_lemma(word: str):
+    decoded_word = unquote(word)
+    res = ctx.de_tagger.analyze(decoded_word)
+    if res and res[0]:
+        return res[0]
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f'Taking lemma of <{decoded_word}> has failed'
+        )
