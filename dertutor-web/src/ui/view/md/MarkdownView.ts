@@ -81,8 +81,7 @@ export const MarkdownView = () => {
           const l = layout()
           if (l.isCompact)
             s.visible = vm.quiclSearchController.$quickSearchResult.value !== undefined || vm.quiclSearchController.$quickSearchFocused.value
-          else
-            s.visible = true
+          s.className = 'listScrollbar'
           s.position = 'fixed'
           s.right = l.isCompact ? '0' : '20px'
           s.width = (l.isCompact ? l.contentWidth - 20 : window.innerWidth - l.contentWidth - l.leftSideMenuWidth) + 'px'
