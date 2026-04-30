@@ -10,8 +10,6 @@ class Settings(BaseSettings):
     token_access_expire_days: int = 0
     token_refresh_expire_days: int = 0
     connect_en_ru_db: bool = False
-    connect_en_pron_db: bool = False
-    connect_de_pron_db: bool = False
 
     model_config = SettingsConfigDict(
         env_file='.env',

@@ -6,6 +6,7 @@ from pydantic.fields import Field
 from pydantic.main import BaseModel
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm.strategy_options import selectinload
+
 from src.api.dao import BaseDAO
 from src.api.notes.schema import Page
 from src.repo import Note

@@ -43,11 +43,11 @@ export const EditorView = () => {
         s.top = layout().navBarHeight + 'px'
         s.width = window.innerWidth / 2 - 20 + 'px'
         s.bgColor = theme().appBg
-        s.caretColor = theme().red
+        s.caretColor = theme().caretColor
         s.textColor = theme().editor
         s.padding = '10px'
-        s.fontFamily = FontFamily.MONO
-        s.fontSize = '18px'
+        s.fontFamily = FontFamily.ARTICLE
+        s.fontSize = theme().fontSize
         s.height = window.innerHeight - layout().statusBarHeight - layout().navBarHeight + 'px'
         s.border = '1px solid ' + theme().border
       })

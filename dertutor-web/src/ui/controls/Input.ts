@@ -195,6 +195,7 @@ export const LineInput = ($buffer: RXObservableValue<string>, $cursorPos: RXObse
           s.fontSize = 'inherit'
           s.text = $sharedState.value.title
           s.paddingRight = '5px'
+          s.fontWeight = 'bold'
         })
 
       span()

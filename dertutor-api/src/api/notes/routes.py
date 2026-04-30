@@ -2,10 +2,11 @@ import logging
 import shutil
 from typing import Annotated
 
-import src.context as ctx
 from fastapi import APIRouter, Query
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio.session import AsyncSession
+
+import src.context as ctx
 from src.api.decorators import only_superuser, open_session
 from src.api.notes.dao import NotesDAO, Page, SearchByNameParams, SearchParams
 from src.api.notes.schema import NoteCreate, NoteDelete, NoteRead, NoteReadFull, NoteRename, NoteUpdate
@@ -34,6 +35,20 @@ async def get_note(session: AsyncSession, note_id: int):
 @open_session
 async def search_notes(session: AsyncSession, params: Annotated[SearchParams, Query()]):
     return await NotesDAO.search_notes(session, params)
+
+
+@router.get('/notes/search_by_name_exactly', response_model=list[NoteRead])
+@open_session
+async def search_by_name_exactly(session: AsyncSession, params: Annotated[SearchByNameParams, Query()]):
+    res = await NotesDAO.search_notes_by_name(session, params)
+
+    if len(res) == 0 and params.lang_id == 1:
+        word = params.name
+        n = word.replace('ß', 'ss')
+        if n != word:
+            params.name = n
+            res = await NotesDAO.search_notes_by_name(session, params)
+    return res
 
 
 @router.get('/notes/search_by_name', response_model=list[NoteRead])

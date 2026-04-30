@@ -1,9 +1,10 @@
 import logging
 from urllib.parse import unquote
 
-import src.context as ctx
 from fastapi import APIRouter, Response, status
 from fastapi.exceptions import HTTPException
+
+import src.context as ctx
 from src.api.corpus.schema import EnRuResponse
 
 router = APIRouter(prefix='', tags=['Corpus'])
@@ -13,7 +14,8 @@ log = logging.getLogger('uvicorn')
 @router.head('/corpus/de_pron/search')
 async def check_de_audio_file(key: str):
     decoded_key = unquote(key)
-    if ctx.de_pron_db.has(decoded_key):
+    p = ctx.de_pron_path / (decoded_key + '.mp3')
+    if p.exists():
         return Response(status_code=status.HTTP_200_OK)
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Audio <{decoded_key}> not found')
@@ -22,17 +24,19 @@ async def check_de_audio_file(key: str):
 @router.get('/corpus/de_pron/search')
 async def get_de_audio_file(key: str):
     decoded_key = unquote(key)
-    bb = ctx.de_pron_db.read(decoded_key)
-    if bb:
-        return Response(content=bb, media_type='audio/mpeg')
+    p = ctx.de_pron_path / (decoded_key + '.mp3')
+    if p.exists():
+        return Response(content=p.read_bytes(), media_type='audio/mpeg')
     else:
+        print(f'Audio not found: {p.as_posix()}')
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Audio <{decoded_key}> not found')
 
 
 @router.head('/corpus/en_pron/search')
 async def check_en_audio_file(key: str):
     decoded_key = unquote(key)
-    if ctx.en_pron_db.has(decoded_key):
+    p = ctx.en_pron_path / (decoded_key + '.mp3')
+    if p.exists():
         return Response(status_code=status.HTTP_200_OK)
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Audio <{decoded_key}> not found')
@@ -41,9 +45,9 @@ async def check_en_audio_file(key: str):
 @router.get('/corpus/en_pron/search')
 async def get_en_audio_file(key: str):
     decoded_key = unquote(key)
-    bb = ctx.en_pron_db.read(decoded_key)
-    if bb:
-        return Response(content=bb, media_type='audio/mpeg')
+    p = ctx.en_pron_path / (decoded_key + '.mp3')
+    if p.exists():
+        return Response(content=p.read_bytes(), media_type='audio/mpeg')
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Audio <{decoded_key}> not found')
 

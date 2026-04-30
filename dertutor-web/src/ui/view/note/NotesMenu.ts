@@ -368,16 +368,17 @@ const GlobalSearchView = () => {
           s.width = '100%'
           s.height = '100%'
           s.valign = 'center'
-          s.bgColor = vm.$searchBufferFocused.value ? theme().white : theme().white + '20'
+          s.bgColor = theme().white + '20'
           s.cornerRadius = INPUT_HEI
           s.paddingHorizontal = '10px'
+          s.gap = '5px'
         })
         .children(() => {
           Icon()
             .react(s => {
               s.value = MaterialIcon.search
               s.fontSize = theme().fontSize
-              s.textColor = vm.$searchBufferFocused.value ? theme().black + 'cc' : theme().white + 'cc'
+              s.textColor = theme().white + 'cc'
             })
 
           TextInput(vm.$searchBuffer)
@@ -391,8 +392,8 @@ const GlobalSearchView = () => {
               s.autoFocus = vm.$searchBufferFocused.value
             })
             .whenFocused(s => {
-              s.border = 'unset'
-              s.textColor = theme().black
+              //s.border = 'unset'
+              s.textColor = theme().mark
             })
             .whenPlaceholderShown(s => {
               s.textColor = theme().white + '88'

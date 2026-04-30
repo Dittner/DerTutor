@@ -70,7 +70,7 @@ export const VocListView = () => {
           //s.opacity = '0.75'
           //s.left = '0'
           s.top = '0'
-          s.maskImage = 'linear-gradient(to right, #00000010, #000000aa)'
+          s.maskImage = 'linear-gradient(to right, #00000030, #000000aa)'
           s.src = 'src/resources/bg.jpg'
           s.width = layout().isCompact ? 'unset' : '100%'
           s.height = layout().isCompact ? '100%' : 'unset'
@@ -78,42 +78,9 @@ export const VocListView = () => {
         })
         .onClick(() => vm.quit())
 
-      // hstack()
-      //   .react(s => {
-
-      //     //s.visible = !layout().isMobile
-      //     s.width = '100%'
-      //     //s.position = 'fixed'
-      //     //s.paddingHorizontal = layout().paddingHorizontal + 'px'
-      //     //s.top = layout().navBarHeight + 'px'
-      //     s.halign = 'left'
-      //     s.valign = 'top'
-      //     //s.height = (window.innerHeight - layout().navBarHeight - layout().statusBarHeight) + 'px'
-      //     //s.height = '100vh'
-      //     s.bgColor = darkTheme().appBg
-      //     s.layer = '-1'
-      //   })
-      //   .children(() => {
-
-
-
-      //     // p().react(s => {
-      //     //   s.text = "»Der Mensch ist ein Seil, geknüpft zwischen Tier und Übermensch — ein Seil über einem Abgrunde.«"
-      //     //   s.fontSize = '1.8rem'
-      //     //   s.fontFamily = FontFamily.PIRULEN
-      //     //   s.textColor = '#b9777d'
-      //     //   s.width = '100%'
-      //     //   s.maxWidth = '700px'
-      //     //   s.textAlign = 'center'
-      //     //   s.paddingHorizontal = '20px'
-      //     //   s.position = 'absolute'
-      //     // })
-      //   })
-      //   .onClick(() => vm.quit())
-
       hstack()
         .react(s => {
-          //s.width = layout().contentWidth + 'px'
+          s.width = '100%'
           s.valign = 'base'
           s.halign = 'left'
           s.textColor = theme().text
@@ -131,7 +98,7 @@ export const VocListView = () => {
 
           p()
             .react(s => {
-              s.fontSize = layout().isCompact ? '3rem' : '6rem'
+              s.fontSize = layout().isCompact ? '3rem' : '8rem'
               s.fontFamily = FontFamily.GOTHIC
               s.textColor = '#ffFFff88'
               //s.maxWidth = '700px'

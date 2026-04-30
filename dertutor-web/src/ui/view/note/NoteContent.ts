@@ -1,5 +1,5 @@
 import { hstack, p, spacer, span, vstack } from "flinker-dom"
-import { PinkBtn, Btn, IconBtn, LinkBtn } from "../../controls/Button"
+import { PinkBtn, Btn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { globalContext } from "../../../App"
 import { Markdown } from "../../controls/Markdown"
@@ -19,9 +19,6 @@ export const NoteContentView = () => {
       s.halign = 'left'
     })
     .children(() => {
-
-      NavBar()
-
       NoteInfo()
 
       Markdown()
@@ -61,104 +58,6 @@ export const NoteContentView = () => {
     })
 }
 
-const NavBar = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
-  return hstack()
-    .observe(vm.$state, 'affectsChildrenProps')
-    .react(s => {
-      s.width = '100%'
-      s.gap = '10px'
-      s.whiteSpace = 'nowrap'
-      s.valign = 'center'
-      s.halign = 'left'
-      s.fontSize = theme().fontSizeXS
-      s.fontFamily = FontFamily.MONO
-      s.height = layout().navBarHeight + 'px'
-    })
-    .children(() => {
-
-      IconBtn()
-        .observe(vm.$noteListShown)
-        .react(s => {
-          s.isSelected = vm.$noteListShown.value
-          s.icon = MaterialIcon.menu
-          s.iconSize = theme().fontSizeL
-          s.textColor = theme().text50
-          s.paddingRight = '10px'
-          s.popUp = 'Show/Hide menu. Press m'
-        })
-        .whenHovered(s => {
-          s.textColor = theme().text
-        })
-        .onClick(() => {
-          vm.$noteListShown.value = !vm.$noteListShown.value
-        })
-
-      IconBtn()
-        .react(s => {
-          s.icon = MaterialIcon.language
-          s.iconSize = theme().fontSizeS
-          s.textColor = theme().link
-          s.wrap = false
-          s.fontFamily = FontFamily.APP
-          s.fontSize = theme().fontSizeXS
-          s.paddingVertical = '5px'
-        })
-        .whenHovered(s => s.textColor = theme().link100)
-        .onClick(() => {
-          vm.$state.value.lang && vm.navigator.navigateTo({})
-        })
-
-      span()
-        .react(s => {
-          s.text = ' › '
-          s.paddingVertical = '2px'
-          s.textColor = theme().link + 'bb'
-          s.textSelectable = false
-        })
-
-      LinkBtn()
-        .react(s => {
-          s.text = vm.$state.value.lang?.name ?? ''
-          s.textColor = theme().link
-        })
-        .whenHovered(s => {
-          s.textColor = theme().link100
-        })
-        .onClick(() => {
-          vm.$state.value.lang && vm.navigator.navigateTo({ langCode: vm.$state.value.lang?.code })
-        })
-
-      span()
-        .react(s => {
-          const lang = vm.$state.value.lang
-          const voc = vm.$state.value.voc ?? lang?.vocs.find(v => v.id === vm.$state.value.selectedNote?.voc_id)
-          s.visible = lang !== undefined && voc !== undefined
-          s.text = ' › '
-          s.paddingVertical = '2px'
-          s.textColor = theme().link + 'bb'
-          s.textSelectable = false
-        })
-
-      LinkBtn()
-        .react(s => {
-          const lang = vm.$state.value.lang
-          const voc = vm.$state.value.voc ?? lang?.vocs.find(v => v.id === vm.$state.value.selectedNote?.voc_id)
-          s.visible = lang !== undefined && voc !== undefined
-          s.text = voc?.name ?? ''
-          s.textColor = theme().link
-        })
-        .whenHovered(s => {
-          s.textColor = theme().link100
-        })
-        .onClick(() => {
-          const lang = vm.$state.value.lang
-          const voc = vm.$state.value.voc ?? lang?.vocs.find(v => v.id === vm.$state.value.selectedNote?.voc_id)
-          lang && voc && vm.navigator.navigateTo({ langCode: lang?.code, vocCode: voc && vm.encodeName(voc.name) })
-        })
-    })
-}
-
 const NoteInfo = () => {
   const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return hstack()
@@ -166,7 +65,7 @@ const NoteInfo = () => {
       s.width = '100%'
       s.height = layout().navBarHeight + 'px'
       s.valign = 'center'
-      s.halign = 'stretch'
+      s.halign = 'center'
       s.gap = '10px'
     })
     .children(() => {
@@ -185,7 +84,7 @@ const NoteInfo = () => {
         })
         .onClick(() => vm.playAudio())
 
-      NoteAudioLevelTag()
+      NoteLevelTag()
 
       spacer()
 
@@ -193,7 +92,6 @@ const NoteInfo = () => {
         .observe(vm.$noteNummberOfTotal)
         .react(s => {
           s.position = 'absolute'
-          s.left = '0'
           s.fontFamily = FontFamily.MONO
           s.fontSize = theme().fontSizeXS
           s.textColor = theme().text50
@@ -201,12 +99,11 @@ const NoteInfo = () => {
           s.textAlign = 'center'
           s.height = layout().navBarHeight + 'px'
           s.lineHeight = layout().navBarHeight + 'px'
-          s.width = '100%'
         })
     })
 }
 
-const NoteAudioLevelTag = () => {
+const NoteLevelTag = () => {
   const vm = DerTutorContext.self.vmFactory.getNoteListVM()
   return p()
     .react(s => {
@@ -255,6 +152,8 @@ const NextPrevNoteNavigator = () => {
     .react(s => {
       s.width = '100%'
       s.valign = 'center'
+      s.halign = 'stretch'
+      s.gap = '10px'
     })
     .children(() => {
       Btn()
@@ -272,7 +171,7 @@ const NextPrevNoteNavigator = () => {
           s.paddingHorizontal = '0'
           s.icon = MaterialIcon.arrow_back
           s.halign = 'left'
-          s.width = '50%'
+          s.maxWidth = layout().contentWidth / 2 - layout().paddingHorizontal - 5 + 'px'
           s.height = '40px'
           s.textColor = theme().text + '88'
         })
@@ -302,7 +201,7 @@ const NextPrevNoteNavigator = () => {
           s.icon = MaterialIcon.arrow_forward
           s.revert = true
           s.halign = 'left'
-          s.width = '50%'
+          s.maxWidth = layout().contentWidth / 2 - layout().paddingHorizontal - 5 + 'px'
           s.height = '40px'
           s.textColor = theme().text + '88'
         })

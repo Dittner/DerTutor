@@ -2,11 +2,12 @@ import logging
 import uuid
 from pathlib import Path
 
-import src.context as ctx
 from fastapi import APIRouter, Response, UploadFile, status
 from fastapi.exceptions import HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio.session import AsyncSession
+
+import src.context as ctx
 from src.api.decorators import only_superuser, open_session
 from src.api.media.dao import MediaDAO
 from src.api.media.schema import MediaDelete, MediaRead

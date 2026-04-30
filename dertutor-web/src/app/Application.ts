@@ -15,6 +15,7 @@ export interface Layout {
   contentWidth: number
   paddingHorizontal: number
   leftSideMenuWidth: number
+  pageWidth: number
 }
 
 export interface BrowserLocation {
@@ -67,10 +68,11 @@ export class Application {
     return {
       isMobile: this.isMobileDevice,
       isCompact,
-      navBarHeight: 70,
+      navBarHeight: 60,
       statusBarHeight: 30,
       paddingHorizontal: isCompact ? 20 : ARTICLE_PADDING,
       contentWidth,
+      pageWidth: document.documentElement.clientWidth,
       leftSideMenuWidth
     }
   }
@@ -116,6 +118,10 @@ export class Application {
     } catch (err) {
       logErr('Failed to copy text: ', err);
     }
+  }
+
+  getSelection() {
+    return window.getSelection()?.toString() ?? ''
   }
 
   clearInputFocus() {

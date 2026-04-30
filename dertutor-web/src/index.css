@@ -52,7 +52,7 @@ body {
     max-width: 100%;
     overflow-x: hidden;
     overflow-y: scroll;
-    overscroll-behavior: none;
+    overscroll-behavior: unset;
     scrollbar-gutter: none;
     caret-shape: auto;
     /* white-space: pre-wrap; */

@@ -66,8 +66,14 @@ export class MarkdownVM extends ViewModel<MarkdownState> {
     this.actionsList.add('q', 'Quit', () => this.quit())
   }
 
+  override didPressESC() {
+    super.didPressESC()
+    this.quiclSearchController.clear()
+  }
+
   override onKeyDown(e: KeyboardEvent) {
-    if (!this.$editMode.value) super.onKeyDown(e)
+    if (!this.$editMode.value || !(document.activeElement instanceof HTMLTextAreaElement))
+      super.onKeyDown(e)
   }
 
   quit() {

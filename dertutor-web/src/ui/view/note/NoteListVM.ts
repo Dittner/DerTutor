@@ -114,6 +114,11 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add('q', 'Quit', () => this.quit())
   }
 
+  override didPressESC() {
+    super.didPressESC()
+    this.quiclSearchController.clear()
+  }
+
   moveNext() {
     const p = this.$state.value.page
     const n = this.$state.value.selectedNote

@@ -1,8 +1,8 @@
-import { btn, hstack, p, spacer, vstack } from "flinker-dom"
+import { hstack, p, vstack } from "flinker-dom"
 import { FontFamily } from "./Font"
 import { Btn, Icon, IconBtn } from "./Button"
 import { RXObservableValue } from "flinker"
-import { INote, LangId } from "../../domain/DomainModel"
+import { INote } from "../../domain/DomainModel"
 import { MaterialIcon } from "../icons/MaterialIcon"
 import { globalContext } from "../../App"
 import { Markdown } from "./Markdown"
@@ -12,7 +12,7 @@ import { translate } from "../../app/LocaleManager"
 import { DerTutorContext } from "../../DerTutorContext"
 import { log } from "../../app/Logger"
 import { SearchByNameSchema } from "../../backend/Schema"
-import { KeyboardKey, Title } from "./Text"
+import { KeyboardKey } from "./Text"
 import { layout } from "../../app/Application"
 
 const LANG_ID_KEY = 'QUICK_SEARCH_CONTROLLER:LANG_ID_KEY'
@@ -99,34 +99,24 @@ export class QuickSearchController {
   }
 }
 
-export const QuickSearchPanel = (controller: QuickSearchController, title: string = '') => {
+export const QuickSearchPanel = (controller: QuickSearchController) => {
   return vstack()
     .react(s => {
       s.width = '100%'
-      s.paddingHorizontal = '20px'
-      s.bgColor = theme().menuBg
-      s.cornerRadius = '4px'
+      s.borderColor = theme().quickSearchTheme.border
     })
     .children(() => {
 
-      hstack()
-        .react(s => {
-          s.width = '100%'
-        })
-        .children(() => {
-          title && Title(title)
-          spacer()
-          LangSwitcher(controller)
-            .react(s => s.visible = controller.showLangSwitcher)
-        })
+      QuickSearchInput(controller)
 
       vstack()
         .react(s => {
           s.fontFamily = FontFamily.APP
           s.gap = '0'
+          s.paddingHorizontal = '20px'
         })
         .children(() => {
-          QuickSearchInput(controller)
+
 
           p()
             .observe(controller.$quickSearchResult)
@@ -178,139 +168,74 @@ const QuickSearchInput = (controller: QuickSearchController) => {
     .react(s => {
       s.fontFamily = FontFamily.APP
       s.valign = 'center'
+      s.halign = 'stretch'
       s.width = '100%'
       s.gap = '5px'
       s.height = layout().navBarHeight + 'px'
+      //s.bgColor = controller.$quickSearchFocused.value ? theme().lineInputFocusedBg : theme().transparent
+      s.borderBottom = '1px solid ' + theme().border
+      s.paddingHorizontal = '20px'
     })
     .children(() => {
 
-      hstack()
+      Icon()
+        .react(s => {
+          s.value = MaterialIcon.search
+          s.textAlign = 'center'
+          s.textColor = theme().text50
+        })
+
+      TextInput(controller.$quickSearchBuffer)
         .observe(controller.$quickSearchFocused)
         .react(s => {
-          s.fontFamily = FontFamily.APP
-          s.valign = 'center'
-          s.halign = 'stretch'
           s.width = '100%'
-          s.maxWidth = '300px'
-          s.gap = '5px'
-          s.height = '30px'
-          s.maxHeight = '30px'
-          //s.border = '1px solid ' + theme().lineInputFocusedBg
-          s.bgColor = controller.$quickSearchFocused.value ? theme().lineInputFocusedBg : theme().lineInputFocusedBg + 'aa'
-          s.cornerRadius = '30px'
-          s.paddingHorizontal = '10px'
+          s.autoFocus = controller.$quickSearchFocused.value
+          s.fontSize = theme().fontSizeS
+          s.placeholder = translate('Enter a word to search')
+          s.border = 'unset'
+          s.textColor = theme().text50
+          s.caretColor = theme().text
         })
-        .children(() => {
+        .whenFocused(s => {
+          s.textColor = theme().text
+        })
+        .whenPlaceholderShown(s => {
+          s.textColor = theme().text50
+        })
+        .onBlur(() => { controller.$quickSearchFocused.value = false })
+        .onFocus(() => {
+          controller.$quickSearchFocused.value = true
+          document.activeElement instanceof HTMLInputElement && document.activeElement.select()
+        })
+        .onKeyDown(e => {
+          if (e.key === 'Enter') {
+            e.stopImmediatePropagation()
+            controller.search()
+          }
+          else if (e.key === 'Escape') {
+            globalContext.app.clearInputFocus()
+            //controller.clear()
+          }
+        })
 
-          Icon()
-            .react(s => {
-              s.value = MaterialIcon.search
-              s.textAlign = 'center'
-              s.textColor = theme().black
-            })
-
-          TextInput(controller.$quickSearchBuffer)
-            .observe(controller.$quickSearchFocused)
-            .react(s => {
-              s.width = '100%'
-              s.autoFocus = controller.$quickSearchFocused.value
-              s.fontSize = theme().fontSizeS
-              s.placeholder = translate('Enter a word to search')
-              s.border = 'unset'
-              s.textColor = theme().black
-              s.caretColor = theme().black
-            })
-            .whenFocused(s => {
-              s.textColor = theme().black
-            })
-            .whenPlaceholderShown(s => {
-              s.textColor = theme().black + '88'
-            })
-            .onBlur(() => { controller.$quickSearchFocused.value = false })
-            .onFocus(() => {
-              controller.$quickSearchFocused.value = true
-              document.activeElement instanceof HTMLInputElement && document.activeElement.select()
-            })
-            .onKeyDown(e => {
-              if (e.key === 'Enter') {
-                e.stopImmediatePropagation()
-                controller.search()
-              }
-              else if (e.key === 'Escape') {
-                globalContext.app.clearInputFocus()
-                //controller.clear()
-              }
-            })
-
-          IconBtn()
-            .observe(controller.$quickSearchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
-            .react(s => {
-              s.visible = controller.$quickSearchBuffer.value.length > 0
-              s.icon = MaterialIcon.close
-              s.iconSize = theme().fontSizeXS
-              s.textColor = theme().lineInputFocusedBg
-              s.bgColor = theme().black + 'cc'
-              s.width = '15px'
-              s.height = '15px'
-              s.cornerRadius = '15px'
-            })
-            .whenHovered(s => s.bgColor = theme().black)
-            .onClick(() => {
-              controller.clear()
-            })
-
+      IconBtn()
+        .observe(controller.$quickSearchBuffer.pipe().map(v => v.length > 0).removeDuplicates().fork())
+        .react(s => {
+          s.visible = controller.$quickSearchBuffer.value.length > 0
+          s.icon = MaterialIcon.close
+          s.iconSize = theme().fontSizeXS
+          s.textColor = theme().black
+          s.bgColor = theme().text50
+          s.width = '15px'
+          s.height = '15px'
+          s.cornerRadius = '15px'
+        })
+        .whenHovered(s => s.bgColor = theme().text)
+        .onClick(() => {
+          controller.clear()
         })
 
       KeyboardKey('/')
     })
 }
 
-const LangSwitcher = (controller: QuickSearchController) => {
-  return hstack().react(s => {
-    s.valign = 'center'
-    s.gap = '10px'
-    s.fontSize = theme().fontSizeXS
-    s.paddingVertical = '2px'
-    s.valign = 'center'
-  })
-    .children(() => {
-      btn()
-        .observe(controller.$langId)
-        .react(s => {
-          s.text = 'de'
-          s.isSelected = controller.$langId.value === LangId.DE
-          s.textColor = theme().text50
-          s.fontSize = 'inherit'
-        })
-        .whenHovered(s => {
-          s.textColor = theme().text
-        })
-        .whenSelected(s => {
-          s.textColor = theme().em
-        })
-        .onClick(() => controller.$langId.value = LangId.DE)
-
-      spacer().react(s => {
-        s.width = '1px'
-        s.height = '10px'
-        s.bgColor = theme().text50
-      })
-
-      btn()
-        .observe(controller.$langId)
-        .react(s => {
-          s.text = 'en'
-          s.isSelected = controller.$langId.value === LangId.EN
-          s.textColor = theme().text50
-          s.fontSize = 'inherit'
-        })
-        .whenHovered(s => {
-          s.textColor = theme().text
-        })
-        .whenSelected(s => {
-          s.textColor = theme().em
-        })
-        .onClick(() => controller.$langId.value = LangId.EN)
-    })
-
-}

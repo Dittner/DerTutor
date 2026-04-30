@@ -1,4 +1,4 @@
-import { hstack, p, spacer, vstack } from "flinker-dom"
+import { btn, hstack, p, spacer, vstack } from "flinker-dom"
 import { globalContext, ThemeSwitcher } from "../../../App"
 import { Btn, IconBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
@@ -10,10 +10,11 @@ import { TextFormatter } from "../editor/TextFormatter"
 import { TextEditor } from "../editor/TextEditor"
 import { RXObservableValue } from "flinker"
 import { Markdown } from "../../controls/Markdown"
-import { QuickSearchPanel } from "../../controls/QuickSearch"
+import { QuickSearchController, QuickSearchPanel } from "../../controls/QuickSearch"
 import { translate } from "../../../app/LocaleManager"
 import { MaterialIcon } from "../../icons/MaterialIcon"
 import { ARTICLE_WIDTH, layout, MARKDOWN_MAX_WIDTH } from "../../../app/Application"
+import { LangId } from "../../../domain/DomainModel"
 
 export const MarkdownView = () => {
   log('new MarkdownView')
@@ -37,14 +38,19 @@ export const MarkdownView = () => {
         .react(s => {
           s.position = 'fixed'
           s.height = layout().navBarHeight + 'px'
-          s.width = '100%'
+          s.width = layout().pageWidth + 'px'
           s.left = '0'
           s.top = '0'
+          s.gap = '20px'
+          s.halign = 'center'
+          s.valign = 'center'
+          s.paddingHorizontal = '20px'
           s.layer = ViewLayer.HEADER
+          s.bgColor = theme().navBarBg
           //s.borderBottom = '1px solid ' + theme().border
         })
 
-      Editor('Editor', vm.$text, formatter)
+      Editor(vm.$text, formatter)
         .react(s => {
           s.visible = vm.$editMode.value
           s.width = '100%'
@@ -74,7 +80,7 @@ export const MarkdownView = () => {
           s.paddingBottom = layout().statusBarHeight + 15 + 'px'
         })
 
-      QuickSearchPanel(vm.quiclSearchController, 'Quick search:')
+      QuickSearchPanel(vm.quiclSearchController)
         .observe(vm.quiclSearchController.$quickSearchFocused)
         .observe(vm.quiclSearchController.$quickSearchResult)
         .react(s => {
@@ -90,7 +96,7 @@ export const MarkdownView = () => {
           s.maxWidth = l.isCompact ? 'unset' : '400px'
           s.height = l.isCompact ? '100%' : 'unset'
           s.className = 'listScrollbar'
-          s.top = (l.isCompact ?  l.navBarHeight : l.navBarHeight + 20) + 'px'
+          s.top = l.navBarHeight + 'px'
         })
     })
 }
@@ -130,9 +136,12 @@ const Header = () => {
             })
             .onClick(() => vm.quit())
 
+
           p().react(s => {
             s.text = 'Markdown'
             s.textColor = theme().h1
+            s.fontWeight = 'bold'
+            s.width = '100%'
             s.textAlign = 'center'
             s.width = '100%'
             s.fontWeight = 'bold'
@@ -153,38 +162,37 @@ const Header = () => {
 
       spacer()
 
+      LangSwitcher(vm.quiclSearchController)
+
       ThemeSwitcher()
         .react(s => {
           s.visible = !layout().isCompact
-          s.position = 'absolute'
+          //s.position = 'absolute'
           s.right = '20px'
         })
     })
 }
 
-const Editor = (title: string, buffer: RXObservableValue<string>, formatter: TextFormatter) => {
+const Editor = (buffer: RXObservableValue<string>, formatter: TextFormatter) => {
   const vm = DerTutorContext.self.vmFactory.getMarkdownVM()
   return vstack()
     .react(s => {
       s.gap = '5px'
     })
     .children(() => {
-      p().react(s => {
-        s.text = title
-        s.textColor = theme().text50
-        s.fontSize = theme().fontSizeXS
-      })
+
       TextEditor(formatter)
         .bind(buffer)
         .react(s => {
           s.width = '100%'
           s.height = '100%'
           s.bgColor = theme().appBg
-          s.caretColor = theme().red
+          s.caretColor = theme().caretColor
           s.textColor = theme().editor
+          s.autoFocus = false
           s.padding = '10px'
-          s.fontFamily = FontFamily.MONO
-          s.fontSize = theme().fontSizeS
+          s.fontFamily = FontFamily.ARTICLE
+          s.fontSize = theme().fontSize
           s.border = '1px solid ' + theme().border
         })
         .whenFocused(s => {
@@ -193,8 +201,61 @@ const Editor = (title: string, buffer: RXObservableValue<string>, formatter: Tex
         .onKeyDown(e => {
           if (e.key === 'Escape') {
             vm.$editMode.value = false
+          } else if (globalContext.app.getSelection() && e.key === '/') {
+            e.preventDefault()
+            vm.quiclSearchController.focus()
           }
         })
+
     })
 }
 
+const LangSwitcher = (controller: QuickSearchController) => {
+  return hstack().react(s => {
+    s.valign = 'center'
+    s.gap = '10px'
+    s.fontSize = theme().fontSizeXS
+    s.paddingVertical = '2px'
+    s.valign = 'center'
+  })
+    .children(() => {
+      btn()
+        .observe(controller.$langId)
+        .react(s => {
+          s.text = 'de'
+          s.isSelected = controller.$langId.value === LangId.DE
+          s.textColor = theme().text50
+          s.fontSize = 'inherit'
+        })
+        .whenHovered(s => {
+          s.textColor = theme().text
+        })
+        .whenSelected(s => {
+          s.textColor = theme().em
+        })
+        .onClick(() => controller.$langId.value = LangId.DE)
+
+      spacer().react(s => {
+        s.width = '1px'
+        s.height = '10px'
+        s.bgColor = theme().text50
+      })
+
+      btn()
+        .observe(controller.$langId)
+        .react(s => {
+          s.text = 'en'
+          s.isSelected = controller.$langId.value === LangId.EN
+          s.textColor = theme().text50
+          s.fontSize = 'inherit'
+        })
+        .whenHovered(s => {
+          s.textColor = theme().text
+        })
+        .whenSelected(s => {
+          s.textColor = theme().em
+        })
+        .onClick(() => controller.$langId.value = LangId.EN)
+    })
+
+}

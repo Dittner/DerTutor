@@ -44,7 +44,9 @@ export function App() {
           else return undefined
         })
 
-      Footer()
+      MessangerView()
+      CmdView()
+      LineInputFooter()
       //ModalView()
       ActionsHelpView()
       AppErrorInfo()
@@ -64,30 +66,31 @@ export const ActionsHelpView = () => {
       const vm = ctx.$activeVM.value
       s.visible = vm && vm.$showActions.value
       s.position = 'fixed'
-      s.top = '0px'
-      s.right = '0px'
+      s.top = layout().navBarHeight + 'px'
+      s.cornerRadius = '10px'
+      s.right = '20px'
       s.width = '600px'
-      s.paddingTop = '20px'
-      s.paddingBottom = layout().statusBarHeight + 'px'
-      s.height = window.innerHeight + 'px'
+      s.height = window.innerHeight - layout().navBarHeight - layout().statusBarHeight + 'px'
       s.paddingHorizontal = '20px'
-      s.bgColor = theme().actionsBg + 'cc'
+      s.bgColor = theme().actionsBg
       s.blur = '10px'
       s.layer = ViewLayer.MODAL_VIEW
     }).children(() => {
 
       p().react(s => {
-        s.textColor = theme().text
+        s.textColor = theme().green
         s.fontWeight = 'bold'
         s.paddingLeft = SHORTKEY_TEXT_WIDTH
+        s.paddingTop = '20px'
+        s.fontSize = theme().fontSizeM
         s.text = translate('Shortkeys')
       })
 
       p().react(s => {
-        s.textColor = theme().text
+        s.textColor = theme().green
         s.paddingLeft = SHORTKEY_TEXT_WIDTH
         s.text = translate('(Press ESC to hide)')
-        s.paddingBottom = '50px'
+        s.paddingBottom = '20px'
       })
 
       vlist<Action>()
@@ -101,16 +104,23 @@ export const ActionsHelpView = () => {
           s.gap = '0'
         })
 
+        spacer().react(s => {
+          s.bgColor = theme().green + '44'
+          s.width = '200px'
+          s.height = '5px'
+          s.marginLeft = SHORTKEY_TEXT_WIDTH
+          s.marginVertical = '20px'
+        })
+
       vstack()
         .react(s => {
           s.width = 'unset'
-          s.textColor = theme().strong
+          s.textColor = theme().green + 'aa'
           s.fontSize = theme().fontSizeXS
           s.fontFamily = FontFamily.MONO
           s.paddingLeft = SHORTKEY_TEXT_WIDTH
-          s.paddingTop = '50px'
+          //s.paddingTop = '50px'
           s.paddingRight = '20px'
-          s.gap = '2px'
         })
         .children(() => {
           p().react(s => { s.text = '<CR> — Enter' })
@@ -130,21 +140,22 @@ const ActionInfoView = (a: Action) => {
       span().react(s => {
         s.display = 'inline-block'
         s.text = a.cmd
-        s.textColor = a.onlySuperUser ? theme().red : theme().strong
+        s.textColor = theme().green100
+        
         s.paddingHorizontal = '20px'
-        s.paddingVertical = '2px'
         s.width = SHORTKEY_TEXT_WIDTH
         s.whiteSpace = 'nowrap'
         s.textAlign = 'right'
+        s.fontWeight = 'bold'
       })
 
       span()
         .react(s => {
           s.text = translate(a.desc)
-          s.textColor = a.onlySuperUser ? theme().red + 'aa' : theme().text
+          s.textColor = theme().green
           s.width = '100%'
           //s.whiteSpace = 'nowrap'
-          s.paddingVertical = '5px'
+          s.paddingVertical = '2px'
         })
     })
 }
@@ -198,42 +209,29 @@ export const ThemeSwitcher = () => {
 
 }
 
-const Footer = () => {
+const LineInputFooter = () => {
   const ctx = DerTutorContext.self
 
-  return hstack()
-    .react(s => {
-      s.position = 'fixed'
-      s.bottom = '0'
-      s.left = '0'
-      s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().fontSizeXS
-      s.gap = '10px'
-      s.width = '100%'
-      s.minHeight = layout().statusBarHeight + 'px'
-      s.valign = 'center'
-      //s.blur = '10px'
-      s.layer = ViewLayer.FOOTER
-    })
-    .children(() => {
-
-      MessangerView()
-      CmdView()
-
-      observer(ctx.$activeVM).onReceive(vm => {
-        return vm && LineInput(vm.inputMode.bufferController.$buffer, vm.inputMode.bufferController.$cursorPos)
-          .observe(vm.inputMode.$isActive)
-          .react(s => {
-            s.visible = vm.inputMode.$isActive.value
-            s.position = 'fixed'
-            s.width = '100%'
-            s.height = layout().statusBarHeight + 'px'
-            s.bottom = '0'
-            s.title = vm.inputMode.name
-            s.isSecure = vm.inputMode.isSecure
-          })
+  return observer(ctx.$activeVM).onReceive(vm => {
+    return vm && LineInput(vm.inputMode.bufferController.$buffer, vm.inputMode.bufferController.$cursorPos)
+      .observe(vm.inputMode.$isActive)
+      .react(s => {
+        s.visible = vm.inputMode.$isActive.value
+        s.position = 'fixed'
+        s.bottom = '0'
+        s.left = '0'
+        s.fontFamily = FontFamily.MONO
+        s.fontSize = theme().fontSizeXS
+        s.width = '100%'
+        s.height = layout().statusBarHeight + 'px'
+        s.minHeight = layout().statusBarHeight + 'px'
+        s.valign = 'center'
+        s.layer = ViewLayer.FOOTER
+        s.bottom = '0'
+        s.title = vm.inputMode.name
+        s.isSecure = vm.inputMode.isSecure
       })
-    })
+  })
 }
 
 export const MessangerView = () => {
@@ -242,15 +240,21 @@ export const MessangerView = () => {
     .observe(ctx.$msg)
     .react(s => {
       const msg = ctx.$msg.value
+      s.position = 'fixed'
+      s.height = layout().statusBarHeight + 'px'
+      s.lineHeight = layout().statusBarHeight + 'px'
+      s.bottom = '0'
+      s.left = '0'
+      s.layer = ViewLayer.FOOTER
       s.visible = !layout().isMobile
       s.fontFamily = FontFamily.MONO
       s.fontSize = theme().fontSizeXS
       s.paddingHorizontal = '20px'
       s.text = msg?.text ?? ''
-      s.width = '100%'
+      //s.width = 'unset'
       s.wrap = false
       s.whiteSpace = 'nowrap'
-      s.bgColor = layout().isCompact ? theme().appBg + '88' : theme().transparent
+      s.bgColor = layout().isCompact ? theme().appBg + '88' : theme().menuBg
 
       if (msg?.level === 'error')
         s.textColor = theme().red
@@ -266,15 +270,20 @@ export const CmdView = () => {
   return p()
     .observe(ctx.$activeVM.pipe().skipNullable().flatMap(vm => vm.$cmd).fork())
     .react(s => {
+      s.position = 'fixed'
+      s.height = layout().statusBarHeight + 'px'
+      s.lineHeight = layout().statusBarHeight + 'px'
+      s.bottom = '0'
+      s.right = '0'
+      s.layer = ViewLayer.FOOTER
+
       s.fontFamily = FontFamily.MONO
       s.fontSize = theme().fontSizeXS
       s.text = ctx.$activeVM.value?.$cmd.value ?? ''
       s.whiteSpace = 'nowrap'
       s.textColor = theme().text50
       s.paddingHorizontal = '20px'
-      s.width = '100%'
-      s.textAlign = 'right'
-      s.bgColor = layout().isCompact ? theme().appBg + '88' : theme().transparent
+      s.bgColor = layout().isCompact ? theme().appBg + '88' : theme().appBg
     })
 }
 
@@ -285,7 +294,8 @@ const AppErrorInfo = () => {
       s.visible = globalContext.app.$err.value.length > 0
       s.position = 'fixed'
       s.top = '0'
-      s.width = '100%'
+      s.left = '0'
+      s.width = 'unset'
     }).children(() => {
       p().react(s => {
         s.whiteSpace = 'nowrap'
@@ -295,8 +305,8 @@ const AppErrorInfo = () => {
         s.fontFamily = FontFamily.MONO
         s.fontSize = '10px'
         s.text = globalContext.app.$err.value
-        s.width = '100%'
         s.textAlign = 'center'
+        s.bgColor = theme().red + '10'
       })
     })
 }
@@ -338,7 +348,7 @@ const LayoutLinesForDevMode = () => {
   }
 
   return div()
-  .observe(globalContext.app.$layoutLinesShown)
+    .observe(globalContext.app.$layoutLinesShown)
     .react(s => {
       s.visible = globalContext.app.$layoutLinesShown.value
       s.position = 'fixed'

@@ -2,7 +2,8 @@ import logging
 from pathlib import Path
 
 from HanTa import HanoverTagger as ht
-from src.core.database import JsonFileDB, KeyValueDB
+
+from src.core.database import JsonFileDB
 from src.session import SessionManager
 from src.settings import Settings
 
@@ -22,15 +23,23 @@ media_path = Path('data/media')
 if not media_path.exists():
     Path.mkdir(media_path)
 
-en_pron_db = KeyValueDB(db_path=Path('data/pron/en_pron.bin'))
-de_pron_db = KeyValueDB(db_path=Path('data/pron/de_pron.bin'))
+pron_path = Path('data/pron')
+if not pron_path.exists():
+    Path.mkdir(pron_path)
+
+de_pron_path = Path('data/pron/de')
+if not de_pron_path.exists():
+    Path.mkdir(de_pron_path)
+
+en_pron_path = Path('data/pron/en')
+if not en_pron_path.exists():
+    Path.mkdir(en_pron_path)
+
 en_ru_db = JsonFileDB(db_path=Path('data/json/en_ru.json'))
 
 de_tagger = ht.HanoverTagger('morphmodel_ger.pgz')
 
 
 async def close_all_connections():
-    en_pron_db.close()
-    de_pron_db.close()
     en_ru_db.close()
     await session_manager.dispose()

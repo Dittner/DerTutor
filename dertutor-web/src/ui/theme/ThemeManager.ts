@@ -21,7 +21,9 @@ export interface GlobalTheme {
   text: string
   text50: string
   red: string
+  caretColor: string
   green: string
+  green100: string
   em: string
   accent: string
   quote: string
@@ -162,7 +164,9 @@ export class ThemeManager {
       text,
       text50: text + 'bb',
       red,
+      caretColor:red,
       green: '#6db5b5',
+      green100: '#8bd1d1',
       h1: strong,
       header: '#786036',
       em: strong,
@@ -201,26 +205,27 @@ export class ThemeManager {
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
     const accent = '#cddbae'
-    const black = '#1f2226'
-    const text = '#a8afc2'
-    const white = '#cfd7ea'
-    const red = '#d44e7f'
+    const black = '#272a2e'
+    const text = '#c0c4d0'
+    const white = '#eff1f8'
+    const red = '#ff6370'
     const header = '#755b54'
-    const blue = '#425865'
-    const green = '#6db5b5'
-    const link = '#4286b3'
+    const blue = '#526b7a'
+    const green = '#7ac2c2'
+    const link = '#55a3d7'
     const link100 = '#81cbfd'
     const res = Object.assign({}, t, {
       id: 'dark',
       isLight: false,
 
       appBg: black,
-      actionsBg: '#28506a',
+      actionsBg: '#202325',
       navBarBg: '#1a1d20', //1c1f22
       articleBg: black, //1d2125
       border: '#555e66',
-      menuBg: '#1a1d20',
+      menuBg: '#202325',
       menuHeaderBg: '#28506a',
+      lineInputFocusedBg: '#ccCCcc',
 
       mark: red,
       pynk: '#d68ceb',
@@ -231,12 +236,14 @@ export class ThemeManager {
       text50: text + 'aa',
       editor: text,
       red,
+      caretColor:red,
       green,
+      green100: '#97e1e1',
       h1: white,
-      header: '#c09f6c',
+      header: '#dfb67a',
       em: accent,
       accent: accent,
-      quote: '#8fb2c7',
+      quote: '#b6d1db',
       blue,
 
       link,
@@ -262,10 +269,11 @@ export class ThemeManager {
     const red = '#b9777d'
     const blue = '#4984c8' //4984c8
     const black = '#0c0d0f' //121416
-    const accent = '#c0caa8'  //b8c892 c693c3
+    const accent = '#bbc0b0'  //b8c892 c693c3
     const white = '#a3abbe'
     const text = '#787f92' //707786
     const appBg = black
+    const green = '#5b9898'
     const menuBg = '#111214'
     const link = '#4573bf'
     const link100 = '#679aea'
@@ -273,7 +281,7 @@ export class ThemeManager {
       id: 'night',
       isLight: false,
       appBg,
-      actionsBg: menuBg,
+      actionsBg: '#1c2424',
       navBarBg: menuBg, //1c1f22
       articleBg: appBg, // '#0f1013', //121416 0c0d0f
       menuBg: menuBg,
@@ -282,12 +290,14 @@ export class ThemeManager {
       text,
       text50: text + 'bb',
       red,
-      green: '#5b9898',
+      caretColor: '#db414e',
+      green,
+      green100: '#79bbbb',
       h1: '#a9b1c2',
       header: '#a78f68',
       em: accent,
       accent,
-      quote: '#a3abbe', //6a87a0 
+      quote: '#698897', //6a87a0 
       strong: white,
 
       blue,
@@ -297,10 +307,10 @@ export class ThemeManager {
       link,
       link100,
       pynk: '#c693c3',
-      note: '#5b9898',
+      note: green,
       warn: '#a27988',
       border: '#2d3338',
-      editor: '#969dad', //839295
+      editor: text, //839295
 
     }) as GlobalTheme
 
@@ -317,8 +327,8 @@ export class ThemeManager {
   * */
 
   createQuickSearchTheme(t: GlobalTheme): GlobalTheme {
-    const text = t.id === 'light' ? t.text : t.id === 'dark' ? '#a8abb2' : '#919399'
-    const strong = t.id === 'light' ? t.strong : t.id === 'dark' ? '#c5c8cf' : '#b1b4bb'
+    const text = t.id === 'light' ? t.text : t.id === 'dark' ? '#c7cad1' : '#919399'
+    const strong = t.id === 'light' ? t.strong : t.id === 'dark' ? '#eff1f8' : '#b1b4bb'
     return Object.assign({}, t, {
       id: t.id + '-qs',
       text: text,
@@ -332,7 +342,8 @@ export class ThemeManager {
       defFontSize: '0.8rem',
       fontSizeS: '0.7rem',
       fontSizeXS: '0.7rem',
-      note: '#779685',
+      note: t.id === 'light' ? t.note : t.id === 'dark' ? '#9cc4ae' : '#8eb39f',
+      menuBg: text + '10',
     })
   }
 
@@ -581,7 +592,7 @@ export class ThemeManager {
     }
 
     buildRule(blockquoteContentProps, parentSelector, 'blockquote p')
-    blockquoteContentProps.fontStyle = 'italic'
+    blockquoteContentProps.fontWeight = 'bold'
     blockquoteContentProps.textAlign = 'right'
     blockquoteContentProps.paddingVertical = '10px'
     buildRule(blockquoteContentProps, parentSelector, 'blockquote footer')
