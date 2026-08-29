@@ -2,11 +2,10 @@ import logging
 import shutil
 from typing import Annotated
 
+import src.context as ctx
 from fastapi import APIRouter, Query
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio.session import AsyncSession
-
-import src.context as ctx
 from src.api.decorators import only_superuser, open_session
 from src.api.notes.dao import NotesDAO, Page, SearchByNameParams, SearchParams
 from src.api.notes.schema import NoteCreate, NoteDelete, NoteRead, NoteReadFull, NoteRename, NoteUpdate
@@ -72,7 +71,6 @@ async def search_by_key(session: AsyncSession, params: Annotated[SearchByNamePar
 
 @router.post('/notes', response_model=NoteRead)
 @open_session
-@only_superuser
 async def create_note(session: AsyncSession, note: NoteCreate):
     return await NotesDAO.add_one(session, **note.model_dump())
 

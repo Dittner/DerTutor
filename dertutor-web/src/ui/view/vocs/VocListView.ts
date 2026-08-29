@@ -103,7 +103,7 @@ export const VocListView = () => {
               s.textColor = '#ffFFff88'
               //s.maxWidth = '700px'
               s.textAlign = 'left'
-              s.text = 'D'
+              //s.text = 'D'
               s.whiteSpace = 'nowrap'
             }).children(() => {
               span().react(s => {
@@ -181,7 +181,7 @@ export const VocListView = () => {
           s.left = '0'
           s.top = layout().navBarHeight + 'px'
           s.visible = vm.$selectedLang.value !== undefined
-          s.width = layout().isCompact ? layout().contentWidth + 'px' : layout().leftSideMenuWidth + 'px'
+          s.width = layout().isCompact ? layout().contentWidth + 'px' : '500px'
           s.bgColor = theme().appBg
           s.blur = '10px'
           s.layer = ViewLayer.MODAL_VIEW_CONTENT

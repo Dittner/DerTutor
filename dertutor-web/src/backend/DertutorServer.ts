@@ -2,7 +2,7 @@ import { RXOperation } from 'flinker'
 import { RestApi, RestApiError } from './RestApi'
 import { AuthenticateSchema, CreateNoteSchema, CreateVocSchema, DeleteMedialFileSchema, DeleteNoteSchema, DeleteVocSchema, GetPageSchema, RenameNoteSchema, RenameVocSchema, SearchByNameSchema, UpdateNoteSchema, UpdateVocSchema } from './Schema'
 import { Path } from '../app/Utils'
-import { ILang, IMediaFile, INote, IPage, IUser } from '../domain/DomainModel'
+import { ILang, ILoadAudioFromDudenResult, IMediaFile, INote, IPage, IUser } from '../domain/DomainModel'
 import { UploadFileCmd } from './cmd/UploadFileCmd'
 
 export class DertutorServer extends RestApi {
@@ -107,8 +107,18 @@ export class DertutorServer extends RestApi {
   //--------------------------------------
   //  media
   //--------------------------------------
-  validateMp3Link(link: string): RXOperation<any, RestApiError> {
+  validateMp3Link(link: string): RXOperation<ILoadAudioFromDudenResult | undefined, RestApiError> {
     return this.head(link)
+  }
+
+  loadAndStoreAudioFileFromDuden(link: string): RXOperation<any, RestApiError> {
+    return this.post(link)
+  }
+
+  loadDeRuTranslation(key: string): RXOperation<any, RestApiError> {
+    const encodedKey = encodeURIComponent(key)
+    const path = '/corpus/de_ru/search?key=' + encodedKey
+    return this.get(path)
   }
 
   loadEnRuTranslation(key: string): RXOperation<any, RestApiError> {

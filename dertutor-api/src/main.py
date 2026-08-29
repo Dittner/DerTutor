@@ -2,12 +2,11 @@ import logging
 import sys
 from contextlib import asynccontextmanager
 
+import src.context as ctx
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, ORJSONResponse
-
-import src.context as ctx
 from src.api.corpus.routes import router as corpus_router
 from src.api.langs.routes import router as langs_router
 from src.api.media.routes import router as media_router

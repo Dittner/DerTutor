@@ -1,6 +1,6 @@
 import { RX, RXObservableValue } from "flinker"
 
-import { IMediaFile, INote, AVAILABLE_LEVELS, ILang, IVoc, DomainService } from "../../../domain/DomainModel"
+import { IMediaFile, INote, AVAILABLE_LEVELS, ILang, IVoc, DomainService, ILoadAudioFromDudenResult, ILoadTranlsationResult } from "../../../domain/DomainModel"
 import { DerTutorContext } from "../../../DerTutorContext"
 import { ViewModel } from "../ViewModel"
 import { UpdateNoteSchema } from "../../../backend/Schema"
@@ -166,6 +166,29 @@ export class EditorVM extends ViewModel<EditorState> {
           this.ctx.$msg.value = { text: this.noteToString(note) + ', audio_url:' + link, level: 'info' }
         })
         .onError(e => {
+          if (lang.code === 'de') {
+            this.loadAudioFromDuden()
+          } else {
+            this.$audioUrl.value = ''
+            this.ctx.$msg.value = { text: this.noteToString(note) + ', ' + e.message, level: 'warning' }
+          }
+        })
+        .subscribe()
+    }
+  }
+
+  private loadAudioFromDuden() {
+    const lang = this.$state.value.lang
+    const note = this.$state.value.note
+    if (lang && note) {
+      const key = encodeURIComponent(note.name)
+      const link = '/corpus/de_pron/load_from_duden?key=' + key
+      this.server.loadAndStoreAudioFileFromDuden(link).pipe()
+        .onReceive((res: ILoadAudioFromDudenResult) => {
+          this.$audioUrl.value = res.url
+          this.ctx.$msg.value = { text: this.noteToString(note) + ', audio_url:' + res.url, level: 'info' }
+        })
+        .onError(e => {
           this.$audioUrl.value = ''
           this.ctx.$msg.value = { text: this.noteToString(note) + ', ' + e.message, level: 'warning' }
         })
@@ -179,8 +202,9 @@ export class EditorVM extends ViewModel<EditorState> {
   }
 
   loadTranslation() {
+    const lang = this.$state.value.lang
     const note = this.$state.value.note
-    if (note) {
+    if (note && lang && lang.code === 'en') {
       this.server.loadEnRuTranslation(note.name).pipe()
         .onReceive(data => {
           let res = '## ' + data.key + '\n'
@@ -196,7 +220,19 @@ export class EditorVM extends ViewModel<EditorState> {
           this.ctx.$msg.value = { text: this.noteToString(note), level: 'info' }
         })
         .onError(e => {
-          this.$audioUrl.value = ''
+          this.ctx.$msg.value = { text: this.noteToString(note) + ', ' + e.message, level: 'warning' }
+        })
+        .subscribe()
+    }
+
+    if (note && lang && lang.code === 'de') {
+      this.server.loadDeRuTranslation(note.name).pipe()
+        .onReceive((data: ILoadTranlsationResult) => {
+          if (data.text)
+            this.$buffer.value = data.text
+          this.ctx.$msg.value = { text: this.noteToString(note) + ', success', level: 'info' }
+        })
+        .onError(e => {
           this.ctx.$msg.value = { text: this.noteToString(note) + ', ' + e.message, level: 'warning' }
         })
         .subscribe()

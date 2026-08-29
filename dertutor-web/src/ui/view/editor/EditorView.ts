@@ -328,7 +328,8 @@ const PendingUploadResources = () => {
             })
             .onClick(() => chooser.dom.click())
 
-          p().observe(vm.$filesPendingUpload)
+          p()
+            .observe(vm.$filesPendingUpload)
             .react(s => {
               s.visible = vm.$filesPendingUpload.value.length > 0
               s.fontFamily = FontFamily.APP
@@ -430,8 +431,7 @@ const Header = () => {
       PinkBtn()
         .observe(vm.$hasChanges)
         .react(s => {
-          s.visible = vm.$state.value.lang?.code === 'en'
-          s.text = 'Load default translation'
+          s.text = translate('Load Translation')
         })
         .onClick(() => vm.loadTranslation())
 

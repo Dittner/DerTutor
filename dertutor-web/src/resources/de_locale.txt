@@ -20,6 +20,7 @@ Choose a media-file = Mediendatei auswählen
 Copy link = Link kopieren
 Delete = Löschen
 Load Audio = Audio laden
+Load Translation = Übersetzung laden
 Vocabulary: = Wörterbuch:
 Replace: = Ersetzen
 Replace all = Ersetzen alles

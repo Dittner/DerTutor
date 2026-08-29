@@ -154,6 +154,7 @@ const NextPrevNoteNavigator = () => {
       s.valign = 'center'
       s.halign = 'stretch'
       s.gap = '10px'
+      s.borderTop = '1px solid ' + theme().text + '88'
     })
     .children(() => {
       Btn()

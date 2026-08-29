@@ -155,6 +155,7 @@ export class VocListVM extends ViewModel<VocListState> {
         schema.lang_id = lang.id
         schema.name = name
         schema.sort_notes = 'id:desc'
+        schema.description = ''
 
         this.server.createVoc(schema).pipe()
           .onReceive((data: IVoc) => {

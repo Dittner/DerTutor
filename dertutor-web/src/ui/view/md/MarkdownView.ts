@@ -95,7 +95,6 @@ export const MarkdownView = () => {
           s.enableOwnScroller = true
           s.maxWidth = l.isCompact ? 'unset' : '400px'
           s.height = l.isCompact ? '100%' : 'unset'
-          s.className = 'listScrollbar'
           s.top = l.navBarHeight + 'px'
         })
     })

@@ -74,6 +74,7 @@ export class TextFormatter {
     return s
       .replace(/^[-–] /gm, '— ')
       .replace(/ [-–]$/gm, '—')
+      .replace(/:[-–]$/gm, ':—')
       .replaceAll('\n- ', '\n— ')
       .replace(/([А-я])- \n/g, '$1')
   }

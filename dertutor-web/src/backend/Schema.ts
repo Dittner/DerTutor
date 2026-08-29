@@ -7,6 +7,7 @@ export interface CreateVocSchema {
   lang_id: number
   sort_notes: string
   name: string
+  description: string
 }
 
 export interface RenameVocSchema {

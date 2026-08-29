@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 
 from HanTa import HanoverTagger as ht
-
 from src.core.database import JsonFileDB
 from src.session import SessionManager
 from src.settings import Settings

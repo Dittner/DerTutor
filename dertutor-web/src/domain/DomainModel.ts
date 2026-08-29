@@ -61,6 +61,16 @@ export interface IMediaFile {
   readonly url: string
 }
 
+export interface ILoadAudioFromDudenResult {
+  readonly key: string
+  readonly url: string
+}
+
+export interface ILoadTranlsationResult {
+  readonly key: string
+  readonly text: string
+}
+
 export const AVAILABLE_LEVELS = ['', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 
 export class DomainService {
