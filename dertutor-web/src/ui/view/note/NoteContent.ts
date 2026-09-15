@@ -3,14 +3,13 @@ import { PinkBtn, Btn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { globalContext } from "../../../App"
 import { Markdown } from "../../controls/Markdown"
-import { DerTutorContext } from "../../../DerTutorContext"
 import { MaterialIcon } from "../../icons/MaterialIcon"
 import { theme } from "../../theme/ThemeManager"
 import { translate } from "../../../app/LocaleManager"
 import { layout, MARKDOWN_MAX_WIDTH } from "../../../app/Application"
 
 export const NoteContentView = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return vstack()
     .observe(vm.$state, 'affectsChildrenProps', 'affectsProps')
     .react(s => {
@@ -59,7 +58,7 @@ export const NoteContentView = () => {
 }
 
 const NoteInfo = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return hstack()
     .react(s => {
       s.width = '100%'
@@ -104,7 +103,7 @@ const NoteInfo = () => {
 }
 
 const NoteLevelTag = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return p()
     .react(s => {
       s.fontFamily = FontFamily.MONO
@@ -145,7 +144,7 @@ const NoteLevelTag = () => {
 
 
 const NextPrevNoteNavigator = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return hstack()
     .observe(vm.$state, 'affectsChildrenProps')
     .observe(vm.$selectedNoteIndex, 'affectsChildrenProps')

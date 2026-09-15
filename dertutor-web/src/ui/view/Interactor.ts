@@ -1,15 +1,15 @@
 import { RXObservableValue } from "flinker"
 import { UrlKeys } from "../../app/URLNavigator"
-import { DerTutorContext } from "../../DerTutorContext"
 import { log } from "../../app/Logger"
+import { GlobalContext } from "../../app/GlobalContext"
 
 export class Interactor<State> {
-  readonly ctx: DerTutorContext
+  readonly ctx: GlobalContext
   readonly $state = new RXObservableValue<State>({} as State)
   prevState: State = {} as State
 
-  constructor(ctx: DerTutorContext) {
-    this.ctx = ctx
+  constructor() {
+    this.ctx = GlobalContext.self
   }
 
   private unsubscribeColl: (() => void)[] = []

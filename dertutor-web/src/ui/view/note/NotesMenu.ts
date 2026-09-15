@@ -1,5 +1,4 @@
 import { btn, hlist, hstack, image, p, spacer, vlist, vstack } from "flinker-dom"
-import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
 import { layout } from "../../../app/Application"
 import { Btn, Icon, IconBtn } from "../../controls/Button"
@@ -13,7 +12,7 @@ import { KeyboardKey, Title } from "../../controls/Text"
 import { TextInput } from "../../controls/Input"
 
 export const NotesMenu = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return vstack()
     .react(s => {
       s.gap = '20px'
@@ -119,7 +118,7 @@ export const NotesMenu = () => {
 
 const VocDropdown = () => {
   const dropdownId = 'NoteListView.VocSelector'
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return hstack()
     .react(s => {
       s.valign = 'center'
@@ -185,7 +184,7 @@ const VocDropdown = () => {
 }
 
 const VocRenderer = (voc: IVoc) => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return p()
     .react(s => {
       s.fontSize = theme().fontSizeXS
@@ -280,7 +279,7 @@ const FiltersView = () => {
 }
 
 const LevelsBar = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return hlist<number>()
     .observe(vm.$state, 'affectsChildrenProps')
     .items(() => [1, 2, 3, 4, 5, 6])
@@ -296,7 +295,7 @@ const LevelsBar = () => {
 }
 
 const LevelRenderer = (level: number) => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return Btn()
     .react(s => {
       s.isSelected = vm.$state.value.level === level
@@ -316,7 +315,7 @@ const LevelRenderer = (level: number) => {
 }
 
 const TagSelector = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return vlist<ITag>()
     .observe(vm.$state.pipe().map(s => s.lang?.tags).removeDuplicates().fork(), 'recreateChildren')
     .observe(vm.$state.pipe().map(s => s.tagId).removeDuplicates().fork(), 'affectsChildrenProps')
@@ -333,7 +332,7 @@ const TagSelector = () => {
 }
 
 const TagRenderer = (t: ITag) => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return Btn()
     .react(s => {
       s.isSelected = vm.$state.value.tagId === t.id
@@ -344,7 +343,7 @@ const TagRenderer = (t: ITag) => {
 
 
 const GlobalSearchView = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   const INPUT_HEI = '30px'
   return hstack()
     //.observe(vm.$searchBufferFocused)
@@ -443,7 +442,7 @@ const GlobalSearchView = () => {
 }
 
 const NoteRenderer = (n: INote) => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return btn()
     .react(s => {
       const searchKey = vm.$state.value.searchKey ?? ''
@@ -482,7 +481,7 @@ const NoteRenderer = (n: INote) => {
 }
 
 const NotesPaginator = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return hstack()
     .observe(vm.$state, 'affectsChildrenProps')
     .react(s => {

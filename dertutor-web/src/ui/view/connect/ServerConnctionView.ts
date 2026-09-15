@@ -1,12 +1,12 @@
 import { p, vstack } from "flinker-dom"
 import { MessangerView } from "../../../App"
 import { FontFamily } from "../../controls/Font"
-import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
 import { layout } from "../../../app/Application"
+import { GlobalContext } from "../../../app/GlobalContext"
 
 export const ServerConnectionView = () => {
-  const ctx = DerTutorContext.self
+  const ctx = GlobalContext.self
   const vm = ctx.vmFactory.getConnectionVM()
 
   return vstack()

@@ -1,5 +1,4 @@
 import { RXObservableValue, RXOperation } from "flinker"
-import { DerTutorContext } from "../../DerTutorContext"
 import { Action, ActionsList, parseKeyToCode } from "../actions/Action"
 import { themeManager } from "../theme/ThemeManager"
 import { UrlKeys, URLNavigator } from "../../app/URLNavigator"
@@ -11,8 +10,9 @@ import { AuthenticateSchema } from "../../backend/Schema"
 import { IUser } from "../../domain/DomainModel"
 import { log } from "../../app/Logger"
 import { translate } from "../../app/LocaleManager"
+import { GlobalContext } from "../../app/GlobalContext"
 
-export type ViewModelID = 'connection' | 'vocs' | 'notes' | 'editor' | 'lab' | 'md'
+export type ViewModelID = 'connection' | 'vocs' | 'notes' | 'editor' | 'lab'
 export interface IViewModel {
   readonly id: ViewModelID
   readonly $showActions: RXObservableValue<boolean>
@@ -28,7 +28,7 @@ export interface IViewModel {
 
 export class ViewModel<ViewModelState> implements IViewModel {
   readonly id: ViewModelID
-  readonly ctx: DerTutorContext
+  readonly ctx: GlobalContext
   readonly navigator: URLNavigator
   readonly interactor: Interactor<ViewModelState>
   readonly server: DertutorServer
@@ -39,11 +39,11 @@ export class ViewModel<ViewModelState> implements IViewModel {
   readonly actionsList = new ActionsList()
   lastExecutedAction: Action | undefined = undefined
 
-  constructor(id: ViewModelID, ctx: DerTutorContext, interactor: Interactor<ViewModelState>) {
+  constructor(id: ViewModelID, interactor: Interactor<ViewModelState>) {
     this.id = id
-    this.ctx = ctx
-    this.navigator = globalContext.navigator
-    this.server = globalContext.server
+    this.ctx = GlobalContext.self
+    this.navigator = this.ctx.navigator
+    this.server = this.ctx.server
 
     this.interactor = interactor
     interactor.$state.pipe()

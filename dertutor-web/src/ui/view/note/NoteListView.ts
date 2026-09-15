@@ -1,5 +1,4 @@
 import { div, hstack, spacer, span } from "flinker-dom"
-import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
 import { ViewLayer } from "../../../app/ViewLayer"
 import { layout } from "../../../app/Application"
@@ -14,7 +13,7 @@ import { VSeparator } from "../../controls/Text"
 import { QuickSearchPanel } from "../../controls/QuickSearch"
 
 export const NoteListView = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return div()
     .children(() => {
 
@@ -61,18 +60,18 @@ export const NoteListView = () => {
         s.layer = ViewLayer.HEADER
       })
 
-      QuickSearchPanel(vm.quiclSearchController)
-        .observe(vm.quiclSearchController.$quickSearchResult)
-        .observe(vm.quiclSearchController.$quickSearchFocused)
+      QuickSearchPanel(vm.quickSearchController)
+        .observe(vm.quickSearchController.$quickSearchResult)
+        .observe(vm.quickSearchController.$quickSearchFocused)
         .react(s => {
           const l = layout()
           s.position = 'fixed'
           s.top = l.navBarHeight + 'px'
           s.right = l.isCompact ? '0' : '20px'
-          s.visible = vm.quiclSearchController.$quickSearchResult.value !== undefined || vm.quiclSearchController.$quickSearchFocused.value
+          s.visible = vm.quickSearchController.$quickSearchResult.value !== undefined || vm.quickSearchController.$quickSearchFocused.value
           s.width = l.isCompact ? '100%' : l.leftSideMenuWidth + 'px'
           s.height = l.isCompact ? '100%' : 'unset'
-          s.maxHeight = vm.quiclSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - l.statusBarHeight + 'px' : 'unset'
+          s.maxHeight = vm.quickSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - l.statusBarHeight + 'px' : 'unset'
           s.className = 'listScrollbar'
           s.enableOwnScroller = true
         })
@@ -80,7 +79,7 @@ export const NoteListView = () => {
 }
 
 const Header = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return hstack()
     .react(s => {
       s.gap = '20px'
@@ -99,7 +98,32 @@ const Header = () => {
       spacer()
 
       IconBtn()
-        .observe(globalContext.app.$dropdownState)
+        .observe(vm.$mdViewMode)
+        .react(s => {
+          s.icon = MaterialIcon.my_library_books
+
+          s.text = translate('Markdown')
+          s.fontSize = theme().fontSizeS
+          s.valign = 'bottom'
+          s.paddingHorizontal = '0'
+          s.iconSize = '1rem'
+          if (vm.$mdViewMode.value === 'hidden')
+            s.textColor = theme().white + 'cc'
+          else if (vm.$mdViewMode.value === 'editing')
+            s.textColor = theme().red + 'cc'
+          else
+            s.textColor = theme().accent
+        })
+        .whenHovered(s => s.textColor = theme().white)
+        .onClick(e => {
+          e.stopImmediatePropagation()
+          vm.switchNoteMdWindow()
+        })
+
+      VSeparator()
+
+      IconBtn()
+        //.observe(globalContext.app.$dropdownState)
         .react(s => {
           s.icon = MaterialIcon.search
           s.textColor = theme().white + 'cc'
@@ -112,7 +136,7 @@ const Header = () => {
         .whenHovered(s => s.textColor = theme().white)
         .onClick(e => {
           e.stopImmediatePropagation()
-          vm.quiclSearchController.$quickSearchFocused.value = true
+          vm.quickSearchController.$quickSearchFocused.value = true
         })
 
       VSeparator()
@@ -123,7 +147,7 @@ const Header = () => {
 
 
 const NavBar = () => {
-  const vm = DerTutorContext.self.vmFactory.getNoteListVM()
+  const vm = globalContext.vmFactory.getNoteListVM()
   return hstack()
     .react(s => {
       s.gap = '10px'

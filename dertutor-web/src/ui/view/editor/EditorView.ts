@@ -4,7 +4,6 @@ import { IMediaFile, ITag, IVoc } from "../../../domain/DomainModel"
 import { PinkBtn, Btn, Icon, IconBtn, LinkBtn, RedBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { Markdown } from "../../controls/Markdown"
-import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
 import { FileWrapper } from "./EditorVM"
 import { TextEditor } from "./TextEditor"
@@ -19,7 +18,7 @@ import { layout } from "../../../app/Application"
 export const EditorView = () => {
   log('new EditorView')
 
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
 
   const formatter = new TextFormatter()
 
@@ -53,6 +52,18 @@ export const EditorView = () => {
       })
       .whenFocused(s => {
         s.border = '1px solid #454545'
+      })
+      .onKeyDown(e => {
+        if (e.key === 'Escape') {
+          e.preventDefault()
+          e.stopPropagation()
+          vm.didPressESC()
+        } else
+          if (e.ctrlKey && e.shiftKey && e.keyCode === 83) {
+            e.preventDefault()
+            e.stopPropagation()
+            vm.save()
+          }
       })
 
     vstack()
@@ -125,7 +136,7 @@ const Panel = (title: string) => {
 }
 
 const LevelsPanel = () => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return Panel('Level:')
     .children(() => {
       hlist<number>()
@@ -140,7 +151,7 @@ const LevelsPanel = () => {
     })
 }
 const LevelRenderer = (level: number) => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return Btn()
     .react(s => {
       s.isSelected = vm.$level.value === level
@@ -152,7 +163,7 @@ const LevelRenderer = (level: number) => {
 }
 
 const TagSelector = () => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return Panel('Tag:')
     .observe(vm.$state, 'recreateChildren')
     .observe(vm.$tagId, 'affectsChildrenProps')
@@ -170,7 +181,7 @@ const TagSelector = () => {
 }
 
 const TagRenderer = (t: ITag) => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return Btn()
     .react(s => {
       s.isSelected = vm.$tagId.value === t.id
@@ -193,7 +204,7 @@ const TagRenderer = (t: ITag) => {
 }
 
 const PronunciationPanel = () => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return Panel('Pronunciation:')
     .children(() => {
       vstack()
@@ -238,7 +249,7 @@ const PronunciationPanel = () => {
 }
 
 const MediaFileList = () => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return vstack()
     .observe(vm.$mediaFiles, 'affectsProps', 'recreateChildren')
     .react(s => {
@@ -254,7 +265,7 @@ const MediaFileList = () => {
 }
 
 const MediaFileView = (mf: IMediaFile) => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return Panel('Media:')
     .children(() => {
       vstack()
@@ -297,7 +308,7 @@ const MediaFileView = (mf: IMediaFile) => {
 
 
 const PendingUploadResources = () => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return vstack()
     .react(s => {
       s.gap = '5px'
@@ -349,7 +360,7 @@ const PendingUploadResources = () => {
 }
 
 const PendingUploadFileList = () => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return vstack()
     .observe(vm.$filesPendingUpload, 'affectsProps', 'recreateChildren')
     .react(s => {
@@ -365,7 +376,7 @@ const PendingUploadFileList = () => {
 }
 
 const FileView = (w: FileWrapper) => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return Panel('File:')
     .react(s => {
       s.bgColor = theme().red + '10'
@@ -401,7 +412,7 @@ const FileView = (w: FileWrapper) => {
 
 
 const Header = () => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return hstack()
     .react(s => {
       s.gap = '20px'
@@ -445,7 +456,7 @@ const Header = () => {
 }
 
 const ReplacePanel = () => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return Panel('Replace:')
     .children(() => {
       TextInput(vm.textReplacer.$replaceFrom).react(s => {
@@ -473,7 +484,7 @@ const ReplacePanel = () => {
 }
 
 const VocSelector = () => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   const dropdownId = 'EditorView.VocSelector'
   return Panel('Vocabulary:')
     .children(() => {
@@ -538,7 +549,7 @@ const VocSelector = () => {
 }
 
 const VocRenderer = (voc: IVoc) => {
-  const vm = DerTutorContext.self.vmFactory.getEditorVM()
+  const vm = globalContext.vmFactory.getEditorVM()
   return btn()
     .react(s => {
       s.wrap = false

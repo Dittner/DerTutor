@@ -7,7 +7,6 @@ import { ServerConnectionView } from "./ui/view/connect/ServerConnctionView"
 import { EditorView } from "./ui/view/editor/EditorView"
 import { NoteListView } from "./ui/view/note/NoteListView"
 import { VocListView } from "./ui/view/vocs/VocListView"
-import { DerTutorContext } from "./DerTutorContext"
 import { LineInput } from "./ui/controls/Input"
 import { Icon } from "./ui/controls/Button"
 import { MaterialIcon } from "./ui/icons/MaterialIcon"
@@ -15,19 +14,19 @@ import { log } from "./app/Logger"
 import { localeManager, translate } from "./app/LocaleManager"
 import { ViewLayer } from "./app/ViewLayer"
 import { LabView } from "./ui/view/lab/LabView"
-import { MarkdownView } from "./ui/view/md/MarkdownView"
 import { layout } from "./app/Application"
+import { MarkdownView } from "./ui/view/note/MarkdownView"
 
 export const globalContext = GlobalContext.init()
 
 export function App() {
   log('new App')
-  const ctx = DerTutorContext.init()
+  const ctx = GlobalContext.self
 
   return div()
     .observe(themeManager.$theme, 'affectsProps', 'affectsChildrenProps')
     .observe(localeManager.$locale, 'affectsProps', 'affectsChildrenProps')
-    .observe(globalContext.app.$layout, 'affectsProps', 'affectsChildrenProps')
+    .observe(ctx.app.$layout, 'affectsProps', 'affectsChildrenProps')
     .react(s => {
       s.width = '100%'
     })
@@ -40,8 +39,27 @@ export function App() {
           else if (vm.id === 'notes') return NoteListView()
           else if (vm.id === 'editor') return EditorView()
           else if (vm.id === 'lab') return LabView()
-          else if (vm.id === 'md') return MarkdownView()
           else return undefined
+        })
+
+      // We can not keep MarkdownView on NoteListView, where it's actually used.  
+      // The Problem: when we are switching to the Editor View, the NoteListView will be destroyed,
+      // and we lose a scroll position of Markdown text.
+      // Therefore we need to place the MarkdownView globally, to keep the Markdown state.
+      MarkdownView()
+        .observe(ctx.vmFactory.getNoteListVM().$mdViewMode)
+        .react(s => {
+          const l = layout()
+          const vm = ctx.vmFactory.getNoteListVM()
+          s.visible = vm.$mdViewMode.value !== 'hidden'
+          s.position = 'fixed'
+          s.top = layout().navBarHeight + 'px'
+          //s.paddingTop = l.navBarHeight + 'px'
+          s.left = l.isCompact ? '0' : l.leftSideMenuWidth + l.paddingHorizontal + 'px'
+          //s.width = layout.isCompact ? '100%' : (layout.contentWidth + 'px')
+          s.width = l.isCompact ? '100%' : l.contentWidth - l.paddingHorizontal + 'px'
+          s.height = window.innerHeight - layout().navBarHeight - layout().statusBarHeight + 'px'
+          s.bgColor = theme().appBg
         })
 
       MessangerView()
@@ -52,13 +70,13 @@ export function App() {
       AppErrorInfo()
       LayoutLinesForDevMode()
     })
-    .onClick(() => globalContext.app.$dropdownState.value = '')
+    .onClick(() => ctx.app.$dropdownState.value = '')
 }
 
 
 const SHORTKEY_TEXT_WIDTH = '160px'
 export const ActionsHelpView = () => {
-  const ctx = DerTutorContext.self
+  const ctx = GlobalContext.self
 
   return div()
     .observe(ctx.$activeVM.pipe().skipNullable().flatMap(vm => vm.$showActions).fork())
@@ -104,13 +122,13 @@ export const ActionsHelpView = () => {
           s.gap = '0'
         })
 
-        spacer().react(s => {
-          s.bgColor = theme().green + '44'
-          s.width = '200px'
-          s.height = '5px'
-          s.marginLeft = SHORTKEY_TEXT_WIDTH
-          s.marginVertical = '20px'
-        })
+      spacer().react(s => {
+        s.bgColor = theme().green + '44'
+        s.width = '200px'
+        s.height = '5px'
+        s.marginLeft = SHORTKEY_TEXT_WIDTH
+        s.marginVertical = '20px'
+      })
 
       vstack()
         .react(s => {
@@ -141,7 +159,7 @@ const ActionInfoView = (a: Action) => {
         s.display = 'inline-block'
         s.text = a.cmd
         s.textColor = theme().green100
-        
+
         s.paddingHorizontal = '20px'
         s.width = SHORTKEY_TEXT_WIDTH
         s.whiteSpace = 'nowrap'
@@ -210,7 +228,7 @@ export const ThemeSwitcher = () => {
 }
 
 const LineInputFooter = () => {
-  const ctx = DerTutorContext.self
+  const ctx = GlobalContext.self
 
   return observer(ctx.$activeVM).onReceive(vm => {
     return vm && LineInput(vm.inputMode.bufferController.$buffer, vm.inputMode.bufferController.$cursorPos)
@@ -235,7 +253,7 @@ const LineInputFooter = () => {
 }
 
 export const MessangerView = () => {
-  const ctx = DerTutorContext.self
+  const ctx = GlobalContext.self
   return p()
     .observe(ctx.$msg)
     .react(s => {
@@ -266,7 +284,7 @@ export const MessangerView = () => {
 }
 
 export const CmdView = () => {
-  const ctx = DerTutorContext.self
+  const ctx = GlobalContext.self
   return p()
     .observe(ctx.$activeVM.pipe().skipNullable().flatMap(vm => vm.$cmd).fork())
     .react(s => {
@@ -288,10 +306,11 @@ export const CmdView = () => {
 }
 
 const AppErrorInfo = () => {
+  const ctx = GlobalContext.self
   return div()
-    .observe(globalContext.app.$err, 'affectsProps', 'affectsChildrenProps')
+    .observe(ctx.app.$err, 'affectsProps', 'affectsChildrenProps')
     .react(s => {
-      s.visible = globalContext.app.$err.value.length > 0
+      s.visible = ctx.app.$err.value.length > 0
       s.position = 'fixed'
       s.top = '0'
       s.left = '0'
@@ -304,7 +323,7 @@ const AppErrorInfo = () => {
         s.borderTop = '2px solid ' + theme().red
         s.fontFamily = FontFamily.MONO
         s.fontSize = '10px'
-        s.text = globalContext.app.$err.value
+        s.text = ctx.app.$err.value
         s.textAlign = 'center'
         s.bgColor = theme().red + '10'
       })
@@ -312,10 +331,11 @@ const AppErrorInfo = () => {
 }
 
 const ModalView = () => {
+  const ctx = GlobalContext.self
   return div()
-    .observe(globalContext.app.$dropdownState)
+    .observe(ctx.app.$dropdownState)
     .react(s => {
-      s.visible = globalContext.app.$dropdownState.value.length > 0
+      s.visible = ctx.app.$dropdownState.value.length > 0
       s.position = 'fixed'
       s.top = '0'
       s.width = '100vw'
@@ -323,10 +343,11 @@ const ModalView = () => {
       s.bgColor = theme().red + '50'
       s.layer = ViewLayer.MODAL_VIEW
     })
-    .onClick(() => globalContext.app.$dropdownState.value = '')
+    .onClick(() => ctx.app.$dropdownState.value = '')
 }
 
 const LayoutLinesForDevMode = () => {
+  const ctx = GlobalContext.self
   const vline = () => {
     return spacer()
       .react(s => {
@@ -348,9 +369,9 @@ const LayoutLinesForDevMode = () => {
   }
 
   return div()
-    .observe(globalContext.app.$layoutLinesShown)
+    .observe(ctx.app.$layoutLinesShown)
     .react(s => {
-      s.visible = globalContext.app.$layoutLinesShown.value
+      s.visible = ctx.app.$layoutLinesShown.value
       s.position = 'fixed'
       s.layer = '1000'
       s.top = '0'

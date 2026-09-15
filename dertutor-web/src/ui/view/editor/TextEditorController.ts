@@ -161,4 +161,12 @@ export class TextEditorController {
       logErr('TextEditorController:wrapAsMultilineCode: ', e)
     }
   }
+
+  static insertExamplesBlock(ta: HTMLTextAreaElement) {
+    try {
+      document.execCommand('insertText', false, '## Bsp.\n```ul\n+ \n```')
+    } catch (e) {
+      logErr('TextEditorController:insertExamplesBlock: ', e)
+    }
+  }
 }

@@ -9,7 +9,6 @@ import { Markdown } from "./Markdown"
 import { theme } from "../theme/ThemeManager"
 import { TextInput } from "./Input"
 import { translate } from "../../app/LocaleManager"
-import { DerTutorContext } from "../../DerTutorContext"
 import { log } from "../../app/Logger"
 import { SearchByNameSchema } from "../../backend/Schema"
 import { KeyboardKey } from "./Text"
@@ -24,10 +23,8 @@ export class QuickSearchController {
   readonly $langId = new RXObservableValue(1)
   readonly $msg = new RXObservableValue('')
   readonly showLangSwitcher: boolean
-  private ctx: DerTutorContext
 
-  constructor(ctx: DerTutorContext, showLangSwitcher: boolean = false) {
-    this.ctx = ctx
+  constructor(showLangSwitcher: boolean = false) {
     this.showLangSwitcher = showLangSwitcher
 
     this.$langId.value = globalContext.localStorage.read(LANG_ID_KEY) ?? 1
@@ -80,7 +77,7 @@ export class QuickSearchController {
         }
       })
       .onError(e => {
-        this.ctx.$msg.value = { level: 'error', text: e.message }
+        globalContext.$msg.value = { level: 'error', text: e.message }
         this.$quickSearchResult.value = undefined
       })
   }

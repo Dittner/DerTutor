@@ -1,7 +1,6 @@
 import { RXObservableValue } from "flinker"
 
 import { AVAILABLE_LEVELS, DomainService, ILang, INote, IPage, IVoc } from "../../../domain/DomainModel"
-import { DerTutorContext } from "../../../DerTutorContext"
 import { ViewModel } from "../ViewModel"
 import { CreateNoteSchema, DeleteNoteSchema, GetPageSchema, RenameNoteSchema } from "../../../backend/Schema"
 import { UrlKeys } from "../../../app/URLNavigator"
@@ -10,6 +9,7 @@ import { Interactor } from "../Interactor"
 import { log } from "../../../app/Logger"
 import { translate } from "../../../app/LocaleManager"
 import { QuickSearchController } from "../../controls/QuickSearch"
+import { GlobalContext } from "../../../app/GlobalContext"
 
 export interface NoteListState {
   allLangs?: ILang[]
@@ -24,6 +24,22 @@ export interface NoteListState {
   tagId?: number
 }
 
+const TEXT_KEY = 'MDVM:TEXT__KEY'
+
+const DEF_TEXT = `Режим _Markdown_ позволяет читать текст, не отвлекаясь на поиск незнакомого иностранного слова. Вам не нужно постоянно переключаться между текстом и словарем в отдельной вкладке или приложении.
+
+## Как этим пользоваться?
+\`\`\`ol
+1. Вставьте в редактор текст на немецком или английском языке;
+1. Выключите режим редактирования: Edit Mode — off (ESC);
+1. Выделите слово (e.g. Tipp) и нажимете слэш; слово добавится в поле быстрого поиска;
+1. При необходимости отредактиуйте слово в поле ввода и нажмите Enter;
+1. Если слово есть в словаре, то будет показан его перевод;
+1. При необходимости измените язык (de|en);
+1. Чтобы включить режим редактирование нажмите: e;
+1. Введённый текст сохраняется после перезагрузки страницы.
+\`\`\``
+
 export class NoteListVM extends ViewModel<NoteListState> {
   readonly $state = new RXObservableValue<Readonly<NoteListState>>({})
   readonly $selectedNoteIndex = new RXObservableValue(-1)
@@ -32,25 +48,37 @@ export class NoteListVM extends ViewModel<NoteListState> {
   readonly $noteListShown = new RXObservableValue(true)
   readonly $taskAnswerShown = new RXObservableValue(false)
 
+  readonly $mdViewMode = new RXObservableValue<'shown' | 'hidden' | 'editing'>('hidden')
+  readonly $mdText = new RXObservableValue('')
+
   readonly $searchBuffer = new RXObservableValue('')
   readonly $searchBufferFocused = new RXObservableValue(false)
 
   readonly $noteNummberOfTotal = new RXObservableValue('')
 
-  readonly quiclSearchController: QuickSearchController
+  readonly quickSearchController: QuickSearchController
 
-  constructor(ctx: DerTutorContext) {
-    const interactor = new NoteListInteractor(ctx)
-    super('notes', ctx, interactor)
+  constructor() {
+    const interactor = new NoteListInteractor()
+    super('notes', interactor)
     this.addKeybindings()
 
-    this.quiclSearchController = new QuickSearchController(ctx)
+    this.quickSearchController = new QuickSearchController()
     //this.$noteListShown = new RXObservableValue(!globalContext.app.$layout.value.isCompact)
     //this.$filtersShown = new RXObservableValue(!globalContext.app.$layout.value.isCompact)
 
     globalContext.app.$layout.pipe()
       .onReceive(l => {
         this.$noteListShown.value = !l.isCompact
+      })
+      .subscribe()
+
+    this.$mdText.value = globalContext.localStorage.read(TEXT_KEY) || DEF_TEXT
+
+    this.$mdText.pipe()
+      .skipFirst()
+      .onReceive(value => {
+        globalContext.localStorage.write(TEXT_KEY, value)
       })
       .subscribe()
   }
@@ -60,7 +88,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
     this.$state.value = state
     this.$lang.value = state.lang
-    this.quiclSearchController.$langId.value = state.lang?.id ?? 1
+    this.quickSearchController.$langId.value = state.lang?.id ?? 1
     this.$searchBuffer.value = state.searchKey ?? ''
     globalContext.app.$dropdownState.value = ''
     this.$taskAnswerShown.value = false
@@ -103,10 +131,11 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add('r', 'Rename note (SUPERUSER)', () => this.renameNote(), true)
     this.actionsList.add('e', 'Edit note (SUPERUSER)', () => this.edit(), true)
     this.actionsList.add(':d<CR>', 'Delete note (SUPERUSER)', () => this.deleteNote(), true)
-    this.actionsList.add('/', 'Quick Search', () => this.quiclSearchController.focus())
+    this.actionsList.add('/', 'Quick Search', () => this.quickSearchController.focus())
     this.actionsList.add('f', 'Global Search', () => this.focusGlobalSearchInput())
     this.actionsList.add('<C-k>', 'Global Search', () => this.focusGlobalSearchInput())
 
+    this.actionsList.add('w', 'Switch Note/Markdown window', () => this.switchNoteMdWindow())
     this.actionsList.add('m', 'Show/Hide menu', () => this.$noteListShown.value = !this.$noteListShown.value)
     this.actionsList.add('<Space>', 'Play audio', () => this.playAudio())
     this.actionsList.add('<CR>', 'Show answer to the task', () => this.$taskAnswerShown.value = !this.$taskAnswerShown.value)
@@ -116,7 +145,9 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
   override didPressESC() {
     super.didPressESC()
-    this.quiclSearchController.clear()
+    this.quickSearchController.clear()
+    if (this.$mdViewMode.value === 'editing')
+      this.$mdViewMode.value = 'shown'
   }
 
   moveNext() {
@@ -163,7 +194,24 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.navigator.navigateTo({ langCode: this.$state.value.lang?.code })
   }
 
+  switchNoteMdWindow() {
+    if (this.$mdViewMode.value === 'hidden')
+      this.$mdViewMode.value = 'shown'
+    else
+      this.$mdViewMode.value = 'hidden'
+  }
+
   private edit() {
+    if (this.$mdViewMode.value === 'shown') {
+      this.$mdViewMode.value = 'editing'
+      return
+    }
+
+    if (this.$mdViewMode.value === 'editing') {
+      this.$mdViewMode.value = 'shown'
+      return
+    }
+
     if (!this.ctx.$user.value) {
       this.ctx.$msg.value = { text: 'User not authorized', level: 'warning' }
       return
@@ -317,7 +365,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
   playAudio() {
     if (this.$state.value?.selectedNote?.audio_url)
       new Audio(this.server.baseUrl + this.$state.value?.selectedNote?.audio_url).play()
-    else this.quiclSearchController.playAudio()
+    else this.quickSearchController.playAudio()
   }
 
   focusGlobalSearchInput() {
@@ -374,6 +422,11 @@ export class NoteListVM extends ViewModel<NoteListState> {
     }
   }
 
+  override deactivate() {
+    super.deactivate()
+    this.$mdViewMode.value = 'hidden'
+  }
+
   private printID() {
     const n = this.$state.value.selectedNote
     if (n)
@@ -384,8 +437,8 @@ export class NoteListVM extends ViewModel<NoteListState> {
 }
 
 class NoteListInteractor extends Interactor<NoteListState> {
-  constructor(ctx: DerTutorContext) {
-    super(ctx)
+  constructor() {
+    super()
     log('new NoteListInteractor')
   }
 
@@ -449,7 +502,7 @@ class NoteListInteractor extends Interactor<NoteListState> {
       const scheme = {} as GetPageSchema
       scheme.lang_id = state.lang.id
       scheme.page = keys.page && keys.page > 0 ? keys.page : 1
-      scheme.size = DerTutorContext.PAGE_SIZE
+      scheme.size = GlobalContext.PAGE_SIZE
       scheme.voc_id = isGlobalSearhcing ? undefined : state.voc?.id
       scheme.key = isGlobalSearhcing ? keys.searchKey : undefined
       scheme.level = keys.level

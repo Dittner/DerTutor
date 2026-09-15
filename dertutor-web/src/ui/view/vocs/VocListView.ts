@@ -1,53 +1,25 @@
 import { btn, hstack, image, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { ILang, IVoc } from "../../../domain/DomainModel"
 import { FontFamily } from "../../controls/Font"
-import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
-import { Markdown } from "../../controls/Markdown"
-import { ThemeSwitcher } from "../../../App"
+import { globalContext, ThemeSwitcher } from "../../../App"
 import { translate } from "../../../app/LocaleManager"
 import { Btn, Icon } from "../../controls/Button"
 import { MaterialIcon } from "../../icons/MaterialIcon"
 import { ViewLayer } from "../../../app/ViewLayer"
 import { layout } from "../../../app/Application"
 import { VSeparator } from "../../controls/Text"
+import { GlobalContext } from "../../../app/GlobalContext"
 
-const ABOUT = `
-## Ресурс для изучения немецкого и английского языков
-Основной функционал:
-\`\`\`ul
-+ _Поиск слов;_
-+ _Базовая грамматика;_
-+ _Статьи, поэзия, упражнения_
-\`\`\`
-
-## [icon:emoji_objects] _Tips_
-\`\`\`ol
-1. Сайт спроектирован таким образом, что перемещение между экранами, поиск слов и навигация по найденным словам можно выполнить, не отрывая рук от клавиатуры.
-Для этого используйте:
-\`\`\`ul
-+ →, ↓, →, ↑ — стрелки для перемещения;
-+ _Enter_ — для выбора элемента меню;
-+ _ESC_ — для отмены операции (напр. ввода текста);
-+ _q_ — для возврата на предыдущий экран.
-\`\`\`
-1. Выделите слово и нажмите _⌘k_ или _f_ для глобального поиска по всем словарям в пределах выбранного языка.
-1. Выделите слово и нажмите / (слэш) для __быстрого поиска__. __Быстрый поиск__ возращает единственный ответ в случае полного совпадения искомого слова со словом в словаре. __Быстрый поиск__ позволяет искать слова, не теряя фокуса от прочтения текста.
-1. Чтобы просмотреть весь список доступных на том или ином экране горячих клавиш, нажмите знак вопроса: «?».
-\`\`\`
-
-## Markdown
-В режиме _Markdown_ вы можете добавить в редактор большой объём текста. Чтение будет более эффективным, если использовать преимущества __быстрого поиска__.
-`
 
 export const VocListView = () => {
-  const vm = DerTutorContext.self.vmFactory.getVocListVM()
+  const vm = globalContext.vmFactory.getVocListVM()
   return vstack()
     .react(s => {
       s.width = '100%'
       s.halign = 'center'
       s.valign = 'top'
-      s.paddingTop = 2 * layout().navBarHeight + 'px'
+      s.paddingTop = layout().navBarHeight + 'px'
       //s.paddingBottom = layout().statusBarHeight + 'px'
       s.bgColor = '#111111'
       //s.paddingHorizontal = '20px'
@@ -81,11 +53,11 @@ export const VocListView = () => {
       hstack()
         .react(s => {
           s.width = '100%'
-          s.valign = 'base'
+          s.valign = 'center'
           s.halign = 'left'
           s.textColor = theme().text
           s.paddingLeft = layout().leftSideMenuWidth + layout().paddingHorizontal + 'px'
-          s.paddingTop = layout().navBarHeight + 'px'
+          s.paddingVertical = layout().navBarHeight + 'px'
           s.height = window.innerHeight - 2 * layout().navBarHeight - layout().statusBarHeight + 'px'
         })
         .children(() => {
@@ -131,41 +103,26 @@ export const VocListView = () => {
       hstack()
         .react(s => {
           s.width = '100%'
-          s.valign = 'bottom'
-          s.layer = '1'
-          //s.bgColor = nightTheme().black + '88'
+          s.valign = 'center'
+          s.halign = 'center'
+          s.textAlign = 'center'
+          s.gap = '10px'
+          s.fontSize = theme().fontSizeS
+          s.fontFamily = FontFamily.MONO
+          s.textColor = theme().white
         })
         .children(() => {
-          spacer().react(s => {
-            s.width = layout().leftSideMenuWidth + 'px'
-            // s.height = '100vh'
-            // s.bgColor = nightTheme().black + 'cc'
+          ['?', '<ESC>', '<CR>', 'f', 't', 'q', '→', '↓', '→', '↑', '.', '/', 'll'].forEach(v => {
+            span()
+              .react(s => {
+                s.text = v
+                s.bgColor = theme().menuBg
+                s.borderColor = theme().border
+                s.paddingHorizontal = '10px'
+                s.cornerRadius = '5px'
+              })
           })
 
-          Markdown().react(s => {
-            //s.position = 'absolute'
-            //s.top = '400px'
-            s.className = theme().id
-            s.paddingTop = '100px'
-            s.paddingHorizontal = layout().paddingHorizontal + 'px'
-            s.mode = 'md'
-            s.fontSize = theme().fontSizeS
-            s.fontFamily = FontFamily.APP
-            s.textColor = theme().quickSearchTheme.text
-            s.width = '100%'
-            s.minWidth = layout().contentWidth + 'px'
-            //s.maxWidth = '700px'
-            //s.bgColor = '#00000088'
-            s.textAlign = 'left'
-            s.text = ABOUT
-            s.paddingBottom = '100px'
-          })
-
-          spacer().react(s => {
-            s.width = window.innerWidth - layout().leftSideMenuWidth - layout().contentWidth + 'px'
-            // s.height = '50vh'
-            // s.bgColor = nightTheme().black + 'cc'
-          })
         })
         .onClick(() => vm.quit())
 
@@ -195,7 +152,7 @@ export const VocListView = () => {
 }
 
 const Header = () => {
-  const vm = DerTutorContext.self.vmFactory.getVocListVM()
+  const vm = globalContext.vmFactory.getVocListVM()
   return hstack()
     .observe(vm.$langs, 'recreateChildren')
     .observe(vm.$selectedLang, 'affectsChildrenProps', 'affectsProps')
@@ -220,11 +177,11 @@ const Header = () => {
       Btn()
         .react(s => {
           s.visible = !layout().isMobile
-          s.text = translate('Markdown')
+          s.text = translate('Lab')
           s.fontSize = theme().fontSizeS
           s.icon = MaterialIcon.edit
         })
-        .onClick(() => vm.navigateToMarkdown())
+        .onClick(() => vm.navigateToLab())
 
       VSeparator()
 
@@ -236,8 +193,7 @@ const Header = () => {
 
 
 const UserAuthStatus = () => {
-  const ctx = DerTutorContext.self
-
+  const ctx = GlobalContext.self
   return p()
     .observe(ctx.$user)
     .react(s => {
@@ -254,7 +210,7 @@ const UserAuthStatus = () => {
 }
 
 const LangRenderer = (lang: ILang) => {
-  const vm = DerTutorContext.self.vmFactory.getVocListVM()
+  const vm = globalContext.vmFactory.getVocListVM()
   return hstack()
     .react(s => {
       const isSelected = vm.$selectedLang.value === lang
@@ -307,7 +263,7 @@ const LangRenderer = (lang: ILang) => {
 }
 
 const VocRenderer = (voc: IVoc) => {
-  const vm = DerTutorContext.self.vmFactory.getVocListVM()
+  const vm = globalContext.vmFactory.getVocListVM()
   return btn()
     .react(s => {
       const isSelected = vm.$highlightedVoc.value === voc

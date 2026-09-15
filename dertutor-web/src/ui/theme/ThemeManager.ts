@@ -281,7 +281,7 @@ export class ThemeManager {
       id: 'night',
       isLight: false,
       appBg,
-      actionsBg: '#1c2424',
+      actionsBg: '#1c2222',
       navBarBg: menuBg, //1c1f22
       articleBg: appBg, // '#0f1013', //121416 0c0d0f
       menuBg: menuBg,

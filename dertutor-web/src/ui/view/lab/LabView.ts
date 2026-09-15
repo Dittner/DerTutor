@@ -2,7 +2,6 @@ import { hstack, p, spacer, vstack } from "flinker-dom"
 import { globalContext } from "../../../App"
 import { PinkBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
-import { DerTutorContext } from "../../../DerTutorContext"
 import { theme } from "../../theme/ThemeManager"
 import { log } from "../../../app/Logger"
 import { translate } from "../../../app/LocaleManager"
@@ -17,8 +16,7 @@ import { layout } from "../../../app/Application"
 export const LabView = () => {
   log('new LabView')
 
-  const vm = DerTutorContext.self.vmFactory.getLabVM()
-
+  const vm = globalContext.vmFactory.getLabVM()
   const formatter = new TextFormatter()
 
   return hstack()
@@ -101,7 +99,7 @@ export const LabView = () => {
 }
 
 const Header = () => {
-  const vm = DerTutorContext.self.vmFactory.getLabVM()
+  const vm = globalContext.vmFactory.getLabVM()
   return hstack()
     .react(s => {
       s.gap = '20px'

@@ -1,7 +1,6 @@
 import { RX, RXObservableValue } from "flinker"
 
 import { IMediaFile, INote, AVAILABLE_LEVELS, ILang, IVoc, DomainService, ILoadAudioFromDudenResult, ILoadTranlsationResult } from "../../../domain/DomainModel"
-import { DerTutorContext } from "../../../DerTutorContext"
 import { ViewModel } from "../ViewModel"
 import { UpdateNoteSchema } from "../../../backend/Schema"
 import { UrlKeys } from "../../../app/URLNavigator"
@@ -38,9 +37,9 @@ export class EditorVM extends ViewModel<EditorState> {
   readonly $mediaFiles = new RXObservableValue<Array<IMediaFile>>([])
   readonly textReplacer = new TextReplacer()
 
-  constructor(ctx: DerTutorContext) {
-    const interactor = new EditorInteractor(ctx)
-    super('editor', ctx, interactor)
+  constructor() {
+    const interactor = new EditorInteractor()
+    super('editor', interactor)
 
     RX.combine(this.$buffer, this.$level, this.$tagId, this.$audioUrl, this.$selectedVocId).pipe()
       .skipFirst()
@@ -86,12 +85,8 @@ export class EditorVM extends ViewModel<EditorState> {
 
   override onKeyDown(e: KeyboardEvent) {
     if (this.isActive) {
-      if (e.key === 'Escape') {
-        if (globalContext.app.$dropdownState.value !== '') globalContext.app.$dropdownState.value = ''
-        else this.quit()
-      }
       //Ctrl + Shift + S
-      else if (e.ctrlKey && e.shiftKey && e.keyCode === 83) {
+      if (e.ctrlKey && e.shiftKey && e.keyCode === 83) {
         e.preventDefault()
         e.stopPropagation()
         this.save()
@@ -99,6 +94,11 @@ export class EditorVM extends ViewModel<EditorState> {
     }
   }
 
+  override didPressESC() {
+    super.didPressESC()
+    if (globalContext.app.$dropdownState.value !== '') globalContext.app.$dropdownState.value = ''
+    else this.quit()
+  }
 
   quit() {
     if (this.$hasChanges.value) {
@@ -307,8 +307,8 @@ export class EditorVM extends ViewModel<EditorState> {
 }
 
 class EditorInteractor extends Interactor<EditorState> {
-  constructor(ctx: DerTutorContext) {
-    super(ctx)
+  constructor() {
+    super()
     log('new NoteListInteractor')
   }
 

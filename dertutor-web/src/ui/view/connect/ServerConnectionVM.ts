@@ -1,6 +1,5 @@
 import { RXObservableValue } from "flinker";
 import { globalContext } from "../../../App";
-import { DerTutorContext } from "../../../DerTutorContext";
 import { ViewModel } from "../ViewModel";
 import { UrlKeys } from "../../../app/URLNavigator";
 import { Interactor } from "../Interactor";
@@ -13,9 +12,9 @@ export interface ServerConnectionState {
 
 export class ServerConnectionVM extends ViewModel<ServerConnectionState> {
   readonly $logs = new RXObservableValue('')
-  constructor(ctx: DerTutorContext) {
-    const interactor = new ServerConnectionInteractor(ctx)
-    super('connection', ctx, interactor)
+  constructor() {
+    const interactor = new ServerConnectionInteractor()
+    super('connection', interactor)
   }
 
   protected override stateDidChange(state: ServerConnectionState) {
@@ -26,8 +25,8 @@ export class ServerConnectionVM extends ViewModel<ServerConnectionState> {
 }
 
 class ServerConnectionInteractor extends Interactor<ServerConnectionState> {
-  constructor(ctx: DerTutorContext) {
-    super(ctx)
+  constructor() {
+    super()
     log('new ServerConnectionInteractor')
   }
 

@@ -45,7 +45,14 @@ export const TextEditor = (formatter: TextFormatter) => {
       e.preventDefault()
       e.stopPropagation()
       TextEditorController.removeNewLines(ta)
-    } // Ctrl+Shift+D
+    } 
+    // Ctrl+Shift+E
+    else if (e.ctrlKey && e.shiftKey && e.keyCode === 69) {
+      e.preventDefault()
+      e.stopPropagation()
+      TextEditorController.insertExamplesBlock(ta)
+    }
+    // Ctrl+Shift+D
     else if ((e.ctrlKey && e.shiftKey && e.keyCode === 68) || (e.metaKey && e.keyCode === 68)) {
       e.preventDefault()
       e.stopPropagation()

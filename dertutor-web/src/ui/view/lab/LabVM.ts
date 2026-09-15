@@ -1,6 +1,5 @@
 import { RXObservableValue } from "flinker"
 
-import { DerTutorContext } from "../../../DerTutorContext"
 import { ViewModel } from "../ViewModel"
 import { Interactor } from "../Interactor"
 import { log } from "../../../app/Logger"
@@ -23,12 +22,12 @@ export class LabVM extends ViewModel<LabState> {
 
   readonly quiclSearchController: QuickSearchController
 
-  constructor(ctx: DerTutorContext) {
-    const interactor = new LabInteractor(ctx)
-    super('lab', ctx, interactor)
+  constructor() {
+    const interactor = new LabInteractor()
+    super('lab', interactor)
     this.addKeybindings()
 
-    this.quiclSearchController = new QuickSearchController(ctx, true)
+    this.quiclSearchController = new QuickSearchController(true)
 
     this.$editor1.value = globalContext.localStorage.read(EDITOR1_TEXT_KEY) ?? ''
     this.$editor2.value = globalContext.localStorage.read(EDITOR2_TEXT_KEY) ?? ''

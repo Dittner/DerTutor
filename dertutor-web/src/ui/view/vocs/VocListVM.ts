@@ -1,6 +1,5 @@
 import { RXObservableValue } from "flinker"
 
-import { DerTutorContext } from "../../../DerTutorContext"
 import { ViewModel } from "../ViewModel"
 import { DomainService, ILang, IVoc } from "../../../domain/DomainModel"
 import { CreateVocSchema, DeleteVocSchema, RenameVocSchema, UpdateVocSchema } from "../../../backend/Schema"
@@ -27,9 +26,9 @@ export class VocListVM extends ViewModel<VocListState> {
   readonly $highlightedVoc = new RXObservableValue<IVoc | undefined>(undefined)
   readonly $showTips = new RXObservableValue(false)
 
-  constructor(ctx: DerTutorContext) {
-    const interactor = new VocListInteractor(ctx)
-    super('vocs', ctx, interactor)
+  constructor() {
+    const interactor = new VocListInteractor()
+    super('vocs', interactor)
     this.addKeybindings()
     this.$showTips.value = globalContext.localStorage.has(SHOW_TIPS_KEY) ? globalContext.localStorage.read(SHOW_TIPS_KEY) : true
   }
@@ -44,12 +43,12 @@ export class VocListVM extends ViewModel<VocListState> {
     this.$highlightedVoc.value = state.voc
   }
 
+  override didPressESC() {
+    super.didPressESC()
+    this.quit()
+  }
+  
   private addKeybindings() {
-    this.actionsList.add('<ESC>', 'Hide actions/Clear messages', () => {
-      this.didPressESC()
-      this.quit()
-    })
-
     this.addDefaultKeybindings()
 
     this.actionsList.add('g', 'Select first item', () => this.moveCursorToTheFirst())
@@ -317,15 +316,15 @@ export class VocListVM extends ViewModel<VocListState> {
     globalContext.localStorage.write(SHOW_TIPS_KEY, false)
   }
 
-  navigateToMarkdown() {
-    this.navigator.navigateTo({ module: 'md' })
+  navigateToLab() {
+    this.navigator.navigateTo({ module: 'lab' })
   }
 }
 
 
 class VocListInteractor extends Interactor<VocListState> {
-  constructor(ctx: DerTutorContext) {
-    super(ctx)
+  constructor() {
+    super()
     log('new VocListInteractor')
   }
 
