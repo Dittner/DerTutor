@@ -98,26 +98,20 @@ const Header = () => {
       spacer()
 
       IconBtn()
-        .observe(vm.$mdViewMode)
         .react(s => {
           s.icon = MaterialIcon.my_library_books
-
           s.text = translate('Markdown')
+          s.popUp = 'Open Markdown, Press <m>'
           s.fontSize = theme().fontSizeS
           s.valign = 'bottom'
           s.paddingHorizontal = '0'
           s.iconSize = '1rem'
-          if (vm.$mdViewMode.value === 'hidden')
-            s.textColor = theme().white + 'cc'
-          else if (vm.$mdViewMode.value === 'editing')
-            s.textColor = theme().red + 'cc'
-          else
-            s.textColor = theme().accent
+          s.textColor = theme().white + 'cc'
         })
         .whenHovered(s => s.textColor = theme().white)
         .onClick(e => {
           e.stopImmediatePropagation()
-          vm.switchNoteMdWindow()
+          vm.navigateToMD()
         })
 
       VSeparator()

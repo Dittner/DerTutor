@@ -8,6 +8,7 @@ import { Interactor } from "../Interactor"
 import { globalContext } from "../../../App"
 import { TextReplacer } from "./TextReplacer"
 import { log } from "../../../app/Logger"
+import { sortByKey } from "../../../app/Utils"
 
 export interface EditorState {
   allLangs?: ILang[]
@@ -40,6 +41,7 @@ export class EditorVM extends ViewModel<EditorState> {
   constructor() {
     const interactor = new EditorInteractor()
     super('editor', interactor)
+    this.addKeybindings()
 
     RX.combine(this.$buffer, this.$level, this.$tagId, this.$audioUrl, this.$selectedVocId).pipe()
       .skipFirst()
@@ -63,6 +65,12 @@ export class EditorVM extends ViewModel<EditorState> {
       .subscribe()
   }
 
+  private addKeybindings() {
+    this.addDefaultKeybindings()
+
+    this.actionsList.add('<C-S>', 'Save', () => this.save())
+  }
+
   protected override stateDidChange(state: EditorState) {
     if (!this.activate) return
 
@@ -83,16 +91,16 @@ export class EditorVM extends ViewModel<EditorState> {
     }
   }
 
-  override onKeyDown(e: KeyboardEvent) {
-    if (this.isActive) {
-      //Ctrl + Shift + S
-      if (e.ctrlKey && e.shiftKey && e.keyCode === 83) {
-        e.preventDefault()
-        e.stopPropagation()
-        this.save()
-      }
-    }
-  }
+  // override onKeyDown(e: KeyboardEvent) {
+  //   if (this.isActive) {
+  //     //Ctrl + Shift + S
+  //     if (e.ctrlKey && e.shiftKey && e.keyCode === 83) {
+  //       e.preventDefault()
+  //       e.stopPropagation()
+  //       this.save()
+  //     }
+  //   }
+  // }
 
   override didPressESC() {
     super.didPressESC()
@@ -320,8 +328,10 @@ class EditorInteractor extends Interactor<EditorState> {
   }
 
   async loadLangs(state: EditorState, keys: UrlKeys) {
-    if (this.ctx.$allLangs.value.length === 0)
+    if (this.ctx.$allLangs.value.length === 0) {
       this.ctx.$allLangs.value = await globalContext.server.loadAllLangs().asAwaitable
+      this.ctx.$allLangs.value.forEach(l => l.vocs.sort(sortByKey('name')))
+    }
     state.allLangs = this.ctx.$allLangs.value
   }
 

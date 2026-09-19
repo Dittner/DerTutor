@@ -10,6 +10,7 @@ import { log } from "../../../app/Logger"
 import { translate } from "../../../app/LocaleManager"
 import { QuickSearchController } from "../../controls/QuickSearch"
 import { GlobalContext } from "../../../app/GlobalContext"
+import { sortByKey } from "../../../app/Utils"
 
 export interface NoteListState {
   allLangs?: ILang[]
@@ -24,21 +25,6 @@ export interface NoteListState {
   tagId?: number
 }
 
-const TEXT_KEY = 'MDVM:TEXT__KEY'
-
-const DEF_TEXT = `Режим _Markdown_ позволяет читать текст, не отвлекаясь на поиск незнакомого иностранного слова. Вам не нужно постоянно переключаться между текстом и словарем в отдельной вкладке или приложении.
-
-## Как этим пользоваться?
-\`\`\`ol
-1. Вставьте в редактор текст на немецком или английском языке;
-1. Выключите режим редактирования: Edit Mode — off (ESC);
-1. Выделите слово (e.g. Tipp) и нажимете слэш; слово добавится в поле быстрого поиска;
-1. При необходимости отредактиуйте слово в поле ввода и нажмите Enter;
-1. Если слово есть в словаре, то будет показан его перевод;
-1. При необходимости измените язык (de|en);
-1. Чтобы включить режим редактирование нажмите: e;
-1. Введённый текст сохраняется после перезагрузки страницы.
-\`\`\``
 
 export class NoteListVM extends ViewModel<NoteListState> {
   readonly $state = new RXObservableValue<Readonly<NoteListState>>({})
@@ -47,9 +33,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
   readonly $noteListShown = new RXObservableValue(true)
   readonly $taskAnswerShown = new RXObservableValue(false)
-
-  readonly $mdViewMode = new RXObservableValue<'shown' | 'hidden' | 'editing'>('hidden')
-  readonly $mdText = new RXObservableValue('')
 
   readonly $searchBuffer = new RXObservableValue('')
   readonly $searchBufferFocused = new RXObservableValue(false)
@@ -70,15 +53,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
     globalContext.app.$layout.pipe()
       .onReceive(l => {
         this.$noteListShown.value = !l.isCompact
-      })
-      .subscribe()
-
-    this.$mdText.value = globalContext.localStorage.read(TEXT_KEY) || DEF_TEXT
-
-    this.$mdText.pipe()
-      .skipFirst()
-      .onReceive(value => {
-        globalContext.localStorage.write(TEXT_KEY, value)
       })
       .subscribe()
   }
@@ -135,8 +109,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add('f', 'Global Search', () => this.focusGlobalSearchInput())
     this.actionsList.add('<C-k>', 'Global Search', () => this.focusGlobalSearchInput())
 
-    this.actionsList.add('w', 'Switch Note/Markdown window', () => this.switchNoteMdWindow())
-    this.actionsList.add('m', 'Show/Hide menu', () => this.$noteListShown.value = !this.$noteListShown.value)
+    this.actionsList.add('m', 'Markdown', () => this.navigateToMD())
     this.actionsList.add('<Space>', 'Play audio', () => this.playAudio())
     this.actionsList.add('<CR>', 'Show answer to the task', () => this.$taskAnswerShown.value = !this.$taskAnswerShown.value)
     this.actionsList.add(':id<CR>', 'Print ID of note', () => this.printID())
@@ -146,8 +119,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
   override didPressESC() {
     super.didPressESC()
     this.quickSearchController.clear()
-    if (this.$mdViewMode.value === 'editing')
-      this.$mdViewMode.value = 'shown'
   }
 
   moveNext() {
@@ -194,24 +165,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.navigator.navigateTo({ langCode: this.$state.value.lang?.code })
   }
 
-  switchNoteMdWindow() {
-    if (this.$mdViewMode.value === 'hidden')
-      this.$mdViewMode.value = 'shown'
-    else
-      this.$mdViewMode.value = 'hidden'
-  }
-
   private edit() {
-    if (this.$mdViewMode.value === 'shown') {
-      this.$mdViewMode.value = 'editing'
-      return
-    }
-
-    if (this.$mdViewMode.value === 'editing') {
-      this.$mdViewMode.value = 'shown'
-      return
-    }
-
     if (!this.ctx.$user.value) {
       this.ctx.$msg.value = { text: 'User not authorized', level: 'warning' }
       return
@@ -398,6 +352,10 @@ export class NoteListVM extends ViewModel<NoteListState> {
     }
   }
 
+  navigateToMD() {
+    this.navigator.navigateTo({ module: 'md' })
+  }
+
   encodeName(value: string) {
     return DomainService.encodeName(value)
   }
@@ -420,11 +378,6 @@ export class NoteListVM extends ViewModel<NoteListState> {
 
       this.navigator.navigateTo(keys)
     }
-  }
-
-  override deactivate() {
-    super.deactivate()
-    this.$mdViewMode.value = 'hidden'
   }
 
   private printID() {
@@ -452,8 +405,10 @@ class NoteListInteractor extends Interactor<NoteListState> {
   }
 
   private async loadLangs(state: NoteListState, keys: UrlKeys) {
-    if (this.ctx.$allLangs.value.length === 0)
+    if (this.ctx.$allLangs.value.length === 0) {
       this.ctx.$allLangs.value = await globalContext.server.loadAllLangs().asAwaitable
+      this.ctx.$allLangs.value.forEach(l => l.vocs.sort(sortByKey('name')))
+    }
     state.allLangs = this.ctx.$allLangs.value
   }
 

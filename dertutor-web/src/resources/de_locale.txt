@@ -11,6 +11,7 @@ Filter by tag: = Nach Tag filtern:
 Search... = Suchen...
 Enter a word to search = Geben Sie ein Suchwort ein
 Back = Zurück
+Go back <Backspace> = Zurück <Backspace>
 Quit = Beenden
 Discard Changes = Änderungen verwerfen
 Save = Speichern

@@ -12,7 +12,7 @@ import { log } from "../../app/Logger"
 import { translate } from "../../app/LocaleManager"
 import { GlobalContext } from "../../app/GlobalContext"
 
-export type ViewModelID = 'connection' | 'vocs' | 'notes' | 'editor' | 'lab'
+export type ViewModelID = 'connection' | 'vocs' | 'notes' | 'editor' | 'lab' | 'md'
 export interface IViewModel {
   readonly id: ViewModelID
   readonly $showActions: RXObservableValue<boolean>

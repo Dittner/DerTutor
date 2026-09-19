@@ -6,6 +6,7 @@ import { log, logErr } from "./Logger"
 
 export enum NAV_MODULE {
   LAB = 'lab',
+  MD = 'md',
 }
 
 export interface UrlKeys {
@@ -43,7 +44,7 @@ export class URLNavigator {
 
     return {
       langCode: values.length > 0 ? values[0] || undefined : undefined,
-      module: values.length > 0 && values[0] === NAV_MODULE.LAB ? values[0] || undefined : undefined,
+      module: values.length > 0 && (values[0] === NAV_MODULE.LAB || values[0] === NAV_MODULE.MD) ? values[0] || undefined : undefined,
       vocCode: values.length > 1 && values[1] !== 'search' ? values[1] || undefined : undefined,
       noteId: params.has('note') ? Number(params.get('note')) : undefined,
       level: params.has('level') ? Number(params.get('level')) : undefined,
@@ -81,6 +82,10 @@ export class URLNavigator {
 
   updateWith(keys: UrlKeys, mode: UpdateUrlMode = 'push') {
     this.navigateTo({ ...this.$keys.value, ...keys }, mode)
+  }
+
+  navigateBack() {
+    globalContext.app.navigateBack()
   }
 
   private counter = 0

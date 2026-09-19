@@ -56,13 +56,13 @@ export class Application {
     this.updateLocation()
   }
 
-  
+
   private getLayout(): Layout {
     const windowWidth = window.innerWidth
     const isCompact = this.isMobileDevice || windowWidth < 1200
     const contentWidth = isCompact ? windowWidth : Math.min(ARTICLE_WIDTH, windowWidth - 600)
     const leftSideMenuWidth = this.isMobileDevice ? 0 : (windowWidth - contentWidth) * 0.45
-    
+
     log('Layout is changed, wid:', window.innerWidth)
 
     return {
@@ -78,7 +78,14 @@ export class Application {
   }
 
   navigate(to: string, mode: UpdateUrlMode) {
-    mode === 'push' ? window.history.pushState('', '', to) : window.history.replaceState('', '', to)
+    if (mode === 'push' && this.$location.value.path !== to)
+      window.history.pushState('', '', to)
+    else
+      window.history.replaceState('', '', to)
+  }
+
+  navigateBack() {
+    window.history.back()
   }
 
   private watchHistoryEvents() {

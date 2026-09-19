@@ -15,7 +15,7 @@ import { localeManager, translate } from "./app/LocaleManager"
 import { ViewLayer } from "./app/ViewLayer"
 import { LabView } from "./ui/view/lab/LabView"
 import { layout } from "./app/Application"
-import { MarkdownView } from "./ui/view/note/MarkdownView"
+import { MarkdownView } from "./ui/view/md/MarkdownView"
 
 export const globalContext = GlobalContext.init()
 
@@ -38,28 +38,9 @@ export function App() {
           else if (vm.id === 'vocs') return VocListView()
           else if (vm.id === 'notes') return NoteListView()
           else if (vm.id === 'editor') return EditorView()
+          else if (vm.id === 'md') return MarkdownView()
           else if (vm.id === 'lab') return LabView()
           else return undefined
-        })
-
-      // We can not keep MarkdownView on NoteListView, where it's actually used.  
-      // The Problem: when we are switching to the Editor View, the NoteListView will be destroyed,
-      // and we lose a scroll position of Markdown text.
-      // Therefore we need to place the MarkdownView globally, to keep the Markdown state.
-      MarkdownView()
-        .observe(ctx.vmFactory.getNoteListVM().$mdViewMode)
-        .react(s => {
-          const l = layout()
-          const vm = ctx.vmFactory.getNoteListVM()
-          s.visible = vm.$mdViewMode.value !== 'hidden'
-          s.position = 'fixed'
-          s.top = layout().navBarHeight + 'px'
-          //s.paddingTop = l.navBarHeight + 'px'
-          s.left = l.isCompact ? '0' : l.leftSideMenuWidth + l.paddingHorizontal + 'px'
-          //s.width = layout.isCompact ? '100%' : (layout.contentWidth + 'px')
-          s.width = l.isCompact ? '100%' : l.contentWidth - l.paddingHorizontal + 'px'
-          s.height = window.innerHeight - layout().navBarHeight - layout().statusBarHeight + 'px'
-          s.bgColor = theme().appBg
         })
 
       MessangerView()
@@ -90,7 +71,8 @@ export const ActionsHelpView = () => {
       s.width = '600px'
       s.height = window.innerHeight - layout().navBarHeight - layout().statusBarHeight + 'px'
       s.paddingHorizontal = '20px'
-      s.bgColor = theme().actionsBg
+      s.bgColor = theme().appBg + '88'
+      s.borderColor = theme().green
       s.blur = '10px'
       s.layer = ViewLayer.MODAL_VIEW
     }).children(() => {
@@ -142,7 +124,11 @@ export const ActionsHelpView = () => {
         })
         .children(() => {
           p().react(s => { s.text = '<CR> — Enter' })
-          p().react(s => s.text = '<C-k> — Ctrl+k / Cmd+k')
+          p().react(s => { s.text = '<BS> — BackSpace' })
+          p().react(s => { s.text = '<ESC> — Escape' })
+          p().react(s => s.text = '<C-k> — Ctrl + k')
+          p().react(s => s.text = '<C-k> — Cmd + k')
+          p().react(s => s.text = '<C-S> — Ctrl + Shift + s')
         })
     })
 }

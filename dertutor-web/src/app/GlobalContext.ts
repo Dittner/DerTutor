@@ -6,13 +6,14 @@ import { URLNavigator } from "./URLNavigator"
 import { generateUID } from "./Utils"
 import { IViewModel } from "../ui/view/ViewModel"
 import { ILang, IUser } from "../domain/DomainModel"
-import { logErr } from "./Logger"
+import { log, logErr } from "./Logger"
 import { Locale, localeManager } from "./LocaleManager"
 import { ServerConnectionVM } from "../ui/view/connect/ServerConnectionVM"
 import { VocListVM } from "../ui/view/vocs/VocListVM"
 import { NoteListVM } from "../ui/view/note/NoteListVM"
 import { LabVM } from "../ui/view/lab/LabVM"
 import { EditorVM } from "../ui/view/editor/EditorVM"
+import { MarkdownVM } from "../ui/view/md/MarkdownVM"
 
 
 export class GlobalContext {
@@ -116,6 +117,12 @@ export class LazyVMFctory {
     if (!this._labVM) this._labVM = new LabVM()
     return this._labVM
   }
+
+  private _markdownVM?: MarkdownVM
+  getMarkdownVM(): MarkdownVM {
+    if (!this._markdownVM) this._markdownVM = new MarkdownVM()
+    return this._markdownVM
+  }
 }
 
 export class Router {
@@ -126,6 +133,8 @@ export class Router {
         let newVM: IViewModel
         if (!ctx.server.$isServerAvailable.value)
           newVM = ctx.vmFactory.getConnectionVM()
+        else if (keys.module === 'md')
+          newVM = ctx.vmFactory.getMarkdownVM()        
         else if (keys.module === 'lab')
           newVM = ctx.vmFactory.getLabVM()
         else if (keys.noteId && keys.edit)

@@ -1,4 +1,4 @@
-import { btn, div, hlist, hstack, input, p, spacer, span, vlist, vstack } from "flinker-dom"
+import { div, hlist, hstack, input, p, spacer, span, vlist, vstack } from "flinker-dom"
 import { globalContext } from "../../../App"
 import { IMediaFile, ITag, IVoc } from "../../../domain/DomainModel"
 import { PinkBtn, Btn, Icon, IconBtn, LinkBtn, RedBtn } from "../../controls/Button"
@@ -550,22 +550,22 @@ const VocSelector = () => {
 
 const VocRenderer = (voc: IVoc) => {
   const vm = globalContext.vmFactory.getEditorVM()
-  return btn()
+  return p()
     .react(s => {
+      const isSelected = vm.$selectedVocId.value === voc.id
       s.wrap = false
       s.fontSize = theme().fontSizeXS
-      s.isSelected = vm.$selectedVocId.value === voc.id
-      s.text = voc.name
+      s.text =  voc.name
       s.width = '100%'
       s.textAlign = 'left'
-      s.textColor = theme().text50
+      s.textColor = isSelected ? theme().strong : theme().text50
       s.paddingVertical = '5px'
+      s.textSelectable = false
     })
     .whenHovered(s => {
-      s.textColor = theme().text
-    })
-    .whenSelected(s => {
-      s.textColor = theme().strong
+      const isSelected = vm.$selectedVocId.value === voc.id
+      s.textColor = isSelected ? theme().strong : theme().text
+      s.cursor = 'pointer'
     })
     .onClick(() => {
       vm.$selectedVocId.value = voc.id

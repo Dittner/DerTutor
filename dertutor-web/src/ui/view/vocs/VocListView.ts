@@ -177,11 +177,11 @@ const Header = () => {
       Btn()
         .react(s => {
           s.visible = !layout().isMobile
-          s.text = translate('Lab')
+          s.text = translate('Markdown')
           s.fontSize = theme().fontSizeS
-          s.icon = MaterialIcon.edit
+          s.icon = MaterialIcon.my_library_books
         })
-        .onClick(() => vm.navigateToLab())
+        .onClick(() => vm.navigateToMD())
 
       VSeparator()
 

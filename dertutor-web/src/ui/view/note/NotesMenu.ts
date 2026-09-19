@@ -190,7 +190,7 @@ const VocRenderer = (voc: IVoc) => {
       s.fontSize = theme().fontSizeXS
       s.textAlign = 'left'
       s.width = '100%'
-      s.paddingVertical = '3px'
+      s.paddingVertical = '5px'
       s.fontSize = theme().fontSizeXS
       s.text = voc.name
       s.textColor = theme().text

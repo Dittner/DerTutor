@@ -69,8 +69,17 @@ async def search_by_key(session: AsyncSession, params: Annotated[SearchByNamePar
     return res
 
 
+@router.get('/notes/all_names', response_model=list[str])
+@open_session
+async def get_all_names(session: AsyncSession, voc_id: int):
+    notes = await NotesDAO.find_all(session, ['id'], voc_id=voc_id)
+    return [n.name for n in notes]
+
+
 @router.post('/notes', response_model=NoteRead)
 @open_session
+# TODO remove comment before deploy!
+# @only_superuser
 async def create_note(session: AsyncSession, note: NoteCreate):
     return await NotesDAO.add_one(session, **note.model_dump())
 

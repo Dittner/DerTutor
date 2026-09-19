@@ -316,8 +316,8 @@ export class VocListVM extends ViewModel<VocListState> {
     globalContext.localStorage.write(SHOW_TIPS_KEY, false)
   }
 
-  navigateToLab() {
-    this.navigator.navigateTo({ module: 'lab' })
+  navigateToMD() {
+    this.navigator.navigateTo({ module: 'md' })
   }
 }
 

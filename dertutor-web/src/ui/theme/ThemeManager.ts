@@ -271,7 +271,7 @@ export class ThemeManager {
     const black = '#0c0d0f' //121416
     const accent = '#bbc0b0'  //b8c892 c693c3
     const white = '#a3abbe'
-    const text = '#787f92' //707786
+    const text = '#707687' //787f92 888d98
     const appBg = black
     const green = '#5b9898'
     const menuBg = '#111214'
