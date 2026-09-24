@@ -4,7 +4,7 @@ import { globalContext } from '../App'
 
 
 export const ARTICLE_PADDING = 80
-export const MARKDOWN_MAX_WIDTH = 800
+export const MARKDOWN_MAX_WIDTH = 700
 export const ARTICLE_WIDTH = MARKDOWN_MAX_WIDTH + 2 * ARTICLE_PADDING
 
 export interface Layout {

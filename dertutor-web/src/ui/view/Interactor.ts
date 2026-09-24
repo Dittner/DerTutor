@@ -20,7 +20,7 @@ export class Interactor<State> {
 
   private isLoading = false
   private reloadCycleDepth = 0
-  private newKeys: UrlKeys | undefined
+  protected newKeys: UrlKeys | undefined
 
   async run(keys: UrlKeys) {
     if (this.isLoading) {

@@ -72,7 +72,7 @@ export class EditorVM extends ViewModel<EditorState> {
   }
 
   protected override stateDidChange(state: EditorState) {
-    if (!this.activate) return
+    if (!this.isActive) return
 
     this.$state.value = state
     const note = state.note

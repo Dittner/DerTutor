@@ -58,7 +58,7 @@ export class NoteListVM extends ViewModel<NoteListState> {
   }
 
   protected override stateDidChange(state: NoteListState) {
-    if (!this.activate) return
+    if (!this.isActive) return
 
     this.$state.value = state
     this.$lang.value = state.lang
@@ -95,8 +95,8 @@ export class NoteListVM extends ViewModel<NoteListState> {
   private addKeybindings() {
     this.addDefaultKeybindings()
 
-    this.actionsList.add('g', 'Select first note', () => this.moveCursorToTheFirst())
-    this.actionsList.add('G', 'Select last note', () => this.moveCursorToTheLast())
+    // this.actionsList.add('g', 'Select first note', () => this.moveCursorToTheFirst())
+    // this.actionsList.add('G', 'Select last note', () => this.moveCursorToTheLast())
 
     this.actionsList.add('<Right>', 'Select next note', () => this.moveNext())
     this.actionsList.add('<Left>', 'Select prev note', () => this.movePrev())

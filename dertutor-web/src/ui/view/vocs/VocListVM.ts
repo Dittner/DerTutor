@@ -34,7 +34,7 @@ export class VocListVM extends ViewModel<VocListState> {
   }
 
   protected override stateDidChange(state: VocListState) {
-    if (!this.activate) return
+    if (!this.isActive) return
 
     state.allLangs?.forEach(l => l.vocs.sort(sortByKey('name')))
     this.$langs.value = state.allLangs ?? []

@@ -271,7 +271,7 @@ export class ThemeManager {
     const black = '#0c0d0f' //121416
     const accent = '#bbc0b0'  //b8c892 c693c3
     const white = '#a3abbe'
-    const text = '#707687' //787f92 888d98
+    const text = '#717787' //787f92 888d98
     const appBg = black
     const green = '#5b9898'
     const menuBg = '#111214'
@@ -370,7 +370,6 @@ export class ThemeManager {
       fontWeight: '500',
       textColor: t.h1,
       paddingTop: headerPadingTop,
-      //paddingBottom: '20px'
     }
     buildRule(h1Props, parentSelector, 'h1')
 
@@ -503,7 +502,7 @@ export class ThemeManager {
       textColor: 'inherit',
       fontWeight: 'inherit',
       borderColor: t.border,
-      padding: '10px'
+      padding: '10px',
     }
 
     buildRule(tdProps, parentSelector, 'th')

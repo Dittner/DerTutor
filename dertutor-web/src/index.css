@@ -126,6 +126,9 @@ blockquote::before {
     display: block;
 }
 
+tr {
+    vertical-align: top;
+}
 /* figure {
     display: flex;
     align-items: flex-start;

@@ -57,7 +57,7 @@ export const MarkdownView = () => {
           s.maxWidth = layout().contentWidth + 'px'
           s.minHeight = window.innerHeight - layout().navBarHeight + 'px'
           s.fontFamily = FontFamily.ARTICLE
-          s.fontSize = theme().fontSize
+          s.fontSize = theme().fontSizeM
           s.textColor = theme().text
           s.bgColor = theme().articleBg
           s.text = vm.$text.value
@@ -91,7 +91,7 @@ export const MarkdownView = () => {
           s.className = 'listScrollbar'
           s.position = 'fixed'
           s.right = l.isCompact ? '0' : '20px'
-          s.width = (l.isCompact ? l.contentWidth - 20 : window.innerWidth - l.contentWidth - l.leftSideMenuWidth) + 'px'
+          s.width = l.isCompact ? '100%' : l.leftSideMenuWidth + 'px'
           s.maxHeight = vm.quiclSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - l.statusBarHeight - 20 + 'px' : 'unset'
           s.enableOwnScroller = true
           s.maxWidth = l.isCompact ? 'unset' : '400px'
