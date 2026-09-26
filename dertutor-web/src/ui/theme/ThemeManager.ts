@@ -243,7 +243,7 @@ export class ThemeManager {
       header: '#dfb67a',
       em: accent,
       accent: accent,
-      quote: '#b6d1db',
+      quote: '#bbBBbb',
       blue,
 
       link,
@@ -297,7 +297,7 @@ export class ThemeManager {
       header: '#a78f68',
       em: accent,
       accent,
-      quote: '#698897', //6a87a0 
+      quote: text, //698897 
       strong: white,
 
       blue,
@@ -575,15 +575,19 @@ export class ThemeManager {
     const blockquoteProps: UIComponentProps = {
       width: '100%',
       paddingHorizontal: '20px',
+      paddingBottom: '20px',
       fontSize: 'inherit',
       textColor: t.quote,
+      fontStyle: 'italic',
       borderLeft: '1px solid ' + t.quote + '88',
+      //bgColor: t.quote + '10',
     }
     buildRule(blockquoteProps, parentSelector, 'blockquote')
 
     const blockquoteContentProps: UIComponentProps = {
       width: '100%',
       paddingHorizontal: '20px',
+      textAlign: 'center',
       fontSize: 'inherit',
       fontWeight: 'inherit',
       textColor: 'inherit',
@@ -681,16 +685,16 @@ export class ThemeManager {
 
 
     /******************************/
-    // ru translation
+    // translation
     /******************************/
 
-    const ruParagraphProps: UIComponentProps = {
+    const transParagraphProps: UIComponentProps = {
       fontWeight: 'inherit',
       fontSize: t.defFontSize,
       textColor: t.text50,
       //fontStyle: t.id === 'light-md' ? 'italic' : 'inherit'
     }
-    buildRule(ruParagraphProps, parentSelector, '.md-ru')
+    buildRule(transParagraphProps, parentSelector, '.md-ru')
 
     /******************************/
     // alignment
@@ -766,9 +770,7 @@ export class ThemeManager {
       textColor: t.warn,
       paddingHorizontal: '20px',
       paddingVertical: '10px',
-      bgColor: t.warn + '10',
-      borderColor: t.warn + '20',
-      //borderLeft: '1px solid ' + t.warn
+      borderLeft: '1px solid ' + t.warn
     }
     const warnFirstChildProps: UIComponentProps = {
       width: '100%',

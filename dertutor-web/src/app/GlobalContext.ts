@@ -6,7 +6,6 @@ import { URLNavigator } from "./URLNavigator"
 import { generateUID } from "./Utils"
 import { IViewModel } from "../ui/view/ViewModel"
 import { ILang, IUser } from "../domain/DomainModel"
-import { log, logErr } from "./Logger"
 import { Locale, localeManager } from "./LocaleManager"
 import { ServerConnectionVM } from "../ui/view/connect/ServerConnectionVM"
 import { VocListVM } from "../ui/view/vocs/VocListVM"
@@ -54,14 +53,6 @@ export class GlobalContext {
       if (!value)
         this.$user.value = undefined
     })
-
-    this.server.loadCurrentUser().pipe()
-      .onReceive(value => {
-        this.$user.value = value
-      }).onError(e => {
-        logErr('User not loaded, err:', e)
-      })
-      .subscribe()
 
     this.navigator.$keys.pipe()
       .map(keys => keys.langCode as Locale)

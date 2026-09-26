@@ -44,6 +44,7 @@ export class Application {
     this.$location = new RXObservableValue({ path: document.location.pathname, queries: document.location.search })
 
     this.$windowWidth.pipe()
+      .skipFirst()
       .debounce(1000)
       .onReceive(_ => this.$layout.value = this.getLayout())
       .subscribe()

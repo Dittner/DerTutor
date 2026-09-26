@@ -3,7 +3,7 @@ import { globalContext } from "../../../App";
 import { ViewModel } from "../ViewModel";
 import { UrlKeys } from "../../../app/URLNavigator";
 import { Interactor } from "../Interactor";
-import { log } from "../../../app/Logger";
+import { log, logWarn } from "../../../app/Logger";
 import { delay } from "../../../app/Utils";
 
 export interface ServerConnectionState {
@@ -28,19 +28,36 @@ export class ServerConnectionVM extends ViewModel<ServerConnectionState> {
   }
 
   async startConnecting() {
-    let logs = ''
-    logs += 'API_URL: ' + globalContext.server.baseUrl + '\n'
-    logs += 'Connecting to the server...\n'
-    this.$logs.value = logs
-    await globalContext.server.ping().asAwaitable
-    logs += this.hasConnection() ? 'Success\n' : 'No connection\n'
-    this.$logs.value = logs
-    if (this.hasConnection()) {
-      this.$logs.value = ''
+
+    try {
+      let logs = ''
+      logs += 'API_URL: ' + globalContext.server.baseUrl + '\n'
+      logs += 'Connecting to the server...\n'
+      this.$logs.value = logs
+      await globalContext.server.ping().asAwaitable
+      this.$logs.value += this.hasConnection() ? 'Success\n' : 'No connection\n'
+      this.$logs.value += 'Authenticating...\n'
+      await this.loadUserInfo()
       this.navigator.updateWith({}) //reload page without clearing url
-    } else {
+    } catch (e: any) {
+      const msg = 'Server connection is failed:' + e
+      this.$logs.value += msg
+      logWarn(msg)
       await delay(5000)
       this.startConnecting()
+    }
+  }
+
+  private async loadUserInfo() {
+    try {
+      this.ctx.$user.value = await this.server.loadCurrentUser().asAwaitable
+      const msg = 'User is authenticated: ' + this.ctx.$user.value.username
+      this.$logs.value += msg + '\n'
+      log(msg)
+    } catch (e: any) {
+      const msg = 'User not loaded, err:' + e
+      this.$logs.value += msg + '\n'
+      logWarn(msg)
     }
   }
 

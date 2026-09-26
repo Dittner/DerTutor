@@ -1,5 +1,5 @@
 import { type AnyRXObservable, RXObservableValue, RXOperation } from 'flinker'
-import { log, logErr } from '../app/Logger'
+import { log, logErr, logWarn } from '../app/Logger'
 import { translate } from '../app/LocaleManager'
 
 
@@ -43,9 +43,14 @@ export class RestApiCmd implements Runnable {
 
   run(): RXOperation<any, RestApiError> {
     const op = new RXOperation<any, RestApiError>()
-    this.startLoading(op).catch((e: RestApiError) => {
+    try {
+      this.startLoading(op).catch((e: RestApiError) => {
+        op.fail(e)
+      })
+    } catch (e: any) {
       op.fail(e)
-    })
+      logWarn('Cathced unknown error (not RestApiError as expected)')
+    }
     return op
   }
 
