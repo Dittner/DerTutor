@@ -64,6 +64,7 @@ export class VocListVM extends ViewModel<VocListState> {
     this.actionsList.add(':chsort<CR>', 'Change sorting of notes (SUPERUSER)', () => this.changeSortNotes(), true)
     this.actionsList.add(':d<CR>', 'Delete vocabulary (SUPERUSER)', () => this.deleteVoc(), true)
 
+    this.actionsList.add('m', 'Markdown', () => this.navigateToMD())
     this.actionsList.add('q', 'Quit', () => this.quit())
 
     this.actionsList.add('<CR>', 'Go', () => this.applySelection())

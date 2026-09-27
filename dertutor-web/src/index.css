@@ -2,7 +2,10 @@
     --LineHeight: 1.5;
     --font-family: -apple-system, 'system-ui', sans-serif;
     --font-family-mono: monospace, 'jetbrains', Menlo, source-code-pro, Monaco, 'Courier New', monospace;
-    --font-family-article: 'verdana', -apple-system, 'system-ui', 'system-ui', sans-serif;
+    --font-family-article: 'verdana', -apple-system, 'system-ui', sans-serif;
+    /*
+Scotch Modern
+    */
 }
 
 .def {
@@ -27,7 +30,7 @@
 html {
     color-scheme: dark;
     scroll-behavior: auto;
-    font-size: 20px;
+    font-size: 21px;
     text-size-adjust: 100%;
     line-height: var(--LineHeight);
     justify-content: space-between;
@@ -121,7 +124,7 @@ blockquote::before {
     content: '“';
     font-family: sans-serif, serif;
     font-style: normal;
-    font-size: 5rem;
+    font-size: 4rem;
     margin-bottom: -2rem;
     display: block;
 }

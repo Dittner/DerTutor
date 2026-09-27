@@ -5,8 +5,13 @@ import { Interactor } from "../Interactor"
 import { log } from "../../../app/Logger"
 import { globalContext } from "../../../App"
 import { QuickSearchController } from "../../controls/QuickSearch"
+import { UrlKeys } from "../../../app/URLNavigator"
+import { ILang } from "../../../domain/DomainModel"
+import { sortByKey } from "../../../app/Utils"
 
-export interface MarkdownState { }
+export interface MarkdownState {
+  allLangs?: ILang[]
+ }
 
 const TEXT_KEY = 'MDVM:TEXT__KEY'
 const SCROLLY_KEY = 'MDVM:SCROLLY_KEY'
@@ -94,4 +99,16 @@ class MarkdownInteractor extends Interactor<MarkdownState> {
     super()
     log('new MarkdownInteractor')
   }
+
+   override async load(state: MarkdownState, keys: UrlKeys) {
+      await this.loadLangs(state, keys)
+    }
+  
+    async loadLangs(state: MarkdownState, keys: UrlKeys) {
+      if (this.ctx.$allLangs.value.length === 0) {
+        this.ctx.$allLangs.value = await globalContext.server.loadAllLangs().asAwaitable
+        this.ctx.$allLangs.value.forEach(l => l.vocs.sort(sortByKey('name')))
+      }
+      state.allLangs = this.ctx.$allLangs.value
+    }
 }

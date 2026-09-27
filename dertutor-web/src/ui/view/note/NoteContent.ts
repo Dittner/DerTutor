@@ -1,5 +1,5 @@
 import { hstack, p, spacer, span, vstack } from "flinker-dom"
-import { PinkBtn, Btn } from "../../controls/Button"
+import { PinkBtn, Btn, LinkBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { globalContext } from "../../../App"
 import { Markdown } from "../../controls/Markdown"
@@ -46,9 +46,7 @@ export const NoteContentView = () => {
           s.visible = note && vm.$taskAnswerShown.value === false && note.text.includes('??')
           s.text = translate('Show answer')
           s.popUp = 'Enter'
-          s.textColor = theme().pynk + 'cc'
         })
-        .whenHovered(s => s.textColor = theme().pynk)
         .onClick(() => vm.$taskAnswerShown.value = true)
 
       spacer()
@@ -74,12 +72,7 @@ const NoteInfo = () => {
           const hasAudio = vm.$state.value.selectedNote !== undefined && vm.$state.value.selectedNote.audio_url !== ''
           s.visible = hasAudio
           s.icon = MaterialIcon.volume_up
-          s.textColor = theme().text50
-          //s.text = 'Audio'
           s.minHeight = 'unset'
-        })
-        .whenHovered(s => {
-          s.textColor = theme().text
         })
         .onClick(() => vm.playAudio())
 
@@ -156,7 +149,7 @@ const NextPrevNoteNavigator = () => {
       s.borderTop = '1px solid ' + theme().text + '88'
     })
     .children(() => {
-      Btn()
+      LinkBtn()
         .react(s => {
           const page = vm.$state.value.page
           if (page) {
@@ -168,7 +161,6 @@ const NextPrevNoteNavigator = () => {
             s.visible = false
           }
 
-          s.paddingHorizontal = '0'
           s.icon = MaterialIcon.arrow_back
           s.halign = 'left'
           s.maxWidth = layout().contentWidth / 2 - layout().paddingHorizontal - 5 + 'px'
@@ -184,7 +176,7 @@ const NextPrevNoteNavigator = () => {
 
       spacer()
 
-      Btn()
+      LinkBtn()
         .react(s => {
           const page = vm.$state.value.page
           if (page) {

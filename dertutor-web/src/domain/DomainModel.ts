@@ -1,3 +1,5 @@
+import { UrlKeys } from "../app/URLNavigator"
+
 export interface IUser {
   readonly id: number
   readonly username: string
@@ -86,5 +88,14 @@ export class DomainService {
 
     DomainService.cache[name] = res
     return res
+  }
+
+  static noteToUrlKeys(note: INote, languages: ILang[]): UrlKeys | undefined {
+    const lang = languages.find(lang => lang.id === note.lang_id)
+    if (!lang) return undefined
+    const voc = lang.vocs.find(v => v.id === note.voc_id)
+    if (!voc) return undefined
+
+    return {langCode: lang.code, vocCode: DomainService.encodeName(voc.name), noteId: note.id}
   }
 }

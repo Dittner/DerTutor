@@ -52,7 +52,10 @@ export const IconBtn = () => {
       s.justifyContent = 'center'
       s.gap = '5px'
       s.wrap = false
+      s.textSelectable = false
       s.boxSizing = 'border-box'
+      s.overflow = 'hidden'
+      s.textOverflow = 'ellipsis'
     })
     .map(s => {
       s.flexDirection = s.revert ? 'row-reverse' : 'row'
@@ -82,6 +85,7 @@ export const IconBtn = () => {
           s.fontFamily = 'inherit'
           s.overflow = 'hidden'
           s.textOverflow = 'ellipsis'
+          s.textSelectable = false
           s.visible = s.text !== '' && s.text !== undefined
         })
     })
@@ -96,7 +100,6 @@ export const IconBtn = () => {
 export const RedBtn = () => {
   return IconBtn()
     .react(s => {
-      s.fontFamily = FontFamily.APP
       s.fontSize = theme().fontSizeXS
       s.iconSize = theme().fontSize
       s.minHeight = '25px'
@@ -116,20 +119,16 @@ export const RedBtn = () => {
 export const Btn = () => {
   return IconBtn()
     .react(s => {
-      s.fontFamily = FontFamily.APP
-      s.fontSize = theme().fontSizeXS
+      s.fontSize = theme().fontSizeS
       s.minHeight = '30px'
       s.gap = '2px'
-      s.textColor = theme().text50
-      s.cornerRadius = '4px'
-      s.overflow = 'hidden'
-      s.textOverflow = 'ellipsis'
+      s.textColor = theme().isLight ? theme().text50 : theme().text
     })
     .whenHovered(s => {
-      s.textColor = theme().text
+      s.textColor = theme().text100
     })
     .whenSelected(s => {
-      s.textColor = theme().accent
+      s.textColor = theme().text100
     })
 }
 
@@ -140,13 +139,12 @@ export const Btn = () => {
 **/
 
 export const LinkBtn = () => {
-  return btn()
+  return IconBtn()
     .react(s => {
-      s.wrap = false
-      s.fontFamily = FontFamily.APP
       s.fontSize = theme().fontSizeXS
+      s.minHeight = '30px'
+      s.gap = '2px'
       s.textColor = theme().link
-      s.paddingVertical = '5px'
     })
     .whenHovered(s => {
       s.textColor = theme().link100

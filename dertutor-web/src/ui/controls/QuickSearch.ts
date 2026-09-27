@@ -1,8 +1,8 @@
-import { hstack, p, vstack } from "flinker-dom"
+import { hstack, p, spacer, vstack } from "flinker-dom"
 import { FontFamily } from "./Font"
 import { Btn, Icon, IconBtn } from "./Button"
 import { RXObservableValue } from "flinker"
-import { INote } from "../../domain/DomainModel"
+import { DomainService, INote } from "../../domain/DomainModel"
 import { MaterialIcon } from "../icons/MaterialIcon"
 import { globalContext } from "../../App"
 import { Markdown } from "./Markdown"
@@ -13,6 +13,7 @@ import { log } from "../../app/Logger"
 import { SearchByNameSchema } from "../../backend/Schema"
 import { KeyboardKey } from "./Text"
 import { layout } from "../../app/Application"
+import { GlobalContext } from "../../app/GlobalContext"
 
 const LANG_ID_KEY = 'QUICK_SEARCH_CONTROLLER:LANG_ID_KEY'
 
@@ -23,8 +24,10 @@ export class QuickSearchController {
   readonly $langId = new RXObservableValue(1)
   readonly $msg = new RXObservableValue('')
   readonly showLangSwitcher: boolean
+  private readonly ctx: GlobalContext
 
   constructor(showLangSwitcher: boolean = false) {
+    this.ctx = globalContext
     this.showLangSwitcher = showLangSwitcher
 
     this.$langId.value = globalContext.localStorage.read(LANG_ID_KEY) ?? 1
@@ -94,6 +97,26 @@ export class QuickSearchController {
     if (this.$quickSearchResult.value?.audio_url)
       new Audio(globalContext.server.baseUrl + this.$quickSearchResult.value?.audio_url).play()
   }
+
+  edit() {
+    if (!this.ctx.$user.value) {
+      this.ctx.$msg.value = { text: 'User not authorized', level: 'warning' }
+      return
+    }
+
+    if (!this.ctx.$user.value.is_superuser) {
+      this.ctx.$msg.value = { text: 'You do not have permission to edit any note', level: 'warning' }
+      return
+    }
+
+    const note = this.$quickSearchResult.value
+    if (note) {
+      const keys = DomainService.noteToUrlKeys(note, this.ctx.$allLangs.value)
+      if (keys) {
+        this.ctx.navigator.navigateTo({ ...keys, edit: true })
+      }
+    }
+  }
 }
 
 export const QuickSearchPanel = (controller: QuickSearchController) => {
@@ -109,7 +132,7 @@ export const QuickSearchPanel = (controller: QuickSearchController) => {
       vstack()
         .react(s => {
           s.fontFamily = FontFamily.APP
-          s.gap = '0'
+          s.gap = '0px'
           s.paddingHorizontal = '20px'
         })
         .children(() => {
@@ -129,16 +152,57 @@ export const QuickSearchPanel = (controller: QuickSearchController) => {
               s.textAlign = 'center'
             })
 
-          Btn()
+          hstack()
             .observe(controller.$quickSearchResult)
             .react(s => {
-              const audioUrl = controller.$quickSearchResult.value?.audio_url ?? ''
-              s.mouseEnabled = audioUrl !== ''
-              s.icon = MaterialIcon.volume_up
-              s.text = 'Audio'
-              s.visible = audioUrl !== ''
+              s.visible = controller.$quickSearchResult.value !== undefined
+              s.width = '100%'
+              s.valign = 'center'
+              s.gap = '10px'
+              s.paddingVertical = '5px'
             })
-            .onClick(() => controller.playAudio())
+            .children(() => {
+              p()
+                .observe(controller.$quickSearchResult)
+                .react(s => {
+                  const level = controller.$quickSearchResult.value?.level ?? 0
+                  s.mouseEnabled = level !== 0
+                  s.visible = level !== 0
+                  s.text = globalContext.vmFactory.getNoteListVM().reprLevel(level)
+                  s.fontSize = theme().fontSizeXS
+                  s.textColor = theme().text
+                  s.borderColor = theme().border
+                  s.bgColor = theme().text + '20'
+                  s.padding = '2px'
+                })
+
+              spacer()
+
+              Btn()
+                .observe(controller.$quickSearchResult)
+                .react(s => {
+                  const audioUrl = controller.$quickSearchResult.value?.audio_url ?? ''
+                  s.mouseEnabled = audioUrl !== ''
+                  s.icon = MaterialIcon.volume_up
+                  s.text = 'Audio'
+                  s.visible = audioUrl !== ''
+                  s.fontSize = theme().fontSizeXS
+                  s.iconSize = theme().fontSizeS
+                })
+                .onClick(() => controller.playAudio())
+
+
+
+              Btn()
+                .observe(controller.$quickSearchResult)
+                .react(s => {
+                  s.icon = MaterialIcon.edit
+                  s.text = 'Edit'
+                  s.fontSize = theme().fontSizeXS
+                  s.iconSize = theme().fontSizeXS
+                })
+                .onClick(() => controller.edit())
+            })
 
           Markdown()
             .observe(controller.$quickSearchResult)
@@ -190,11 +254,11 @@ const QuickSearchInput = (controller: QuickSearchController) => {
           s.fontSize = theme().fontSizeS
           s.placeholder = translate('Enter a word to search')
           s.border = 'unset'
-          s.textColor = theme().text50
+          s.textColor = theme().text
           s.caretColor = theme().text
         })
         .whenFocused(s => {
-          s.textColor = theme().text
+          s.textColor = theme().text100
         })
         .whenPlaceholderShown(s => {
           s.textColor = theme().text50
@@ -221,13 +285,15 @@ const QuickSearchInput = (controller: QuickSearchController) => {
           s.visible = controller.$quickSearchBuffer.value.length > 0
           s.icon = MaterialIcon.close
           s.iconSize = theme().fontSizeXS
-          s.textColor = theme().black
-          s.bgColor = theme().text50
+          s.textColor = theme().appBg
+          s.bgColor = theme().text
           s.width = '15px'
           s.height = '15px'
           s.cornerRadius = '15px'
         })
-        .whenHovered(s => s.bgColor = theme().text)
+        .whenHovered(s => {
+          s.bgColor = theme().text50
+        })
         .onClick(() => {
           controller.clear()
         })

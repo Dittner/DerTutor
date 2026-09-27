@@ -136,23 +136,14 @@ const VocDropdown = () => {
           //s.border = '1px solid ' + theme().border
         })
 
-      IconBtn()
+      Btn()
         .observe(globalContext.app.$dropdownState)
         .react(s => {
           s.isSelected = globalContext.app.$dropdownState.value === dropdownId
           s.icon = MaterialIcon.keyboard_arrow_down
-          s.textColor = theme().white + 'cc'
           s.text = translate('Vocabularies')
-          s.fontSize = theme().fontSizeS
           s.revert = true
-          s.valign = 'bottom'
-          //s.height = '40px'
-          s.paddingHorizontal = '0'
-          s.cornerRadius = '4px'
-          //s.iconSize = '1.2rem'
         })
-        .whenHovered(s => s.textColor = theme().white)
-        .whenSelected(s => s.textColor = theme().white)
         .onClick(e => {
           e.stopImmediatePropagation()
           globalContext.app.$dropdownState.value = globalContext.app.$dropdownState.value === dropdownId ? '' : dropdownId
@@ -198,7 +189,7 @@ const VocRenderer = (voc: IVoc) => {
       s.textSelectable = false
     })
     .whenHovered(s => {
-      s.textColor = theme().strong
+      s.textColor = theme().text100
       s.cursor = 'pointer'
     })
     .onClick(() => {
@@ -216,23 +207,14 @@ const FilterDropdown = () => {
     })
     .children(() => {
 
-      IconBtn()
+      Btn()
         .observe(globalContext.app.$dropdownState)
         .react(s => {
           s.isSelected = globalContext.app.$dropdownState.value === dropdownId
           s.icon = MaterialIcon.settings
-          s.textColor = theme().white + 'cc'
           s.text = translate('Filter')
-          s.fontSize = theme().fontSizeS
           s.revert = true
-          s.valign = 'bottom'
-          //s.height = '40px'
-          s.paddingHorizontal = '0'
-          s.cornerRadius = '4px'
-          //s.iconSize = '1.2rem'
         })
-        .whenHovered(s => s.textColor = theme().white)
-        .whenSelected(s => s.textColor = theme().white)
         .onClick(e => {
           e.stopImmediatePropagation()
           globalContext.app.$dropdownState.value = globalContext.app.$dropdownState.value === dropdownId ? '' : dropdownId
@@ -299,11 +281,8 @@ const LevelRenderer = (level: number) => {
   return Btn()
     .react(s => {
       s.isSelected = vm.$state.value.level === level
-      s.wrap = false
-      s.textColor = theme().text50
       s.text = vm.reprLevel(level)
       s.textAlign = 'left'
-      s.textSelectable = false
     })
     .whenHovered(s => {
       s.textColor = theme().text
@@ -353,11 +332,6 @@ const GlobalSearchView = () => {
       s.valign = 'center'
       s.width = '100%'
       s.height = INPUT_HEI
-      //s.border = '1px solid ' + (vm.$searchBufferFocused.value ? theme().red : theme().border)
-      //s.bgColor = vm.$searchBufferFocused.value ? theme().red + '10' : theme().border + '10'
-
-      //s.paddingHorizontal = '20px'
-      //s.paddingRight = '5px'
     })
     .children(() => {
 
@@ -367,7 +341,7 @@ const GlobalSearchView = () => {
           s.width = '100%'
           s.height = '100%'
           s.valign = 'center'
-          s.bgColor = theme().white + '20'
+          s.bgColor = theme().text + '22'
           s.cornerRadius = INPUT_HEI
           s.paddingHorizontal = '10px'
           s.gap = '5px'
@@ -377,7 +351,7 @@ const GlobalSearchView = () => {
             .react(s => {
               s.value = MaterialIcon.search
               s.fontSize = theme().fontSize
-              s.textColor = theme().white + 'cc'
+              s.textColor = theme().text
             })
 
           TextInput(vm.$searchBuffer)
@@ -387,15 +361,15 @@ const GlobalSearchView = () => {
               s.fontSize = theme().fontSizeS
               s.placeholder = translate('Search...')
               s.border = 'unset'
-              s.textColor = theme().white
+              s.textColor = theme().text100
               s.autoFocus = vm.$searchBufferFocused.value
             })
             .whenFocused(s => {
               //s.border = 'unset'
-              s.textColor = theme().mark
+              s.textColor = theme().isLight ? theme().text100 : theme().mark
             })
             .whenPlaceholderShown(s => {
-              s.textColor = theme().white + '88'
+              s.textColor = theme().text50
             })
             .onKeyDown(e => {
               if (e.key === 'Enter') {
@@ -421,14 +395,16 @@ const GlobalSearchView = () => {
               s.visible = vm.$searchBuffer.value.length > 0
               s.icon = MaterialIcon.close
               s.iconSize = theme().fontSizeXS
-              s.textColor = theme().black
-              s.bgColor = theme().white + 'cc'
+              s.textColor = theme().appBg
+              s.bgColor = theme().text
               s.width = '15px'
               s.height = '15px'
               s.right = '105px'
               s.cornerRadius = '15px'
             })
-            .whenHovered(s => s.bgColor = theme().white)
+            .whenHovered(s => {
+              s.bgColor = theme().text50
+            })
             .onClick(() => {
               vm.$searchBuffer.value = ''
               vm.$searchBufferFocused.value = false
@@ -487,7 +463,7 @@ const NotesPaginator = () => {
     .react(s => {
       s.width = '100%'
       s.gap = '10px'
-      s.valign = 'center'
+      s.valign = 'base'
       s.halign = 'left'
       s.paddingHorizontal = '20px'
       s.minHeight = '30px'
@@ -505,6 +481,7 @@ const NotesPaginator = () => {
           s.paddingHorizontal = '10px'
           s.borderColor = theme().border
           s.popUp = translate('Previous page')
+          s.fontSize = theme().fontSizeXS
         })
         .onClick(() => vm.$state.value.page && vm.navigator.updateWith({ page: vm.$state.value.page?.page - 1 }))
 
@@ -513,8 +490,8 @@ const NotesPaginator = () => {
           const p = vm.$state.value.page
           s.visible = p && p.page > 1
           s.fontFamily = FontFamily.MONO
+          s.fontSize = theme().fontSizeXS
           s.text = '1'
-          s.wrap = false
           s.popUp = translate('First page')
         })
         .onClick(() => vm.navigator.updateWith({ page: 1 }))
@@ -525,7 +502,7 @@ const NotesPaginator = () => {
           s.visible = p && p.page > 2
           s.fontFamily = FontFamily.MONO
           s.text = p ? `${p.page - 1}` : ''
-          s.wrap = false
+          s.fontSize = theme().fontSizeXS
           s.popUp = translate('Previous page')
           //s.href = vm.getPageLink(p ? p.page + 1 : 1)
         })
@@ -542,7 +519,8 @@ const NotesPaginator = () => {
           s.text = p ? `${p.page}` : ''
           s.fontSize = theme().fontSizeXS
           s.textSelectable = false
-          s.textColor = theme().accent + 'bb'
+          s.textColor = theme().text100
+          s.fontWeight = 'bold'
         })
 
       Btn()
@@ -551,7 +529,7 @@ const NotesPaginator = () => {
           s.visible = p && p.page < p.pages - 1
           s.fontFamily = FontFamily.MONO
           s.text = p ? `${p.page + 1}` : ''
-          s.wrap = false
+          s.fontSize = theme().fontSizeXS
           s.popUp = translate('Next page')
           //s.href = vm.getPageLink(p ? p.page + 1 : 1)
         })
@@ -566,7 +544,7 @@ const NotesPaginator = () => {
           s.visible = p && p.page < p.pages
           s.fontFamily = FontFamily.MONO
           s.text = p ? `${p.pages}` : ''
-          s.wrap = false
+          s.fontSize = theme().fontSizeXS
           s.popUp = translate('Last page')
         })
         .onClick(() => {
@@ -581,7 +559,7 @@ const NotesPaginator = () => {
           s.fontFamily = FontFamily.MONO
           s.text = '»'
           s.paddingBottom = '2px'
-          s.wrap = false
+          s.fontSize = theme().fontSizeXS
           s.paddingHorizontal = '10px'
           s.borderColor = theme().border
           s.popUp = translate('Next page')

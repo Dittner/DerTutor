@@ -5,7 +5,7 @@ import { layout } from "../../../app/Application"
 import { NotesMenu } from "./NotesMenu"
 import { NoteContentView } from "./NoteContent"
 import { FontFamily } from "../../controls/Font"
-import { IconBtn, LinkBtn } from "../../controls/Button"
+import { Btn, LinkBtn } from "../../controls/Button"
 import { globalContext, ThemeSwitcher } from "../../../App"
 import { MaterialIcon } from "../../icons/MaterialIcon"
 import { translate } from "../../../app/LocaleManager"
@@ -97,18 +97,12 @@ const Header = () => {
 
       spacer()
 
-      IconBtn()
+      Btn()
         .react(s => {
           s.icon = MaterialIcon.my_library_books
           s.text = translate('Markdown')
           s.popUp = 'Open Markdown, Press <m>'
-          s.fontSize = theme().fontSizeS
-          s.valign = 'bottom'
-          s.paddingHorizontal = '0'
-          s.iconSize = '1rem'
-          s.textColor = theme().white + 'cc'
         })
-        .whenHovered(s => s.textColor = theme().white)
         .onClick(e => {
           e.stopImmediatePropagation()
           vm.navigateToMD()
@@ -116,18 +110,11 @@ const Header = () => {
 
       VSeparator()
 
-      IconBtn()
-        //.observe(globalContext.app.$dropdownState)
+      Btn()
         .react(s => {
           s.icon = MaterialIcon.search
-          s.textColor = theme().white + 'cc'
           s.text = translate('Quick search')
-          s.fontSize = theme().fontSizeS
-          s.valign = 'bottom'
-          s.paddingHorizontal = '0'
-          s.iconSize = '1rem'
         })
-        .whenHovered(s => s.textColor = theme().white)
         .onClick(e => {
           e.stopImmediatePropagation()
           vm.quickSearchController.$quickSearchFocused.value = true
@@ -154,33 +141,22 @@ const NavBar = () => {
     })
     .children(() => {
 
-      IconBtn()
+      Btn()
         .observe(vm.$noteListShown)
         .react(s => {
           s.isSelected = vm.$noteListShown.value
           s.icon = MaterialIcon.menu
           s.iconSize = theme().fontSizeL
-          s.textColor = theme().text50
           s.paddingRight = '10px'
-          s.popUp = 'Show/Hide menu. Press m'
         })
-        .whenHovered(s => s.textColor = theme().text)
-        .whenSelected(s => s.textColor = theme().white + 'cc')
         .onClick(() => {
           vm.$noteListShown.value = !vm.$noteListShown.value
         })
 
-      IconBtn()
+      LinkBtn()
         .react(s => {
           s.icon = MaterialIcon.language
-          s.iconSize = theme().fontSizeS
-          s.textColor = theme().link
-          s.wrap = false
-          s.fontFamily = FontFamily.APP
-          s.fontSize = theme().fontSizeXS
-          s.paddingVertical = '5px'
         })
-        .whenHovered(s => s.textColor = theme().link100)
         .onClick(() => {
           vm.$state.value.lang && vm.navigator.navigateTo({})
         })
@@ -189,7 +165,7 @@ const NavBar = () => {
         .react(s => {
           s.text = ' › '
           s.paddingVertical = '2px'
-          s.textColor = theme().link + 'bb'
+          s.textColor = theme().link + 'cc'
           s.textSelectable = false
         })
 
@@ -197,10 +173,6 @@ const NavBar = () => {
         .observe(vm.$state)
         .react(s => {
           s.text = vm.$state.value.lang?.name ?? ''
-          s.textColor = theme().link
-        })
-        .whenHovered(s => {
-          s.textColor = theme().link100
         })
         .onClick(() => {
           vm.$state.value.lang && vm.navigator.navigateTo({ langCode: vm.$state.value.lang?.code })
@@ -225,10 +197,8 @@ const NavBar = () => {
           const voc = vm.$state.value.voc ?? lang?.vocs.find(v => v.id === vm.$state.value.selectedNote?.voc_id)
           s.visible = lang !== undefined && voc !== undefined
           s.text = voc?.name ?? ''
-          s.textColor = theme().link
           s.maxWidth = layout().isCompact ? '120px' : '100%'
-          s.overflow = 'hidden'
-          s.textOverflow = 'ellipsis'
+
         })
         .whenHovered(s => {
           s.textColor = theme().link100

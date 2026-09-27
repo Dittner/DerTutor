@@ -1,6 +1,6 @@
-import { btn, hstack, p, spacer, vstack } from "flinker-dom"
+import { hstack, p, spacer, vstack } from "flinker-dom"
 import { globalContext, ThemeSwitcher } from "../../../App"
-import { IconBtn } from "../../controls/Button"
+import { Btn, LinkBtn } from "../../controls/Button"
 import { FontFamily } from "../../controls/Font"
 import { theme } from "../../theme/ThemeManager"
 import { log } from "../../../app/Logger"
@@ -92,11 +92,11 @@ export const MarkdownView = () => {
           s.position = 'fixed'
           s.right = l.isCompact ? '0' : '20px'
           s.width = l.isCompact ? '100%' : l.leftSideMenuWidth + 'px'
-          s.maxHeight = vm.quiclSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - l.statusBarHeight - 20 + 'px' : 'unset'
+          s.maxHeight = vm.quiclSearchController.$quickSearchResult.value ? window.innerHeight - l.navBarHeight - 20 - l.statusBarHeight - 20 + 'px' : 'unset'
           s.enableOwnScroller = true
           s.maxWidth = l.isCompact ? 'unset' : '400px'
           s.height = l.isCompact ? '100%' : 'unset'
-          s.top = l.navBarHeight + 'px'
+          s.top = l.navBarHeight + 20 + 'px'
         })
     })
 }
@@ -121,63 +121,37 @@ const Header = () => {
           s.width = layout().contentWidth + 'px'
         })
         .children(() => {
-          IconBtn()
+          LinkBtn()
             .react(s => {
               s.icon = MaterialIcon.arrow_back
               s.text = translate('Back')
-              s.fontSize = theme().fontSizeXS
-              s.textColor = theme().link
               s.height = layout().navBarHeight + 'px'
               s.halign = 'left'
               s.width = '100px'
               s.popUp = translate('Go back <Backspace>')
             })
-            .whenHovered(s => {
-              s.textColor = theme().link100
-            })
             .onClick(() => vm.goBack())
-
-          // IconBtn()
-          //   .react(s => {
-          //     s.icon = MaterialIcon.language
-          //     s.iconSize = theme().fontSizeS
-          //     s.textColor = theme().link
-          //     s.wrap = false
-          //     s.fontFamily = FontFamily.APP
-          //     s.fontSize = theme().fontSizeXS
-          //     s.paddingVertical = '5px'
-          //   })
-          //   .whenHovered(s => s.textColor = theme().link100)
-          //   .onClick(() => {
-          //     vm.navigator.navigateTo({})
-          //   })
 
 
           p().react(s => {
             s.text = 'Markdown'
-            s.textColor = theme().h1
-            s.fontWeight = 'bold'
-            s.width = '100%'
+            s.textColor = theme().text100
             s.textAlign = 'center'
-            s.width = '100%'
             s.fontWeight = 'bold'
+            s.width = '100%'
             s.fontFamily = FontFamily.APP
-            s.fontSize = theme().fontSizeL
+            s.fontSize = theme().fontSize
           })
 
-          IconBtn()
+          Btn()
             .observe(vm.$editMode)
             .react(s => {
               s.isSelected = vm.$editMode.value
               s.icon = MaterialIcon.edit
-              s.fontSize = theme().fontSizeS
               s.width = '100px'
               s.textAlign = 'right'
-              s.textColor = theme().white + 'cc'
               s.text = s.isSelected ? 'Editing' : 'Edit'
             })
-            .whenHovered(s => s.textColor = theme().white)
-            .whenSelected(s => s.textColor = theme().red + 'cc')
             .onClick(() => vm.$editMode.value = !vm.$editMode.value)
         })
 
@@ -209,7 +183,7 @@ const Editor = (buffer: RXObservableValue<string>, formatter: TextFormatter) => 
           s.height = '100%'
           s.bgColor = theme().appBg
           s.caretColor = theme().caretColor
-          s.textColor = theme().red + 'cc'
+          s.textColor = theme().red + 'aa'
           s.autoFocus = false
           s.padding = '10px'
           s.fontFamily = FontFamily.ARTICLE
@@ -240,19 +214,16 @@ const LangSwitcher = (controller: QuickSearchController) => {
     s.valign = 'center'
   })
     .children(() => {
-      btn()
+      Btn()
         .observe(controller.$langId)
         .react(s => {
           s.text = 'de'
           s.isSelected = controller.$langId.value === LangId.DE
-          s.textColor = theme().text50
           s.fontSize = 'inherit'
         })
-        .whenHovered(s => {
-          s.textColor = theme().text
-        })
         .whenSelected(s => {
-          s.textColor = theme().em
+          s.textColor = theme().text100
+          s.fontWeight = 'bold'
         })
         .onClick(() => controller.$langId.value = LangId.DE)
 
@@ -262,19 +233,16 @@ const LangSwitcher = (controller: QuickSearchController) => {
         s.bgColor = theme().text50
       })
 
-      btn()
+      Btn()
         .observe(controller.$langId)
         .react(s => {
           s.text = 'en'
           s.isSelected = controller.$langId.value === LangId.EN
-          s.textColor = theme().text50
           s.fontSize = 'inherit'
         })
-        .whenHovered(s => {
-          s.textColor = theme().text
-        })
         .whenSelected(s => {
-          s.textColor = theme().em
+          s.textColor = theme().text100
+          s.fontWeight = 'bold'
         })
         .onClick(() => controller.$langId.value = LangId.EN)
     })

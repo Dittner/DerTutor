@@ -115,7 +115,7 @@ export const ActionsHelpView = () => {
       vstack()
         .react(s => {
           s.width = 'unset'
-          s.textColor = theme().green + 'aa'
+          s.textColor = theme().green
           s.fontSize = theme().fontSizeXS
           s.fontFamily = FontFamily.MONO
           s.paddingLeft = SHORTKEY_TEXT_WIDTH
@@ -173,8 +173,7 @@ export const ThemeSwitcher = () => {
       s.paddingHorizontal = '10px'
       s.valign = 'center'
       s.gap = '2px'
-      s.border = '1px solid ' + theme().border
-      s.textColor = theme().text + '50'
+      s.borderColor = theme().border
       s.popUp = theme().id
     })
     .whenHovered(s => {
@@ -195,19 +194,19 @@ export const ThemeSwitcher = () => {
       // spacer()
 
       Icon().react(s => {
-        s.value = MaterialIcon.contrast
+        s.value = MaterialIcon.brightness_3
         s.fontSize = theme().fontSizeXS
         s.textAlign = 'center'
-        s.textColor = theme().id === 'dark' ? theme().text : 'inherit'
+        s.textColor = theme().id === 'night' ? theme().text100 : theme().text + '44'
       })
 
       spacer()
 
       Icon().react(s => {
-        s.value = MaterialIcon.brightness_3
+        s.value = MaterialIcon.sunny
         s.fontSize = theme().fontSizeXS
         s.textAlign = 'center'
-        s.textColor = theme().id === 'night' ? theme().text : 'inherit'
+        s.textColor = theme().id === 'night' ? theme().text + '44' : theme().text100 
       })
     })
 

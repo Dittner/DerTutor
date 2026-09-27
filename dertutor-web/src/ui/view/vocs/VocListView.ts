@@ -21,7 +21,7 @@ export const VocListView = () => {
       s.valign = 'top'
       s.paddingTop = layout().navBarHeight + 'px'
       //s.paddingBottom = layout().statusBarHeight + 'px'
-      s.bgColor = '#111111'
+      s.bgColor = theme().appBg
       //s.paddingHorizontal = '20px'
     })
     .children(() => {
@@ -72,8 +72,6 @@ export const VocListView = () => {
             .react(s => {
               s.fontSize = layout().isCompact ? '3rem' : '8rem'
               s.fontFamily = FontFamily.GOTHIC
-              s.textColor = '#ffFFff88'
-              //s.maxWidth = '700px'
               s.textAlign = 'left'
               //s.text = 'D'
               s.whiteSpace = 'nowrap'
@@ -109,15 +107,15 @@ export const VocListView = () => {
           s.gap = '10px'
           s.fontSize = theme().fontSizeS
           s.fontFamily = FontFamily.MONO
-          s.textColor = theme().white
+          s.textColor = theme().green
         })
         .children(() => {
           ['?', '<ESC>', '<CR>', 'f', 't', 'q', '→', '↓', '→', '↑', '.', '/', 'll'].forEach(v => {
             span()
               .react(s => {
                 s.text = v
-                s.bgColor = theme().menuBg
-                s.borderColor = theme().border
+                //s.bgColor = theme().menuBg
+                s.borderColor = theme().green + '88'
                 s.paddingHorizontal = '10px'
                 s.cornerRadius = '5px'
               })
@@ -141,6 +139,7 @@ export const VocListView = () => {
           s.width = layout().isCompact ? layout().contentWidth + 'px' : '500px'
           s.bgColor = theme().appBg
           s.blur = '10px'
+          s.halign = 'left'
           s.layer = ViewLayer.MODAL_VIEW_CONTENT
           s.fontFamily = FontFamily.APP
           s.fontSize = theme().fontSizeXS
@@ -178,7 +177,6 @@ const Header = () => {
         .react(s => {
           s.visible = !layout().isMobile
           s.text = translate('Markdown')
-          s.fontSize = theme().fontSizeS
           s.icon = MaterialIcon.my_library_books
         })
         .onClick(() => vm.navigateToMD())
@@ -266,22 +264,19 @@ const VocRenderer = (voc: IVoc) => {
   const vm = globalContext.vmFactory.getVocListVM()
   return btn()
     .react(s => {
-      const isSelected = vm.$highlightedVoc.value === voc
-      s.wrap = false
-      s.isSelected = isSelected
+      s.isSelected = vm.$highlightedVoc.value === voc
       s.textAlign = 'left'
       s.width = '100%'
+      s.textColor = theme().isLight ? theme().text50 : theme().text
       s.paddingVertical = '5px'
       s.paddingHorizontal = '0'
       s.fontSize = theme().fontSizeS
-      s.textColor = isSelected ? theme().accent : theme().text50
     })
     .whenHovered(s => {
-      s.textColor = theme().text
+      s.textColor = theme().text100
     })
     .whenSelected(s => {
-      s.textColor = theme().strong
-      //s.borderColor = theme().accent
+      s.textColor = theme().text100
     })
     .onClick(() => {
       vm.$highlightedVoc.value = voc

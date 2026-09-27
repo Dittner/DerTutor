@@ -558,13 +558,12 @@ const VocRenderer = (voc: IVoc) => {
       s.text =  voc.name
       s.width = '100%'
       s.textAlign = 'left'
-      s.textColor = isSelected ? theme().strong : theme().text50
+      s.textColor = isSelected ? theme().text100 : theme().text50
       s.paddingVertical = '5px'
       s.textSelectable = false
     })
     .whenHovered(s => {
-      const isSelected = vm.$selectedVocId.value === voc.id
-      s.textColor = isSelected ? theme().strong : theme().text
+      s.textColor = theme().text100
       s.cursor = 'pointer'
     })
     .onClick(() => {

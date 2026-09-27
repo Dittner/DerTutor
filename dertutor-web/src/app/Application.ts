@@ -3,7 +3,7 @@ import { log, logErr, logWarn } from './Logger'
 import { globalContext } from '../App'
 
 
-export const ARTICLE_PADDING = 80
+export const ARTICLE_PADDING = 150
 export const MARKDOWN_MAX_WIDTH = 700
 export const ARTICLE_WIDTH = MARKDOWN_MAX_WIDTH + 2 * ARTICLE_PADDING
 

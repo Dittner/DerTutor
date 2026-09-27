@@ -112,7 +112,7 @@ export class EditorVM extends ViewModel<EditorState> {
     if (this.$hasChanges.value) {
       this.ctx.$msg.value = { text: this.noteToString(this.$state.value.note) + ', discard/save changes before quitting', level: 'warning' }
     } else {
-      this.navigator.updateWith({ edit: undefined })
+      this.navigator.navigateBack()
     }
   }
 
