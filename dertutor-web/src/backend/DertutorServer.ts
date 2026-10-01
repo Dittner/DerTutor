@@ -1,6 +1,6 @@
 import { RXOperation } from 'flinker'
 import { RestApi, RestApiError } from './RestApi'
-import { AuthenticateSchema, CreateNoteSchema, CreateVocSchema, DeleteMedialFileSchema, DeleteNoteSchema, DeleteVocSchema, GetPageSchema, RenameNoteSchema, RenameVocSchema, SearchByNameSchema, UpdateNoteSchema, UpdateVocSchema } from './Schema'
+import { AuthenticateSchema, CreateNoteSchema, CreateVocSchema, DeleteMedialFileSchema, DeleteNoteSchema, DeleteVocSchema, GetPageSchema, RelevelNoteSchema, RenameNoteSchema, RenameVocSchema, SearchByNameSchema, UpdateNoteSchema, UpdateVocSchema } from './Schema'
 import { Path } from '../app/Utils'
 import { ILang, ILoadAudioFromDudenResult, IMediaFile, INote, IPage, IUser } from '../domain/DomainModel'
 import { UploadFileCmd } from './cmd/UploadFileCmd'
@@ -98,6 +98,10 @@ export class DertutorServer extends RestApi {
 
   renameNote(scheme: RenameNoteSchema): RXOperation<INote | undefined, RestApiError> {
     return this.patch('/notes/rename', scheme)
+  }
+
+  reevelNote(scheme: RelevelNoteSchema): RXOperation<INote | undefined, RestApiError> {
+    return this.patch('/notes/relevel', scheme)
   }
 
   deleteNote(scheme: DeleteNoteSchema): RXOperation<INote | undefined, RestApiError> {

@@ -8,7 +8,7 @@ from sqlalchemy import event
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from src.api.decorators import only_superuser, open_session
 from src.api.notes.dao import NotesDAO, Page, SearchByNameParams, SearchParams
-from src.api.notes.schema import NoteCreate, NoteDelete, NoteRead, NoteReadFull, NoteRename, NoteUpdate
+from src.api.notes.schema import NoteCreate, NoteDelete, NoteRead, NoteReadFull, NoteRelevel, NoteRename, NoteUpdate
 from src.repo.model import Note
 
 router = APIRouter(prefix='', tags=['Notes'])
@@ -126,6 +126,13 @@ def format_note_text(t: str):
 @only_superuser
 async def rename_note(session: AsyncSession, note: NoteRename):
     return await NotesDAO.update_one(session, note.id, name=note.name)
+
+
+@router.patch('/notes/relevel', response_model=NoteRead | None)
+@open_session
+@only_superuser
+async def relevel_note(session: AsyncSession, note: NoteRelevel):
+    return await NotesDAO.update_one(session, note.id, level=note.level)
 
 
 @router.delete('/notes', response_model=NoteRead | None)

@@ -284,7 +284,7 @@ export class ThemeManager {
       isLight: false,
       appBg,
       actionsBg: '#1c2222',
-      navBarBg: '#1c1f22', //1c1f22
+      navBarBg: '#141719', //1c1f22
       articleBg: appBg, // '#0f1013', //121416 0c0d0f
       menuBg: menuBg,
       menuHeaderBg: menuBg,
@@ -593,10 +593,22 @@ export class ThemeManager {
 
     const imgProps: UIComponentProps = {
       maxWidth: ARTICLE_WIDTH - 80 + 'px',
+      //textAlign: 'center'
       //paddingTop: '50px'
     }
     buildRule(imgProps, parentSelector, 'img')
     buildRule(imgProps, parentSelector, 'figure')
+
+    /******************************/
+    // figcaption: img, audio
+    /******************************/
+    const captionProps: UIComponentProps = {
+      fontWeight: 'inherit',
+      fontSize: t.fontSizeXS,
+      textColor: t.text50,
+      paddingBottom: '5px',
+    }
+    buildRule(captionProps, parentSelector, 'figcaption')
 
     /******************************/
     // audio
@@ -615,17 +627,7 @@ export class ThemeManager {
     }
     buildRule(audioControlsProps, parentSelector, 'audio::-webkit-media-controls-panel')
 
-    /******************************/
-    // figcaption
-    /******************************/
-
-    const imgCaptionProps: UIComponentProps = {
-      fontWeight: 'inherit',
-      fontSize: t.fontSizeXS,
-      textColor: t.text50,
-      paddingBottom: '5px'
-    }
-    buildRule(imgCaptionProps, parentSelector, 'figcaption')
+    
 
     /******************************/
     // stars delim

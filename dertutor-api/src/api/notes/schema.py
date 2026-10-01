@@ -27,6 +27,11 @@ class NoteRename(BaseModel):
     name: str
 
 
+class NoteRelevel(BaseModel):
+    id: int
+    level: int | None
+
+
 class NoteRead(BaseModel):
     id: int
     lang_id: int

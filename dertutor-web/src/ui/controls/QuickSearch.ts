@@ -1,4 +1,4 @@
-import { hstack, p, spacer, vstack } from "flinker-dom"
+import { hstack, p, spacer, span, vstack } from "flinker-dom"
 import { FontFamily } from "./Font"
 import { Btn, Icon, IconBtn } from "./Button"
 import { RXObservableValue } from "flinker"
@@ -123,7 +123,7 @@ export const QuickSearchPanel = (controller: QuickSearchController) => {
   return vstack()
     .react(s => {
       s.width = '100%'
-      s.borderColor = theme().quickSearchTheme.border
+      s.border = '10px solid ' + theme().quickSearchTheme.text + '22'
     })
     .children(() => {
 
@@ -162,36 +162,35 @@ export const QuickSearchPanel = (controller: QuickSearchController) => {
               s.paddingVertical = '5px'
             })
             .children(() => {
-              p()
-                .observe(controller.$quickSearchResult)
-                .react(s => {
-                  const level = controller.$quickSearchResult.value?.level ?? 0
-                  s.mouseEnabled = level !== 0
-                  s.visible = level !== 0
-                  s.text = globalContext.vmFactory.getNoteListVM().reprLevel(level)
-                  s.fontSize = theme().fontSizeXS
-                  s.textColor = theme().text
-                  s.borderColor = theme().border
-                  s.bgColor = theme().text + '20'
-                  s.padding = '2px'
-                })
-
-              spacer()
-
               Btn()
                 .observe(controller.$quickSearchResult)
                 .react(s => {
                   const audioUrl = controller.$quickSearchResult.value?.audio_url ?? ''
                   s.mouseEnabled = audioUrl !== ''
                   s.icon = MaterialIcon.volume_up
-                  s.text = 'Audio'
                   s.visible = audioUrl !== ''
-                  s.fontSize = theme().fontSizeXS
-                  s.iconSize = theme().fontSizeS
                 })
                 .onClick(() => controller.playAudio())
 
+              span()
+                .observe(controller.$quickSearchResult)
+                .react(s => {
+                  const level = controller.$quickSearchResult.value?.level ?? 0
+                  s.mouseEnabled = level !== 0
+                  s.visible = level !== 0
+                  s.text = globalContext.vmFactory.getNoteListVM().reprLevel(level)
+                  s.textColor = theme().text
+                  s.wrap = false
+                  s.whiteSpace = 'nowrap'
+                  s.fontSize = theme().fontSizeXS
+                  s.fontFamily = FontFamily.ARTICLE
+                  s.bgColor = theme().text + '10'
+                  s.borderColor = theme().text + '20'
+                  s.cornerRadius = '4px'
+                  s.paddingHorizontal = '4px'
+                })
 
+              spacer()
 
               Btn()
                 .observe(controller.$quickSearchResult)

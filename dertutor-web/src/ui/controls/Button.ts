@@ -46,6 +46,7 @@ export const IconBtn = () => {
     .propsDidChange(props => $sharedState.value = props)
     .react(s => {
       s.fontFamily = FontFamily.APP
+      s.fontSize = theme().fontSizeXS
       s.display = 'flex'
       s.flexDirection = 'row'
       s.alignItems = 'center'
@@ -68,6 +69,7 @@ export const IconBtn = () => {
       $sharedState.value.icon && Icon()
         .observe($sharedState)
         .react(s => {
+          s.fontSize = theme().fontSizeS
           const ss = $sharedState.value
           if (ss.icon) s.value = ss.icon
           if (ss.iconSize) s.fontSize = ss.iconSize
@@ -100,7 +102,7 @@ export const IconBtn = () => {
 export const RedBtn = () => {
   return IconBtn()
     .react(s => {
-      s.fontSize = theme().fontSizeXS
+      //s.fontSize = theme().fontSizeXS
       s.iconSize = theme().fontSize
       s.minHeight = '25px'
       s.gap = '2px'
@@ -119,7 +121,7 @@ export const RedBtn = () => {
 export const Btn = () => {
   return IconBtn()
     .react(s => {
-      s.fontSize = theme().fontSizeS
+      //s.fontSize = theme().fontSizeS
       s.minHeight = '30px'
       s.gap = '2px'
       s.textColor = theme().isLight ? theme().text50 : theme().text
@@ -141,7 +143,7 @@ export const Btn = () => {
 export const LinkBtn = () => {
   return IconBtn()
     .react(s => {
-      s.fontSize = theme().fontSizeXS
+      //s.fontSize = theme().fontSizeXS
       s.minHeight = '30px'
       s.gap = '2px'
       s.textColor = theme().link
@@ -159,7 +161,7 @@ export const Link = () => {
     .react(s => {
       s.wrap = false
       s.fontFamily = FontFamily.MONO
-      s.fontSize = theme().fontSizeXS
+      //s.fontSize = theme().fontSizeXS
       s.textColor = theme().link
       s.bgColor = theme().transparent
     })
@@ -184,7 +186,7 @@ export const PinkBtn = () => {
   return IconBtn()
     .react(s => {
       s.fontFamily = FontFamily.APP
-      s.fontSize = theme().fontSizeXS
+      //s.fontSize = theme().fontSizeXS
       s.minHeight = '25px'
       s.gap = '2px'
       s.textColor = theme().pynk + 'cc'

@@ -41,6 +41,11 @@ export interface RenameNoteSchema {
   name: string
 }
 
+export interface RelevelNoteSchema {
+  id: number
+  level: number | undefined
+}
+
 export interface UpdateNoteSchema {
   id: number
   voc_id: number

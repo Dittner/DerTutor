@@ -168,6 +168,7 @@ export class EditorVM extends ViewModel<EditorState> {
     if (lang && note) {
       const key = encodeURIComponent(note.name)
       const link = lang.code === 'en' ? '/corpus/en_pron/search?key=' + key : '/corpus/de_pron/search?key=' + key
+      this.ctx.$msg.value = { text: this.noteToString(note) + ', loading audio...', level: 'info' }
       this.server.validateMp3Link(link).pipe()
         .onReceive(_ => {
           this.$audioUrl.value = link
@@ -191,6 +192,7 @@ export class EditorVM extends ViewModel<EditorState> {
     if (lang && note) {
       const key = encodeURIComponent(note.name)
       const link = '/corpus/de_pron/load_from_duden?key=' + key
+      this.ctx.$msg.value = { text: this.noteToString(note) + ', loading audio...', level: 'info' }
       this.server.loadAndStoreAudioFileFromDuden(link).pipe()
         .onReceive((res: ILoadAudioFromDudenResult) => {
           this.$audioUrl.value = res.url
@@ -212,6 +214,7 @@ export class EditorVM extends ViewModel<EditorState> {
   loadTranslation() {
     const lang = this.$state.value.lang
     const note = this.$state.value.note
+    this.ctx.$msg.value = { text: this.noteToString(note) + ', loading translation...', level: 'info' }
     if (note && lang && lang.code === 'en') {
       this.server.loadEnRuTranslation(note.name).pipe()
         .onReceive(data => {
@@ -256,6 +259,7 @@ export class EditorVM extends ViewModel<EditorState> {
     if (!note) return
 
     try {
+      this.ctx.$msg.value = { text: this.noteToString(note) + ', uploading files...', level: 'info' }
       const mediaFiles = [...this.$mediaFiles.value]
       for (const w of this.$filesPendingUpload.value) {
         const mf = await this.server.uploadFile(note.id, w.file, w.$name.value).asAwaitable

@@ -2,7 +2,7 @@ import { RXObservableValue } from "flinker"
 
 import { AVAILABLE_LEVELS, DomainService, ILang, INote, IPage, IVoc } from "../../../domain/DomainModel"
 import { ViewModel } from "../ViewModel"
-import { CreateNoteSchema, DeleteNoteSchema, GetPageSchema, RenameNoteSchema } from "../../../backend/Schema"
+import { CreateNoteSchema, DeleteNoteSchema, GetPageSchema, RelevelNoteSchema, RenameNoteSchema } from "../../../backend/Schema"
 import { UrlKeys } from "../../../app/URLNavigator"
 import { globalContext } from "../../../App"
 import { Interactor } from "../Interactor"
@@ -114,6 +114,14 @@ export class NoteListVM extends ViewModel<NoteListState> {
     this.actionsList.add('<CR>', 'Show answer to the task', () => this.$taskAnswerShown.value = !this.$taskAnswerShown.value)
     this.actionsList.add(':id<CR>', 'Print ID of note', () => this.printID())
     this.actionsList.add('q', 'Quit', () => this.quit())
+
+
+    this.actionsList.add(':a1<CR>', 'Change level to A1 (SUPERUSER)', () => this.relevelNote(1))
+    this.actionsList.add(':a2<CR>', 'Change level to A2 (SUPERUSER)', () => this.relevelNote(2))
+    this.actionsList.add(':b1<CR>', 'Change level to B1 (SUPERUSER)', () => this.relevelNote(3))
+    this.actionsList.add(':b2<CR>', 'Change level to B2 (SUPERUSER)', () => this.relevelNote(4))
+    this.actionsList.add(':c1<CR>', 'Change level to C1 (SUPERUSER)', () => this.relevelNote(5))
+    this.actionsList.add(':c2<CR>', 'Change level to C2 (SUPERUSER)', () => this.relevelNote(6))
   }
 
   override didPressESC() {
@@ -273,6 +281,43 @@ export class NoteListVM extends ViewModel<NoteListState> {
           })
           .subscribe()
       }
+    }
+  }
+
+  private async relevelNote(to: number) {
+    if (this.inputMode.$isActive.value) return
+    if (!this.$state.value.selectedNote) {
+      this.ctx.$msg.value = { text: 'Note not selected' }
+      return
+    }
+
+    const note = this.$state.value.selectedNote
+    if (note) {
+      if (note.level === to) {
+        this.ctx.$msg.value = { level: 'info', text: 'No changes' }
+        return
+      }
+
+      const scheme = {} as RelevelNoteSchema
+      scheme.id = note.id
+      scheme.level = to
+
+      this.server.reevelNote(scheme).pipe()
+        .onReceive((note: INote | undefined) => {
+          log('NoteListVM:completeReleveling, res: ', note)
+          if (note) {
+            //reload page
+            this.interactor.clearCache()
+            this.navigator.updateWith({})
+            this.ctx.$msg.value = { level: 'info', text: 'ID:' + note.id + ', written' }
+          } else {
+            this.ctx.$msg.value = { level: 'warning', text: 'Failed to change level' }
+          }
+        })
+        .onError(e => {
+          this.ctx.$msg.value = { level: 'error', text: e.message }
+        })
+        .subscribe()
     }
   }
 

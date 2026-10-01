@@ -128,9 +128,15 @@ const Header = () => {
 
       PinkBtn()
         .react(s => {
-          s.text = 'Merge'
+          s.text = 'Merge By Paragraphs'
         })
-        .onClick(() => vm.merge())
+        .onClick(() => vm.mergeByParagraphs())
+
+      PinkBtn()
+        .react(s => {
+          s.text = 'Merge By Sentences'
+        })
+        .onClick(() => vm.mergeBySentences())
 
       PinkBtn()
         .react(s => {

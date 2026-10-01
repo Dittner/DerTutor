@@ -105,9 +105,9 @@ export const VocListView = () => {
           s.halign = 'center'
           s.textAlign = 'center'
           s.gap = '10px'
-          s.fontSize = theme().fontSizeS
+          s.fontSize = theme().fontSizeXS
           s.fontFamily = FontFamily.MONO
-          s.textColor = theme().green
+          s.textColor = theme().red
         })
         .children(() => {
           ['?', '<ESC>', '<CR>', 'f', 't', 'q', '→', '↓', '→', '↑', '.', '/', 'll'].forEach(v => {
@@ -115,7 +115,7 @@ export const VocListView = () => {
               .react(s => {
                 s.text = v
                 //s.bgColor = theme().menuBg
-                s.borderColor = theme().green + '88'
+                s.borderColor = theme().red + '88'
                 s.paddingHorizontal = '10px'
                 s.cornerRadius = '5px'
               })

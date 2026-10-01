@@ -78,7 +78,7 @@ export class LabVM extends ViewModel<LabState> {
     this.navigator.navigateTo({})
   }
 
-  merge() {
+  mergeBySentences() {
     const text1Rows = this.$editor1.value.replace(/([.?!]+)/gm, '$1\n').replace(/\n+/gm, '\n').split('\n')
     const text2Rows = this.$editor2.value.replace(/([.?!]+)/gm, '$1\n').replace(/\n+/gm, '\n').split('\n')
     let res = '```ol\n'
@@ -93,11 +93,26 @@ export class LabVM extends ViewModel<LabState> {
     res += '```'
     this.$result.value = res
   }
+
+  mergeByParagraphs() {
+    const text1Rows = this.$editor1.value.replace(/\n+/gm, '\n').split('\n')
+    const text2Rows = this.$editor2.value.replace(/\n+/gm, '\n').split('\n')
+    let res = '```ol\n'
+    text1Rows.forEach((r, i) => {
+      if (!r.match(/^\s*$/)) {
+        res += r.trim() + '\n'
+        if (i < text2Rows.length)
+          res += '~~\n' + text2Rows.at(i)?.trim() + '\n\n'
+      }
+
+    })
+    this.$result.value = res
+  }
 }
 
 class LabInteractor extends Interactor<LabState> {
-  constructor(ctx: DerTutorContext) {
-    super(ctx)
+  constructor() {
+    super()
     log('new LabInteractor')
   }
 }

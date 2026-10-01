@@ -129,7 +129,9 @@ const VocDropdown = () => {
       image()
         .observe(vm.$lang)
         .react(s => {
-          s.src = vm.$lang.value?.code === 'de' ? '/src/resources/de_flag.svg' : '/src/resources/en_flag.svg'
+          s.visible = vm.$lang.value !== undefined
+          if (vm.$lang.value)
+            s.src = vm.$lang.value.code === 'de' ? '/src/resources/de_flag.svg' : '/src/resources/en_flag.svg'
           s.width = '15px'
           s.height = '15px'
           s.cornerRadius = '15px'

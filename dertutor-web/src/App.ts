@@ -75,6 +75,8 @@ export const ActionsHelpView = () => {
       s.borderColor = theme().green
       s.blur = '10px'
       s.layer = ViewLayer.MODAL_VIEW
+      s.enableOwnScroller = true
+      s.className = 'listScrollbar'
     }).children(() => {
 
       p().react(s => {
@@ -257,7 +259,7 @@ export const MessangerView = () => {
       //s.width = 'unset'
       s.wrap = false
       s.whiteSpace = 'nowrap'
-      s.bgColor = layout().isCompact ? theme().appBg + '88' : theme().menuBg
+      //s.bgColor = layout().isCompact ? theme().appBg + '88' : theme().menuBg
 
       if (msg?.level === 'error')
         s.textColor = theme().red
